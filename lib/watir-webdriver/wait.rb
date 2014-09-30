@@ -117,8 +117,13 @@ module Watir
         raise NoMethodError, "undefined method `#{m}' for #{@element.inspect}:#{@element.class}"
       end
 
-      Watir::Wait.until(@timeout, @message) { @element.present? }
-
+      if @element.respond_to? :browser
+        @element.browser.without_implicit_wait do
+          Watir::Wait.until(@timeout, @message) { @element.present? }
+        end
+      else
+        Watir::Wait.until(@timeout, @message) { @element.present? }
+      end
       @element.__send__(m, *args, &block)
     end
   end # WhenPresentDecorator
@@ -149,8 +154,14 @@ module Watir
       message = "waiting for #{selector_string} to become present"
 
       if block_given?
-        Watir::Wait.until(timeout, message) { present? }
-        yield self
+        if self.respond_to? :browser
+          browser.without_implicit_wait do
+            Watir::Wait.until(timeout, message) { present? }
+            yield self
+          end
+        else
+          yield self
+        end
       else
         WhenPresentDecorator.new(self, timeout, message)
       end
@@ -171,7 +182,13 @@ module Watir
     def wait_until_present(timeout = nil)
       timeout ||= Watir.default_timeout
       message = "waiting for #{selector_string} to become present"
-      Watir::Wait.until(timeout, message) { present? }
+      if self.respond_to? :browser
+        browser.without_implicit_wait do
+          Watir::Wait.until(timeout, message) { present? }
+        end
+      else
+        Watir::Wait.until(timeout, message) { present? }
+      end
     end
 
     #

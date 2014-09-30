@@ -35,6 +35,22 @@ module Watir
     end
 
     #
+    # Returns true if element does not exist.
+    # Immediately returns result without implicit waits when set
+    # For use when element is not expected to be there
+    #
+    # @return [Boolean]
+    #
+
+    def not_exists?
+      browser.without_implicit_wait do
+        !exists?
+      end
+    end
+
+    alias_method :not_exist?, :not_exists?
+
+    #
     # Returns true if element exists.
     #
     # @return [Boolean]

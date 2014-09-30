@@ -10,7 +10,7 @@ module Watir
     include HasWindow
     include Waitable
 
-    attr_reader :driver
+    attr_reader :driver, :implicit_wait
     alias_method :wd, :driver # ensures duck typing with Watir::Element
 
     class << self
@@ -201,6 +201,33 @@ module Watir
     def refresh
       @driver.navigate.refresh
       run_checkers
+    end
+
+    #
+    # Set the amount of time the driver should wait when searching for elements.
+    #
+    # @param [Fixnum] seconds
+    #
+
+    def implicit_wait=(seconds)
+      driver.manage.timeouts.implicit_wait=(seconds)
+      @implicit_wait = seconds
+    end
+
+    #
+    # Toggles off implicit wait for specific block
+    #
+    # @yield [block] code to be executed without using an implicit_wait
+    #
+
+    def without_implicit_wait
+      begin
+        original_implicit_wait = @implicit_wait
+        implicit_wait = 0
+        yield(self)
+      ensure
+        implicit_wait = original_implicit_wait
+      end
     end
 
     #
