@@ -11,7 +11,6 @@ module Watir
     load :getAttribute
     load :getOuterHtml
     load :getInnerHtml
-    load :getParentElement
 
     private
 
