@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 module Watir
 
   #
@@ -366,13 +368,15 @@ module Watir
     #
 
     def parent
-      assert_exists
+      locate_dom_element(:getParentElement)
+    end
 
-      e = element_call { execute_atom :getParentElement, @element }
+    def next_sibling
+      locate_dom_element(:getNextSibling) || element(xpath: './following-sibling::*')
+    end
 
-      if e.kind_of?(Selenium::WebDriver::Element)
-        Watir.element_class_for(e.tag_name.downcase).new(@parent, element: e)
-      end
+    def previous_sibling
+      locate_dom_element(:getPreviousSibling) || element(xpath: './preceding-sibling::*[1]')
     end
 
     #
@@ -605,6 +609,16 @@ module Watir
         attribute_value(method.gsub(/_/, '-'), *args)
       else
         super
+      end
+    end
+
+    def locate_dom_element(method)
+      assert_exists
+
+      e = element_call { execute_atom method, @element }
+
+      if e.kind_of?(Selenium::WebDriver::Element)
+        Watir.element_class_for(e.tag_name.downcase).new(@parent, element: e)
       end
     end
 
