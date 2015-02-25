@@ -20,7 +20,7 @@ module Watir
 
     def text
       assert_exists
-      @alert.text
+      @alert.text.strip
     end
 
     #

@@ -79,7 +79,7 @@ module Watir
 
     def text
       assert_exists
-      element_call { @element.text }
+      element_call { @element.text }.strip
     end
 
     #
