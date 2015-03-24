@@ -9,7 +9,7 @@ module Watir
     include HasWindow
     include Waitable
 
-    attr_reader :driver
+    attr_reader :driver, :browsing_context
     alias_method :wd, :driver # ensures duck typing with Watir::Element
 
     class << self
@@ -49,6 +49,7 @@ module Watir
         raise ArgumentError, "expected Symbol or Selenium::WebDriver::Driver, got #{browser.class}"
       end
 
+      @browsing_context = BrowsingContext.new(self)
       @error_checkers = []
       @current_frame  = nil
       @closed         = false
@@ -176,6 +177,8 @@ module Watir
     # Returns HTML code of current page.
     #
     # @return [String]
+    #
+    # Note - this overrides creation of an Html object;
     #
 
     def html
@@ -382,11 +385,14 @@ module Watir
       elsif !window.present?
         raise Exception::NoMatchingWindowFoundException, "browser window was closed"
       else
-        driver.switch_to.default_content
-        true
+        switch_to
       end
     end
     alias_method :ensure_not_stale, :assert_exists
+
+    def switch_to
+      @browsing_context.switch_to
+    end
 
     def reset!
       # no-op

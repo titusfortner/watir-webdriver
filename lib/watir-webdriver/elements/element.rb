@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 module Watir
 
   #
@@ -10,6 +12,8 @@ module Watir
     include Exception
     include Container
     include EventuallyPresent
+
+    attr_reader :browsing_context
 
     #
     # temporarily add :id and :class_name manually since they're no longer specified in the HTML spec.
@@ -26,6 +30,7 @@ module Watir
       @parent   = parent
       @selector = selector
       @element  = nil
+      @browsing_context = @parent.browsing_context
 
       unless @selector.kind_of? Hash
         raise ArgumentError, "invalid argument: #{selector.inspect}"
@@ -388,8 +393,7 @@ module Watir
     #
 
     def wd
-      assert_exists
-      @element
+      @element || assert_exists || @element
     end
 
     #
@@ -512,7 +516,7 @@ module Watir
 
       ensure_context
       if stale?
-        if Watir.always_locate? && !@selector[:element]
+        if Watir.always_locate? && ! @selector[:element]
           @element = locate
         else
           reset!

@@ -1,18 +1,26 @@
+# encoding: utf-8
 module Watir
   class IFrame < HTMLElement
 
-    def locate
-      @parent.assert_exists
+    def initialize(*args)
+      super(*args)
+      @browsing_context = BrowsingContext.new(self)
+    end
 
-      locator = locator_class.new(@parent.wd, @selector.merge(tag_name: frame_tag), self.class.attribute_list)
+    def locate
+      @selector.merge!(:tag_name => frame_tag)
+      super
+    end
+
+      locator = locator_class.new(@parent.wd, @selector.merge(:tag_name => frame_tag), self.class.attribute_list)
       element = locator.locate
       element or raise UnknownFrameException, "unable to locate #{@selector[:tag_name]} using #{selector_string}"
 
       FramedDriver.new(element, driver)
     end
 
-    def switch_to!
-      locate.send :switch!
+    def switch_to
+      @browsing_context.switch_to
     end
 
     def assert_exists
@@ -103,51 +111,4 @@ module Watir
     end
 
   end # Container
-
-
-  # @api private
-  #
-  # another hack..
-  #
-
-  class FramedDriver
-    def initialize(element, driver)
-      @element = element
-      @driver = driver
-    end
-
-    def ==(other)
-      wd == other.wd
-    end
-    alias_method :eql?, :==
-
-    def send_keys(*args)
-      switch!
-      @driver.switch_to.active_element.send_keys(*args)
-    end
-
-    protected
-
-    def wd
-      @element
-    end
-
-    private
-
-    def method_missing(meth, *args, &blk)
-      if @driver.respond_to?(meth)
-        switch!
-        @driver.send(meth, *args, &blk)
-      else
-        @element.send(meth, *args, &blk)
-      end
-    end
-
-    def switch!
-      @driver.switch_to.frame @element
-    rescue Selenium::WebDriver::Error::NoSuchFrameError => e
-      raise Exception::UnknownFrameException, e.message
-    end
-
-  end # FramedDriver
 end # Watir

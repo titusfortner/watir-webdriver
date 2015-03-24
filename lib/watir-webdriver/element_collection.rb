@@ -87,6 +87,7 @@ module Watir
     private
 
     def elements
+      @parent.send :assert_exists # Populate all Elements in chain with WebDriver::Elements
       @elements ||= locator_class.new(
         @parent.wd,
         @selector,
