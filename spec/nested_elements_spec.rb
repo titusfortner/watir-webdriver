@@ -5,16 +5,16 @@ describe "Nesting Elements" do
     browser.goto(WatirSpec.url_for("nested_elements.html", :needs_server => true))
   end
 
-  let(:el_collect) {browser.body.divs.first.div}
-  let(:frame) {browser.body.iframe.div}
-  let(:fr_collect) {browser.body.iframes.first.div}
+  let(:el_collect) { browser.body.divs.first.div }
+  let(:frame) { browser.body.iframe.div }
+  let(:fr_collect) { browser.body.iframes.first.div }
 
-  let(:el_collect_frame) {browser.body.divs.first.iframe.div}
-  let(:el_collect_fr_collect) {browser.body.divs.first.iframes.first.div}
-  let(:frame_el_collect) {browser.body.iframe.divs.first.div}
-  let(:frame_fr_collect) {browser.body.iframe.iframes.first.div}
-  let(:fr_collect_el_collect) {browser.body.iframes.first.divs.first.div}
-  let(:fr_collect_frame) {browser.body.iframes.first.iframe.div}
+  let(:el_collect_frame) { browser.body.divs.first.iframe.div }
+  let(:el_collect_fr_collect) { browser.body.divs.first.iframes.first.div }
+  let(:frame_el_collect) { browser.body.iframe.divs.first.div }
+  let(:frame_fr_collect) { browser.body.iframe.iframes.first.div }
+  let(:fr_collect_el_collect) { browser.body.iframes.first.divs.first.div }
+  let(:fr_collect_frame) { browser.body.iframes.first.iframe.div }
 
   let(:element_1) { browser.body.divs.first.iframe.iframes.first.div }
   let(:element_2) { browser.body.divs.last.iframe.iframes.first.div }
@@ -116,21 +116,21 @@ describe "Nesting Elements" do
       expect(element_12.exists?).to be true
     end
   end
-  
+
   context "Present when evaluated separately" do
 
     it "Element Collection Present" do
       expect(el_collect.present?).to be true
     end
-    
+
     it "Frame Present" do
       expect(frame.present?).to be true
     end
-    
+
     it "Frame Collection Present" do
       expect(fr_collect.present?).to be true
     end
-    
+
     it "Element Collection with Frame Present" do
       expect(el_collect_frame.present?).to be true
     end
