@@ -31,91 +31,96 @@ describe "Nesting Elements" do
 
   context "Exists when evaluated separately" do
 
-    it "Element Collection Exists" do
-      expect(el_collect.exists?).to be true
+    context "Fails before 0eefa3d" do
+      it "Element 1" do
+        expect(element_1.exists?).to be true
+      end
+
+      it "Element 2" do
+        expect(element_2.exists?).to be true
+      end
+
+      it "Element 3" do
+        expect(element_3.exists?).to be true
+      end
+
+      it "Element 4" do
+        expect(element_4.exists?).to be true
+      end
     end
 
-    it "Frame Exists" do
-      expect(frame.exists?).to be true
-    end
+    context "Always passes" do
 
-    it "Frame Collection Exists" do
-      expect(fr_collect.exists?).to be true
-    end
+      it "Element Collection Exists" do
+        expect(el_collect.exists?).to be true
+      end
 
-    it "Element Collection with Frame Exists" do
-      expect(el_collect_frame.exists?).to be true
-    end
+      it "Frame Exists" do
+        expect(frame.exists?).to be true
+      end
 
-    it "Element Collection with Frame Collection Exists" do
-      expect(el_collect_fr_collect.exists?).to be true
-    end
+      it "Frame Collection Exists" do
+        expect(fr_collect.exists?).to be true
+      end
 
-    it "Frame with Element Collection Exists" do
-      expect(frame_el_collect.exists?).to be true
-    end
+      it "Element Collection with Frame Exists" do
+        expect(el_collect_frame.exists?).to be true
+      end
 
-    it "Frame with Frame Collection Exists" do
-      expect(frame_fr_collect.exists?).to be true
-    end
+      it "Element Collection with Frame Collection Exists" do
+        expect(el_collect_fr_collect.exists?).to be true
+      end
 
-    it "Frame Collection with Element Collection Exists" do
-      expect(fr_collect_el_collect.exists?).to be true
-    end
+      it "Frame with Element Collection Exists" do
+        expect(frame_el_collect.exists?).to be true
+      end
 
-    it "Frame Collection with Frame Exists" do
-      expect(fr_collect_frame.exists?).to be true
-    end
+      it "Frame with Frame Collection Exists" do
+        expect(frame_fr_collect.exists?).to be true
+      end
 
+      it "Frame Collection with Element Collection Exists" do
+        expect(fr_collect_el_collect.exists?).to be true
+      end
 
-    it "Element 1" do
-      expect(element_1.exists?).to be true
-    end
+      it "Frame Collection with Frame Exists" do
+        expect(fr_collect_frame.exists?).to be true
+      end
 
-    it "Element 2" do
-      expect(element_2.exists?).to be true
-    end
+      it "Element 5" do
+        expect(element_5.exists?).to be true
+      end
 
-    it "Element 3" do
-      expect(element_3.exists?).to be true
-    end
+      it "Element 6" do
+        expect(element_6.exists?).to be true
+      end
 
-    it "Element 4" do
-      expect(element_4.exists?).to be true
-    end
+      it "Element 7" do
+        expect(element_7.exists?).to be true
+      end
 
-    it "Element 5" do
-      expect(element_5.exists?).to be true
-    end
+      it "Element 8" do
+        expect(element_8.exists?).to be true
+      end
 
-    it "Element 6" do
-      expect(element_6.exists?).to be true
-    end
+      it "Element 9" do
+        expect(element_9.exists?).to be true
+      end
 
-    it "Element 7" do
-      expect(element_7.exists?).to be true
-    end
+      it "Element 10" do
+        expect(element_10.exists?).to be true
+      end
 
-    it "Element 8" do
-      expect(element_8.exists?).to be true
-    end
+      it "Element 11" do
+        expect(element_11.exists?).to be true
+      end
 
-    it "Element 9" do
-      expect(element_9.exists?).to be true
-    end
-
-    it "Element 10" do
-      expect(element_10.exists?).to be true
-    end
-
-    it "Element 11" do
-      expect(element_11.exists?).to be true
-    end
-
-    it "Element 12" do
-      expect(element_12.exists?).to be true
+      it "Element 12" do
+        expect(element_12.exists?).to be true
+      end
     end
   end
+
 
   context "Present when evaluated separately" do
 
