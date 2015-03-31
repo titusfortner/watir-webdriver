@@ -20,7 +20,11 @@ module Watir
     #
 
     def append(*args)
+      original_value = element_call { @element.value } if args.size == 1 && args.first.is_a?(String)
       send_keys(*args)
+      if original_value && element_call { @element.value } != "#{original_value}#{args.first}"
+        set(*args)
+      end
     end
     alias_method :<<, :append
 
