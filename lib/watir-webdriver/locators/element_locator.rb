@@ -1,3 +1,4 @@
+# encoding: utf-8
 module Watir
   class ElementLocator
     include Watir::Exception
@@ -112,6 +113,12 @@ module Watir
 
       if selector.key? :index
         raise ArgumentError, "can't locate all elements by :index"
+      elsif selector.delete :children
+        if selector.key?(:xpath) || selector.has_key?(:css)
+          raise ArgumentError, "can't combine :children with either :xpath or :css"
+        else
+          selector.merge!(:xpath => "./#{selector.delete(:tag_name) || '*'}")
+        end
       end
 
       how, what = given_xpath_or_css(selector) || build_wd_selector(selector)
@@ -178,6 +185,10 @@ module Watir
         unless what.kind_of?(Fixnum)
           raise TypeError, "expected Fixnum, got #{what.inspect}:#{what.class}"
         end
+      when :children
+        unless what.kind_of?(TrueClass) || what.kind_of?(FalseClass)
+          raise TypeError, "expected true or false, got #{what.inspect}:#{what.class}"
+        end
       else
         unless VALID_WHATS.any? { |t| what.kind_of? t }
           raise TypeError, "expected one of #{VALID_WHATS.inspect}, got #{what.inspect}:#{what.class}"
@@ -226,7 +237,7 @@ module Watir
 
     def normalize_selector(how, what)
       case how
-      when :tag_name, :text, :xpath, :index, :class, :label, :css
+      when :tag_name, :text, :xpath, :index, :class, :label, :css, :children
         # include :class since the valid attribute is 'class_name'
         # include :for since the valid attribute is 'html_for'
         [how, what]
@@ -362,7 +373,7 @@ module Watir
     def use_css?(selectors)
       return false unless Watir.prefer_css?
 
-      if selectors.key?(:text) || selectors.key?(:label) || selectors.key?(:index)
+      if selectors.key?(:text) || selectors.key?(:label) || selectors.key?(:index) || selectors.key?(:children)
         return false
       end
 
