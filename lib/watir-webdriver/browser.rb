@@ -257,6 +257,40 @@ module Watir
     end
 
     #
+    # Execute an asynchronous piece of JavaScript in the context of the
+    # currently selected frame or window. Unlike executing
+    # execute_script (synchronous JavaScript), scripts
+    # executed with this method must explicitly signal they are finished by
+    # invoking the provided callback. This callback is always injected into the
+    # executed function as the last argument.
+    #
+    # @example Check that Ajax requests are completed with jQuery
+    #   browser.executeAsyncScript("var callback = arguments[arguments.length - 1];" +
+    # "angular.element(document.body).injector().get('$browser').notifyWhenNoOutstandingRequests(callback);");
+    #   #=> true
+    #
+    # @param [String] script JavaScript snippet to execute
+    # @param *args Arguments will be available in the given script in the 'arguments' pseudo-array
+    #
+
+
+    # test.rb
+    #   dir_to_jquery = Dir.pwd + '/features/support/ajax_resources'
+    #   # jQuerify.js is the same java script posted above by Joe Coder
+    #   jquerystring = File.open("#{dir_to_jquery}/jQuerify.js").read
+    #
+    #   #Give time for script to load and inject jquery library dynamically
+    #   @browser.manage.timeouts.script_timeout = 10
+    #   @browser.execute_async_script(jquerystring)
+    #   @browser.execute_script("jQuery(function($) { " +" $('input[name=\"q\"]').val('pradeep@seleniumframework.com').closest('form').submit(); " +" }); ");
+
+    def execute_async_script(script, *args)
+      args.map! { |e| e.kind_of?(Watir::Element) ? e.wd : e }
+      @driver.execute_script(script, *args)
+    end
+
+
+    #
     # Sends sequence of keystrokes to currently active element.
     #
     # @example
