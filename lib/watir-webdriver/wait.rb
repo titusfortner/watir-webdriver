@@ -32,6 +32,7 @@ module Watir
       #
       # @param [Fixnum] timeout How long to wait in seconds
       # @param [String] message Message to raise if timeout is exceeded
+      # @yield block
       # @raise [TimeoutError] if timeout is exceeded
       #
 
@@ -49,6 +50,7 @@ module Watir
       #
       # @param [Fixnum] timeout How long to wait in seconds
       # @param [String] message Message to raise if timeout is exceeded
+      # @yield block
       # @raise [TimeoutError] if timeout is exceeded
       #
 
@@ -82,13 +84,54 @@ module Watir
   end # Wait
 
   module Waitable
+
+    #
+    # Executes given block until it returns true or exceeds timeout.
+    #
+    # @example
+    #   browser.wait_until(30, 'Element is not visible') {browser.text_field(:name => "new_user_first_name").visible?}
+    #
+    # @param [Fixnum] timeout How long to wait in seconds
+    # @param [String] message Message to raise if timeout is exceeded
+    # @yield block
+    # @raise [TimeoutError] if timeout is exceeded
+    #
+
     def wait_until(*args, &blk)
       Wait.until(*args, &blk)
     end
 
+    #
+    # Executes given block while it returns true or exceeds timeout.
+    #
+    # @example
+    #   browser.wait_while(30, 'Element is still visible') {browser.text_field(:name => "new_user_first_name").visible?}
+    #
+    # @param [Fixnum] timeout How long to wait in seconds
+    # @param [String] message Message to raise if timeout is exceeded
+    # @yield block
+    # @raise [TimeoutError] if timeout is exceeded
+    #
+
     def wait_while(*args, &blk)
       Wait.while(*args, &blk)
     end
+
+    #
+    # Execute the block once, bypassing execution of default wait_for_exists and wait_for_present methods
+    #
+    # @example
+    #   browser.without_waiting {browser.text_field(:name => "new_user_first_name").visible?}
+    #
+
+    def without_waiting
+      original_timeout = @default_timeout
+      @default_timeout = 0
+      return_value = yield
+      @default_timeout = original_timeout
+      return_value
+    end
+
   end
 
   #
@@ -99,6 +142,7 @@ module Watir
   class WhenPresentDecorator
     extend Forwardable
 
+    ELEMENT_ACTIONS = [:set, :append, :clear, :click, :double_click, :right_click, :send_keys, :focus, :focused?, :submit]
     def_delegator :@element, :present?
 
     def initialize(element, timeout, message = nil)
@@ -117,6 +161,11 @@ module Watir
       end
 
       Watir::Wait.until(@timeout, @message) { @element.present? }
+
+
+      if @timeout >= Watir.default_timeout && @timeout != 0 && ELEMENT_ACTIONS.include?(m)
+        warn "#when_present might be unnecessary for #{@element.send :selector_string}; elements now automatically wait when taking action - #{m}"
+      end
 
       @element.__send__(m, *args, &block)
     end

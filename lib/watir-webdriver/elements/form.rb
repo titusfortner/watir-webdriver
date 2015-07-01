@@ -8,7 +8,7 @@ module Watir
     #
 
     def submit
-      element_call { @element.submit }
+      element_call(:wait_for_present) { @element.submit }
       run_checkers
     end
 

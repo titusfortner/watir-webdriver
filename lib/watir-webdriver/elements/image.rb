@@ -23,7 +23,7 @@ module Watir
     #
 
     def width
-      assert_exists
+      wait_for_exists
       driver.execute_script "return arguments[0].width", @element
     end
 
@@ -34,22 +34,22 @@ module Watir
     #
 
     def height
-      assert_exists
+      wait_for_exists
       driver.execute_script "return arguments[0].height", @element
     end
 
     def file_created_date
-      assert_exists
+      wait_for_exists
       raise NotImplementedError, "not currently supported by WebDriver"
     end
 
     def file_size
-      assert_exists
+      wait_for_exists
       raise NotImplementedError, "not currently supported by WebDriver"
     end
 
     def save(path)
-      assert_exists
+      wait_for_exists
       raise NotImplementedError, "not currently supported by WebDriver"
     end
 

@@ -387,6 +387,8 @@ module Watir
       end
     end
     alias_method :ensure_not_stale, :assert_exists
+    alias_method :wait_for_exists, :assert_exists
+    alias_method :wait_for_present, :assert_exists
 
     def reset!
       # no-op
