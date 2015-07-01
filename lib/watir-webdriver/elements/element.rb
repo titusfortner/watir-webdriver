@@ -80,7 +80,7 @@ module Watir
     #
 
     def text
-      element_call { @element.text }
+      element_call { @element.text }.strip
     end
 
     #
@@ -191,8 +191,8 @@ module Watir
 
       element_call do
         driver.action.
-               drag_and_drop(@element, other.wd).
-               perform
+            drag_and_drop(@element, other.wd).
+            perform
       end
     end
 
@@ -212,8 +212,8 @@ module Watir
 
       element_call do
         driver.action.
-               drag_and_drop_by(@element, right_by, down_by).
-               perform
+            drag_and_drop_by(@element, right_by, down_by).
+            perform
       end
     end
 
@@ -451,17 +451,17 @@ module Watir
 
       if tag_name == "input"
         klass = case elem.attribute(:type)
-          when *Button::VALID_TYPES
-            Button
-          when 'checkbox'
-            CheckBox
-          when 'radio'
-            Radio
-          when 'file'
-            FileField
-          else
-            TextField
-          end
+                when *Button::VALID_TYPES
+                  Button
+                when 'checkbox'
+                  CheckBox
+                when 'radio'
+                  Radio
+                when 'file'
+                  FileField
+                else
+                  TextField
+                end
       else
         klass = Watir.element_class_for(tag_name)
       end
@@ -479,7 +479,7 @@ module Watir
       @parent.browser
     end
 
-  protected
+    protected
 
     def wait_for_exists
       return if exists? # Performance shortcut
@@ -568,7 +568,7 @@ module Watir
       locator_class.new(@parent.wd, @selector, self.class.attribute_list).locate
     end
 
-  private
+    private
 
     def unknown_exception
       Watir::Exception::UnknownObjectException

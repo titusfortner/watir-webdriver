@@ -20,7 +20,7 @@ module Watir
 
     def text
       wait_for_exists
-      @alert.text
+      @alert.text.strip
     end
 
     #
