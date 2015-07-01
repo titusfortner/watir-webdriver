@@ -245,6 +245,19 @@ module Watir
     end
 
     #
+    # Scrolls to the location of an element in the DOM
+    # Returns the resulting location on the screen
+    #
+    # @example
+    #   browser.text_field(id: "scroll_into_view").scroll_to
+    #
+
+    def scroll_into_view
+      wd.location_once_scrolled_into_view
+      self
+    end
+
+    #
     # Returns value of the element.
     #
     # @return [String]
