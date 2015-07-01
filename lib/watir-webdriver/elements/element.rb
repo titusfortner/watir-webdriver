@@ -368,11 +368,26 @@ module Watir
     #
 
     def parent
-      e = element_call { execute_atom :getParentElement, @element }
+      e = element(xpath: './ancestor::*[1]')
+      e.exists? ? e.to_subtype : nil
+    end
 
-      if e.kind_of?(Selenium::WebDriver::Element)
-        Watir.element_class_for(e.tag_name.downcase).new(@parent, element: e)
-      end
+    #
+    # Returns previous sibling element of current element.
+    #
+
+    def previous_sibling
+      element(xpath: './preceding-sibling::*[1]')
+      e.exists? ? e.to_subtype : e
+    end
+
+    #
+    # Returns following sibling element of current element.
+    #
+
+    def next_sibling
+      e = element(xpath: './following-sibling::*')
+      e.exists? ? e.to_subtype : e
     end
 
     #
@@ -640,8 +655,7 @@ module Watir
       end
       yield
     rescue Selenium::WebDriver::Error::StaleElementReferenceError
-      raise unless Watir.always_locate?
-      retry
+      raise unless Watir.always_locate?      retry
     end
 
     def method_missing(meth, *args, &blk)
