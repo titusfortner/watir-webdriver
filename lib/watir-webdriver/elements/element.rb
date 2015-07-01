@@ -655,7 +655,8 @@ module Watir
       end
       yield
     rescue Selenium::WebDriver::Error::StaleElementReferenceError
-      raise unless Watir.always_locate?      retry
+      raise unless Watir.always_locate?
+      retry
     end
 
     def method_missing(meth, *args, &blk)
