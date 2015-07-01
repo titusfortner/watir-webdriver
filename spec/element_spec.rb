@@ -97,11 +97,14 @@ describe Watir::Element do
 
       watir_element = browser.div(id: "text")
 
-        # simulate element going stale after assert_exists and before action taken
+        # simulate element going stale after assert_exists and before action taken, but not when block retried
       allow(watir_element).to receive(:text) do
-        watir_element.send :assert_exists
-        browser.refresh
-        watir_element.send(:element_call) { watir_element.instance_variable_get('@element').text }
+        watir_element.send(:element_call) do
+          @already_stale ||= false
+          browser.refresh unless @already_stale
+          @already_stale = true
+          watir_element.instance_variable_get('@element').text
+        end
       end
 
       if Watir.always_locate?

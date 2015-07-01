@@ -24,7 +24,6 @@ module Watir
     #
 
     def set?
-      assert_exists
       element_call { @element.selected? }
     end
 
