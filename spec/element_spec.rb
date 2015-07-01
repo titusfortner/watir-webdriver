@@ -131,4 +131,30 @@ describe Watir::Element do
       end
     end
   end
+
+  describe "#scroll_into_view" do
+
+    before do
+      browser.goto WatirSpec.url_for('scroll.html')
+    end
+
+    it "scrolls to an element to make it visible" do
+      first_element = browser.p(id: 'first')
+      last_element = browser.p(id: 'last')
+
+      expect(first_element).to be_visible
+      expect(last_element).to_not be_visible
+
+      last_element.scroll_into_view
+
+      expect(last_element).to be_visible
+      expect(first_element).to_not be_visible
+    end
+
+    it "can make calls on element" do
+      last_element = browser.p(id: 'last')
+      expect(last_element.scroll_into_view).to be_visible
+    end
+
+  end
 end
