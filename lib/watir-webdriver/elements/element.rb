@@ -377,7 +377,7 @@ module Watir
     #
 
     def previous_sibling
-      element(xpath: './preceding-sibling::*[1]')
+      e = element(xpath: './preceding-sibling::*[1]')
       e.exists? ? e.to_subtype : e
     end
 
