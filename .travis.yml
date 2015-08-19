@@ -8,6 +8,7 @@ notifications:
     - jarmo.p@gmail.com
     - titusfortner@gmail.com
   irc: "irc.freenode.net#watir"
+sudo: true
 before_script:
   - support/travis.sh
 script: bundle exec rake $RAKE_TASK
