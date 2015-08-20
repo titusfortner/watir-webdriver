@@ -10,13 +10,13 @@ elif [[ "$BROWSER_VERSION" = "42" ]]; then
 # June 1, 2015
 export CHROME_REVISION=317475
 elif [[ "$BROWSER_VERSION" = "A" ]]; then
-export CHROME_REVISION=325000
+export CHROME_REVISION=318566
 elif [[ "$BROWSER_VERSION" = "B" ]]; then
-export CHROME_REVISION=330000
+export CHROME_REVISION=319561
 elif [[ "$BROWSER_VERSION" = "C" ]]; then
-export CHROME_REVISION=335000
+export CHROME_REVISION=320643
 elif [[ "$BROWSER_VERSION" = "D" ]]; then
-export CHROME_REVISION=340007
+export CHROME_REVISION=32450
 else
 export CHROME_REVISION=`curl -s http://commondatastorage.googleapis.com/chromium-browser-snapshots/Linux_x64/LAST_CHANGE`
 fi
