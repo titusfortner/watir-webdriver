@@ -19,6 +19,7 @@ module Watir
     #
 
     def text
+      wait_until_present
       assert_exists
       @alert.text
     end
@@ -33,6 +34,7 @@ module Watir
     #
 
     def ok
+      wait_until_present
       assert_exists
       @alert.accept
       @browser.after_hooks.run
@@ -48,6 +50,7 @@ module Watir
     #
 
     def close
+      wait_until_present
       assert_exists
       @alert.dismiss
       @browser.after_hooks.run
@@ -64,6 +67,7 @@ module Watir
     #
 
     def set(value)
+      wait_until_present
       assert_exists
       @alert.send_keys(value)
     end
