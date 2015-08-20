@@ -1,24 +1,11 @@
+
 #/bin/sh
 
 set -e
 set -x
 
-if [[ "$BROWSER_VERSION" = "43" ]]; then
-# July 13, 2015
-export CHROME_REVISION=323860
-elif [[ "$BROWSER_VERSION" = "GOOD" ]]; then
-export CHROME_REVISION=323898
-elif [[ "$BROWSER_VERSION" = "A" ]]; then
-export CHROME_REVISION=323898
-elif [[ "$BROWSER_VERSION" = "B" ]]; then
-export CHROME_REVISION=323899
-elif [[ "$BROWSER_VERSION" = "C" ]]; then
-export CHROME_REVISION=323900
-else
-export CHROME_REVISION=`curl -s http://commondatastorage.googleapis.com/chromium-browser-snapshots/Linux_x64/LAST_CHANGE`
-fi
-
-export CHROMEDRIVER_VERSION=`curl -s http://chromedriver.storage.googleapis.com/LATEST_RELEASE`
+export CHROME_REVISION=335000
+export CHROMEDRIVER_VERSION=2.18
 
 sh -e /etc/init.d/xvfb start
 git submodule update --init
