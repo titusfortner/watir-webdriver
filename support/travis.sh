@@ -8,18 +8,12 @@ if [[ "$BROWSER_VERSION" = "43" ]]; then
 export CHROME_REVISION=323860
 elif [[ "$BROWSER_VERSION" = "42" ]]; then
 # June 1, 2015
-export CHROME_REVISION=317474
-# March 30, 2015
-elif [[ "$BROWSER_VERSION" = "41" ]]; then
-export CHROME_REVISION=310958
+export CHROME_REVISION=317475
 else
 export CHROME_REVISION=`curl -s http://commondatastorage.googleapis.com/chromium-browser-snapshots/Linux_x64/LAST_CHANGE`
 fi
 
-if [[ "$CHROMEDRIVER" = "2.15" ]]; then
-# March 27, 2015
-export CHROMEDRIVER_VERSION=2.15
-elif [[ "$BROWSER_VERSION" = "2.16" ]]; then
+if [[ "$BROWSER_VERSION" = "2.16" ]]; then
 # June 8, 2015
 export CHROMEDRIVER_VERSION=2.16
 elif [[ "$BROWSER_VERSION" = "2.17" ]]; then
