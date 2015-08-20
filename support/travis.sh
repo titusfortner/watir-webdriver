@@ -8,15 +8,23 @@ if [[ "$BROWSER_VERSION" = "43" ]]; then
 export CHROME_REVISION=323860
 elif [[ "$BROWSER_VERSION" = "42" ]]; then
 # June 1, 2015
-export CHROME_REVISION=317475
-elif [[ "$BROWSER_VERSION" = "A" ]]; then
-export CHROME_REVISION=318566
-elif [[ "$BROWSER_VERSION" = "B" ]]; then
-export CHROME_REVISION=319561
-elif [[ "$BROWSER_VERSION" = "C" ]]; then
 export CHROME_REVISION=320643
+elif [[ "$BROWSER_VERSION" = "A" ]]; then
+export CHROME_REVISION=321040
+elif [[ "$BROWSER_VERSION" = "B" ]]; then
+export CHROME_REVISION=321503
+elif [[ "$BROWSER_VERSION" = "C" ]]; then
+export CHROME_REVISION=322000
 elif [[ "$BROWSER_VERSION" = "D" ]]; then
-export CHROME_REVISION=32450
+export CHROME_REVISION=322502
+elif [[ "$BROWSER_VERSION" = "E" ]]; then
+export CHROME_REVISION=323000
+elif [[ "$BROWSER_VERSION" = "F" ]]; then
+export CHROME_REVISION=323501
+elif [[ "$BROWSER_VERSION" = "G" ]]; then
+export CHROME_REVISION=324001
+elif [[ "$BROWSER_VERSION" = "H" ]]; then
+export CHROME_REVISION=324510
 else
 export CHROME_REVISION=`curl -s http://commondatastorage.googleapis.com/chromium-browser-snapshots/Linux_x64/LAST_CHANGE`
 fi
