@@ -4,10 +4,7 @@ rvm:
   #- 2.2
 notifications:
   recipients:
-    - p0deje@gmail.com
-    - jarmo.p@gmail.com
     - titusfortner@gmail.com
-  irc: "irc.freenode.net#watir"
 sudo: true
 before_script:
   - support/travis.sh
@@ -19,5 +16,3 @@ env:
   - RAKE_TASK=spec WATIR_WEBDRIVER_BROWSER=chrome BROWSER_VERSION=D
   - RAKE_TASK=spec WATIR_WEBDRIVER_BROWSER=chrome BROWSER_VERSION=E
   - RAKE_TASK=spec WATIR_WEBDRIVER_BROWSER=chrome BROWSER_VERSION=F
-  - RAKE_TASK=spec WATIR_WEBDRIVER_BROWSER=chrome BROWSER_VERSION=G
-  - RAKE_TASK=spec WATIR_WEBDRIVER_BROWSER=chrome BROWSER_VERSION=H
