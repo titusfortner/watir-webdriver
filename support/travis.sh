@@ -9,22 +9,19 @@ export CHROME_REVISION=323860
 elif [[ "$BROWSER_VERSION" = "42" ]]; then
 # June 1, 2015
 export CHROME_REVISION=317475
+elif [[ "$BROWSER_VERSION" = "A" ]]; then
+export CHROME_REVISION=325000
+elif [[ "$BROWSER_VERSION" = "B" ]]; then
+export CHROME_REVISION=330000
+elif [[ "$BROWSER_VERSION" = "C" ]]; then
+export CHROME_REVISION=335000
+elif [[ "$BROWSER_VERSION" = "D" ]]; then
+export CHROME_REVISION=340007
 else
 export CHROME_REVISION=`curl -s http://commondatastorage.googleapis.com/chromium-browser-snapshots/Linux_x64/LAST_CHANGE`
 fi
 
-if [[ "$BROWSER_VERSION" = "2.16" ]]; then
-# June 8, 2015
-export CHROMEDRIVER_VERSION=2.16
-elif [[ "$BROWSER_VERSION" = "2.17" ]]; then
-# July 31, 2015
-export CHROMEDRIVER_VERSION=2.17
-# August 19, 2015
-elif [[ "$CHROMEDRIVER" = "2.18" ]]; then
-export CHROMEDRIVER_VERSION=2.18
-else
 export CHROMEDRIVER_VERSION=`curl -s http://chromedriver.storage.googleapis.com/LATEST_RELEASE`
-fi
 
 sh -e /etc/init.d/xvfb start
 git submodule update --init
