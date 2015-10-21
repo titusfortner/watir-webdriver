@@ -19,7 +19,6 @@ module WatirSpec
     module_function
 
     def execute
-      load_requires
       start_server
       configure
       add_guard_hook
@@ -47,22 +46,6 @@ module WatirSpec
           $browser = WatirSpec.new_browser
           at_exit { $browser.close }
         end
-      end
-    end
-
-    def load_requires
-      require "rspec"
-      require "fileutils"
-
-      implementation = File.expand_path("../../../implementation.rb", __FILE__)
-      load implementation
-
-      begin
-        require "ruby-debug"
-        Debugger.start
-        Debugger.settings[:autoeval] = true
-        Debugger.settings[:autolist] = 1
-      rescue LoadError
       end
     end
 

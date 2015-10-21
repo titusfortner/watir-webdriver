@@ -1,5 +1,5 @@
 # encoding: utf-8
-require File.expand_path("../spec_helper", __FILE__)
+require 'spec_helper'
 
 describe "SelectList" do
 
@@ -150,7 +150,7 @@ describe "SelectList" do
   describe "#option" do
     it "returns an instance of Option" do
       option = browser.select_list(name: "new_user_country").option(text: "Denmark")
-      expect(option).to be_instance_of(Option)
+      expect(option).to be_instance_of(Watir::Option)
       expect(option.value).to eq "1"
     end
   end

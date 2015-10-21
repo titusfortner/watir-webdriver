@@ -1,5 +1,5 @@
 # encoding: utf-8
-require File.expand_path("../spec_helper", __FILE__)
+require 'spec_helper'
 
 describe "H1s", "H2s", "H3s", "H4s", "H5s", "H6s" do
   before :each do

@@ -1,25 +1,32 @@
 # encoding: utf-8
+# encoding: utf-8
+begin
+  require "rubygems"
+rescue LoadError
+end
 
-$LOAD_PATH.unshift(File.dirname(__FILE__))
-$LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
+require "tmpdir"
+require "sinatra/base"
+require "rspec"
+require "fileutils"
+
+require_relative 'lib/watirspec'
+require_relative 'lib/guards'
+require_relative 'lib/implementation'
+require_relative 'lib/runner'
+require_relative 'lib/server'
+require_relative 'lib/silent_logger'
+
 
 require 'coveralls'
 Coveralls.wear!
 
 require 'watir-webdriver'
-require 'locator_spec_helper'
 require 'rubygems'
-require 'rspec'
 require "tmpdir"
 require "sinatra/base"
-require "#{File.dirname(__FILE__)}/lib/watirspec"
-require "#{File.dirname(__FILE__)}/lib/implementation"
-require "#{File.dirname(__FILE__)}/lib/server"
-require "#{File.dirname(__FILE__)}/lib/runner"
-require "#{File.dirname(__FILE__)}/lib/guards"
-require "#{File.dirname(__FILE__)}/lib/silent_logger"
+require 'locator_spec_helper'
 
-include Watir
 
 if ENV['ALWAYS_LOCATE'] == "false"
   Watir.always_locate = false
@@ -44,8 +51,14 @@ if Selenium::WebDriver::Platform.linux? && ENV['DISPLAY'].nil?
   raise "DISPLAY not set"
 end
 
+
+require_relative "lib/implementation_config"
+
 begin
-  require "rubygems"
+  require "ruby-debug"
+  Debugger.start
+  Debugger.settings[:autoeval] = true
+  Debugger.settings[:autolist] = 1
 rescue LoadError
 end
 
@@ -56,4 +69,3 @@ if __FILE__ == $0
 else
   WatirSpec::Runner.execute_if_necessary
 end
-

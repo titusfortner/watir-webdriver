@@ -2,6 +2,10 @@ require File.expand_path('spec_helper', File.dirname(__FILE__))
 
 describe Watir::Element do
 
+  before :each do
+    browser.goto(WatirSpec.url_for("forms_with_input_elements.html"))
+  end
+
   describe '#present?' do
     before do
       browser.goto(WatirSpec.url_for("wait.html"))
@@ -147,12 +151,6 @@ describe Watir::Element do
     end
   end
 
-describe "Element" do
-
-  before :each do
-    browser.goto(WatirSpec.url_for("forms_with_input_elements.html"))
-  end
-
   describe ".new" do
     it "finds elements matching the conditions when given a hash of :how => 'what' arguments" do
       expect(browser.checkbox(name: 'new_user_interests', title: 'Dancing is fun!').value).to eq 'dancing'
@@ -165,8 +163,8 @@ describe "Element" do
 
     it "raises ArgumentError if given the wrong number of arguments" do
       container = double("container").as_null_object
-      expect { Element.new(container, 1,2,3,4) }.to raise_error(ArgumentError)
-      expect { Element.new(container, "foo") }.to raise_error(ArgumentError)
+      expect { Watir::Element.new(container, 1,2,3,4) }.to raise_error(ArgumentError)
+      expect { Watir::Element.new(container, "foo") }.to raise_error(ArgumentError)
     end
   end
 
@@ -326,7 +324,7 @@ describe "Element" do
   describe "#parent" do
     bug "http://github.com/jarib/celerity/issues#issue/28", :celerity do
       it "gets the parent of this element" do
-        expect(browser.text_field(id: "new_user_email").parent).to be_instance_of(FieldSet)
+        expect(browser.text_field(id: "new_user_email").parent).to be_instance_of(Watir::FieldSet)
       end
 
       it "returns nil if the element has no parent" do

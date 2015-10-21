@@ -1,5 +1,5 @@
 # encoding: utf-8
-require File.expand_path("../spec_helper", __FILE__)
+require 'spec_helper'
 
 describe "Table" do
 
@@ -145,7 +145,7 @@ describe "Table" do
   describe "#tbody" do
     it "returns the correct instance of TableSection" do
       body = browser.table(index: 0).tbody(id: 'first')
-      expect(body).to be_instance_of(TableSection)
+      expect(body).to be_instance_of(Watir::TableSection)
       expect(body[0][0].text).to eq "March 2008"
     end
   end
@@ -154,7 +154,7 @@ describe "Table" do
     it "returns the correct instance of TableSection" do
       bodies = browser.table(index: 0).tbodys
 
-      expect(bodies).to be_instance_of(TableSectionCollection)
+      expect(bodies).to be_instance_of(Watir::TableSectionCollection)
 
       expect(bodies[0].id).to eq "first"
       expect(bodies[1].id).to eq "second"

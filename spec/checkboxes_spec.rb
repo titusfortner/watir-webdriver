@@ -1,5 +1,5 @@
 # encoding: utf-8
-require File.expand_path("../spec_helper", __FILE__)
+require 'spec_helper'
 
 describe "CheckBoxes" do
 
@@ -32,7 +32,7 @@ describe "CheckBoxes" do
       count = 0
 
       browser.checkboxes.each_with_index do |c, index|
-        expect(c).to be_instance_of(CheckBox)
+        expect(c).to be_instance_of(Watir::CheckBox)
         expect(c.name).to eq browser.checkbox(index: index).name
         expect(c.id).to eq browser.checkbox(index: index).id
         expect(c.value).to eq browser.checkbox(index: index).value

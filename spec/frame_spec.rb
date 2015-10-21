@@ -1,5 +1,5 @@
 # encoding: utf-8
-require File.expand_path("../spec_helper", __FILE__)
+require 'spec_helper'
 
 #
 # TODO: fix duplication with iframe_spec
@@ -62,7 +62,7 @@ describe "Frame" do
 
         browser.frame(id: "two").frame(id: "three").link(id: "four").click
 
-        Wait.until{ browser.title == "definition_lists" }
+        Watir::Wait.until{ browser.title == "definition_lists" }
       end
     end
 
