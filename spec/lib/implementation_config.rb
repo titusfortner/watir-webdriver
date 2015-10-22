@@ -21,6 +21,8 @@ class ImplementationConfig
     args = case browser
            when :firefox
              firefox_args
+           when :marionette
+             marionette_args
            when :chrome
              chrome_args
            when :remote
@@ -93,6 +95,11 @@ class ImplementationConfig
     profile.native_events = native_events?
 
     [:firefox, {profile: profile}]
+  end
+
+  def marionette_args
+    caps = Selenium::WebDriver::Remote::W3CCapabilities.firefox
+    [:firefox, {desired_capabilities: caps}]
   end
 
   def chrome_args

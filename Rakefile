@@ -127,14 +127,14 @@ namespace :spec do
 
   desc 'Run specs in all browsers'
   task all_browsers: [:firefox,
-                      :firefox_nightly,
                       :chrome,
+                      :phantomjs,
+                      (:marionette if ENV['MARIONETTE_PATH']),
                       (:safari if Selenium::WebDriver::Platform.os == :macosx),
                       (:ie if Selenium::WebDriver::Platform.os == :windows),
-                      (:edge if Selenium::WebDriver::Platform.os == :windows),
-                      :phantomjs].compact
+                      (:edge if Selenium::WebDriver::Platform.os == :windows)].compact
 
-  %w(firefox firefox_nightly chrome safari phantomjs ie edge).each do |browser|
+  %w(firefox marionette chrome safari phantomjs ie edge).each do |browser|
     desc "Run specs in #{browser}"
     task browser do
       ENV['WATIR_BROWSER'] = browser

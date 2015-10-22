@@ -81,7 +81,7 @@ describe "IFrame" do
     end
 
 
-    bug "https://github.com/detro/ghostdriver/issues/159", :phantomjs do
+    bug "Unable to get title after navigation from inside nested frames", :marionette do
       it "handles nested iframes" do
         browser.goto(WatirSpec.url_for("nested_iframes.html"))
 

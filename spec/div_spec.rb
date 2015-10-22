@@ -89,21 +89,8 @@ describe "Div" do
   end
 
   describe "#style" do
-    not_compliant_on :internet_explorer do
-      it "returns the style attribute if the element exists" do
-        expect(browser.div(id: 'best_language').style).to eq "color: red; text-decoration: underline; cursor: pointer;"
-      end
-    end
-
-    deviates_on :internet_explorer8 do
-      it "returns the style attribute if the element exists" do
-        expect(browser.div(id: 'best_language').style).to eq "COLOR: red; CURSOR: pointer; TEXT-DECORATION: underline"
-      end
-    end
-    deviates_on :internet_explorer9 do
-      it "returns the style attribute if the element exists" do
-        expect(browser.div(id: 'best_language').style).to eq "color: red; text-decoration: underline; cursor: pointer;"
-      end
+    it "returns the style attribute if the element exists" do
+      expect(browser.div(id: 'best_language').style).to eq "color: red; text-decoration: underline; cursor: pointer;"
     end
 
     it "returns an empty string if the element exists but the attribute doesn't" do
@@ -163,55 +150,51 @@ describe "Div" do
     end
   end
 
-  not_compliant_on :safari do
-    describe "#double_click" do
-      it "fires the ondblclick event" do
-        browser.div(id: 'html_test').double_click
-        expect(messages).to include('double clicked')
+  bug "Interactions Not Yet Supported", :marionette do
+    bug "https://code.google.com/p/selenium/issues/detail?id=4136", :safari do
+      describe "#double_click" do
+        it "fires the ondblclick event" do
+          browser.div(id: 'html_test').double_click
+          expect(messages).to include('double clicked')
+        end
       end
     end
+  end
 
-    describe "#right_click" do
-      it "fires the oncontextmenu event" do
-        browser.goto(WatirSpec.url_for("right_click.html"))
-        browser.div(id: "click").right_click
-        bug "https://github.com/detro/ghostdriver/issues/125", :phantomjs do
-          expect(messages.first).to eq 'right-clicked'
+  bug "Interactions Not Yet Supported", :marionette do
+    bug "https://code.google.com/p/selenium/issues/detail?id=4136", :safari do
+      bug "https://github.com/detro/ghostdriver/issues/125", :phantomjs do
+        describe "#right_click" do
+          it "fires the oncontextmenu event" do
+            browser.goto(WatirSpec.url_for("right_click.html"))
+            browser.div(id: "click").right_click
+            expect(messages.first).to eq 'right-clicked'
+          end
         end
       end
     end
   end
 
   describe "#html" do
-    not_compliant_on :internet_explorer do
-      it "returns the HTML of the element" do
-        html = browser.div(id: 'footer').html.downcase
-        expect(html).to include('id="footer"')
-        expect(html).to include('title="closing remarks"')
-        expect(html).to include('class="profile"')
+    it "returns the HTML of the element" do
+      html = browser.div(id: 'footer').html.downcase
+      expect(html).to include('id="footer"')
+      expect(html).to include('title="closing remarks"')
+      expect(html).to include('class="profile"')
 
-        expect(html).to_not include('<div id="content">')
-        expect(html).to_not include('</body>')
-      end
+      expect(html).to_not include('<div id="content">')
+      expect(html).to_not include('</body>')
     end
 
-    deviates_on :internet_explorer do
-      it "returns the HTML of the element" do
-        html = browser.div(id: 'footer').html.downcase
-        expect(html).to include('title="closing remarks"')
-        expect(html).to_not include('</body>')
-        deviates_on :internet_explorer8 do
-          expect(html).to include('id=footer')
-          expect(html).to include('class=profile')
-          expect(html).to_not include('<div id=content>')
-        end
-        deviates_on :internet_explorer9 do
-          expect(html).to include('id="footer"')
-          expect(html).to include('class="profile"')
-          expect(html).to_not include('<div id="content">')
-        end
+    it "returns the HTML of the element" do
+      html = browser.div(id: 'footer').html.downcase
+      expect(html).to include('title="closing remarks"')
+      expect(html).to_not include('</body>')
+      deviates_on :internet_explorer8 do
+        expect(html).to include('id=footer')
+        expect(html).to include('class=profile')
+        expect(html).to_not include('<div id=content>')
       end
     end
   end
-
 end

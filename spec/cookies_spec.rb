@@ -41,29 +41,35 @@ describe "Browser#cookies" do
     end
   end
 
-  not_compliant_on :internet_explorer do
-    it 'adds a cookie' do
-      browser.goto set_cookie_url
-      verify_cookies_count 1
+  it 'adds a cookie' do
+    browser.goto set_cookie_url
+    verify_cookies_count 1
 
-      browser.cookies.add 'foo', 'bar'
-      verify_cookies_count 2
+    browser.cookies.add 'foo', 'bar'
+    verify_cookies_count 2
 
-      compliant_on :safari do
-        $browser.close
-        $browser = WatirSpec.new_browser
-      end
+    compliant_on :safari do
+      $browser.close
+      $browser = WatirSpec.new_browser
     end
   end
 
-  not_compliant_on :chrome, :internet_explorer, :safari, :phantomjs do
+  bug "https://github.com/SeleniumHQ/selenium/issues/392", :safari do
     it 'adds a cookie with options' do
       browser.goto set_cookie_url
 
       expires = Time.now + 10000
-      options = {path: "/set_cookie",
-                 secure: true,
-                 expires: expires}
+      options = {path: "/set_cookie"}
+
+      bug "https://github.com/detro/ghostdriver/issues/451", :phantomjs do
+        bug 'https://code.google.com/p/chromedriver/issues/detail?id=1247', :chrome do
+          options[:secure] = true
+        end
+      end
+
+      bug "Failed to convert expiry to Date", :marionette do
+        options[:expires] = expires
+      end
 
       browser.cookies.add 'a', 'b', options
       cookie = browser.cookies.to_a.find { |e| e[:name] == 'a' }
@@ -73,37 +79,42 @@ describe "Browser#cookies" do
       expect(cookie[:value]).to eq 'b'
 
       expect(cookie[:path]).to eq "/set_cookie"
-      expect(cookie[:secure]).to be true
 
-      expect(cookie[:expires]).to be_kind_of(Time)
+      bug "Secure set true, but returns false", :marionette do
+        not_compliant_on :chrome, :phantomjs do
+          expect(cookie[:secure]).to be true
+        end
+      end
+
+      not_compliant_on :marionette do
+        expect(cookie[:expires]).to be_kind_of(Time)
+      end
 
       # a few ms slack
       expect((cookie[:expires]).to_i).to be_within(2).of(expires.to_i)
     end
   end
 
-  not_compliant_on :internet_explorer do
-    it 'removes a cookie' do
+  it 'removes a cookie' do
+    browser.goto set_cookie_url
+    verify_cookies_count 1
+
+    browser.cookies.delete 'monster'
+    verify_cookies_count 0
+  end
+
+  bug "https://code.google.com/p/selenium/issues/detail?id=5212", :safari do
+    it 'clears all cookies' do
       browser.goto set_cookie_url
-      verify_cookies_count 1
+      browser.cookies.add 'foo', 'bar'
+      verify_cookies_count 2
 
-      browser.cookies.delete 'monster'
+      browser.cookies.clear
       verify_cookies_count 0
-    end
-
-    bug "https://code.google.com/p/selenium/issues/detail?id=5487", :safari do
-      it 'clears all cookies' do
-        browser.goto set_cookie_url
-        browser.cookies.add 'foo', 'bar'
-        verify_cookies_count 2
-
-        browser.cookies.clear
-        verify_cookies_count 0
-      end
     end
   end
 
-  not_compliant_on :internet_explorer, :phantomjs do
+  context 'file interactions'
     let(:file) { "#{Dir.tmpdir}/cookies" }
 
     before do
@@ -131,10 +142,8 @@ describe "Browser#cookies" do
         expect(actual).to eq(expected)
       end
     end
-  end
 
   def set_cookie_url
-    # add timestamp to url to avoid caching in IE8
     WatirSpec.url_for('set_cookie/index.html', needs_server: true) + "?t=#{Time.now.to_i + Time.now.usec}"
   end
 

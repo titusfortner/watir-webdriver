@@ -1,8 +1,8 @@
 require 'spec_helper'
 
-describe 'Alert API' do
+bug "http://code.google.com/p/selenium/issues/detail?id=3862", :safari do
   bug "https://github.com/detro/ghostdriver/issues/20", :phantomjs do
-    not_compliant_on :safari do
+    describe 'Alert API' do
       before do
         browser.goto WatirSpec.url_for("alerts.html")
       end
@@ -85,12 +85,14 @@ describe 'Alert API' do
       end
 
       context 'prompt' do
-        describe '#set' do
-          it 'enters text to prompt' do
-            browser.button(id: 'prompt').click
-            browser.alert.set 'My Name'
-            browser.alert.ok
-            expect(browser.button(id: 'prompt').value).to eq 'My Name'
+        bug "Marionette Error: keysToSend.join is not a function", :marionette do
+          describe '#set' do
+            it 'enters text to prompt' do
+              browser.button(id: 'prompt').click
+              browser.alert.set 'My Name'
+              browser.alert.ok
+              expect(browser.button(id: 'prompt').value).to eq 'My Name'
+            end
           end
         end
       end

@@ -135,15 +135,17 @@ describe Watir::Element do
 
   end
 
-  describe "#hover" do
-    not_compliant_on %i(firefox synthesized_events),:internet_explorer, :safari do
-      it "should hover over the element" do
-        browser.goto WatirSpec.url_for('hover.html')
-        link = browser.a
+  bug "Interactions Not Yet Supported", :marionette do
+    bug "https://code.google.com/p/selenium/issues/detail?id=4136", :safari do
+      describe "#hover" do
+        it "should hover over the element" do
+          browser.goto WatirSpec.url_for('hover.html')
+          link = browser.a
 
-        expect(link.style("font-size")).to eq "10px"
-        link.hover
-        expect(link.style("font-size")).to eq "20px"
+          expect(link.style("font-size")).to eq "10px"
+          link.hover
+          expect(link.style("font-size")).to eq "20px"
+        end
       end
     end
   end
@@ -299,10 +301,12 @@ describe Watir::Element do
     end
   end
 
-  describe "#focused?" do
-    it "knows if the element is focused" do
-      expect(browser.element(id: 'new_user_first_name')).to be_focused
-      expect(browser.element(id: 'new_user_last_name')).to_not be_focused
+  bug "Can Not Get Active Element", :marionette do
+    describe "#focused?" do
+      it "knows if the element is focused" do
+        expect(browser.element(id: 'new_user_first_name')).to be_focused
+        expect(browser.element(id: 'new_user_last_name')).to_not be_focused
+      end
     end
   end
 
@@ -320,8 +324,8 @@ describe Watir::Element do
     end
 
     it "returns nil if the element has no parent" do
-        expect(browser.body.parent.parent).to be_nil
-      end
+      expect(browser.body.parent.parent).to be_nil
+    end
   end
 
   describe "#visible?" do
@@ -330,7 +334,7 @@ describe Watir::Element do
     end
 
     it "raises UnknownObjectException exception if the element does not exist" do
-      expect {browser.text_field(id: "no_such_id").visible?}.to raise_error(Watir::Exception::UnknownObjectException)
+      expect { browser.text_field(id: "no_such_id").visible? }.to raise_error(Watir::Exception::UnknownObjectException)
     end
 
     it "raises UnknownObjectException exception if the element is stale" do
@@ -424,7 +428,7 @@ describe Watir::Element do
     end
 
     let(:receiver) { browser.text_field(id: 'receiver') }
-    let(:events)   { browser.element(id: 'output').ps.size }
+    let(:events) { browser.element(id: 'output').ps.size }
 
     it 'sends keystrokes to the element' do
       receiver.send_keys 'hello world'
@@ -438,28 +442,31 @@ describe Watir::Element do
       expect(events).to eq 10
     end
 
-    # key combinations probably not ever possible on mobile devices?
-    bug "http://code.google.com/p/chromium/issues/detail?id=93879", :chrome do
-      not_compliant_on :safari do
-        it 'performs key combinations' do
-          receiver.send_keys 'foo'
-          receiver.send_keys [@c, 'a']
-          receiver.send_keys :backspace
-          expect(receiver.value).to be_empty
-          expect(events).to eq 6
-        end
+    bug "Interactions Not Yet Supported", :marionette do
+      bug "https://code.google.com/p/selenium/issues/detail?id=4136", :safari do
+        bug "https://code.google.com/p/chromedriver/issues/detail?id=30", [:chrome, :macosx] do
+          context 'in combinations' do
+            it 'performs key combinations' do
+              receiver.send_keys 'foo'
+              receiver.send_keys [@c, 'a']
+              receiver.send_keys :backspace
+              expect(receiver.value).to be_empty
+              expect(events).to eq 6
+            end
 
-        it 'performs arbitrary list of key combinations' do
-          receiver.send_keys 'foo'
-          receiver.send_keys [@c, 'a'], [@c, 'x']
-          expect(receiver.value).to be_empty
-          expect(events).to eq 7
-        end
+            it 'performs arbitrary list of key combinations' do
+              receiver.send_keys 'foo'
+              receiver.send_keys [@c, 'a'], [@c, 'x']
+              expect(receiver.value).to be_empty
+              expect(events).to eq 7
+            end
 
-        it 'supports combination of strings and arrays' do
-          receiver.send_keys 'foo', [@c, 'a'], :backspace
-          expect(receiver.value).to be_empty
-          expect(events).to eq 6
+            it 'supports combination of strings and arrays' do
+              receiver.send_keys 'foo', [@c, 'a'], :backspace
+              expect(receiver.value).to be_empty
+              expect(events).to eq 6
+            end
+          end
         end
       end
     end

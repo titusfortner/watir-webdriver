@@ -73,41 +73,57 @@ describe "Option" do
   end
 
   describe "#select" do
-    it "selects the chosen option (page context)" do
-      browser.option(text: "Denmark").select
-      expect(browser.select_list(name: "new_user_country").selected_options.map(&:text)).to eq ["Denmark"]
-    end
-
-    it "selects the chosen option (select_list context)" do
-      browser.select_list(name: "new_user_country").option(text: "Denmark").select
-      expect(browser.select_list(name: "new_user_country").selected_options.map(&:text)).to eq ["Denmark"]
-    end
-
-    it "selects the option when found by text (page context)" do
-      browser.option(text: 'Sweden').select
-      expect(browser.option(text: 'Sweden')).to be_selected
-    end
-
-    it "selects the option when found by text (select_list context)" do
-      browser.select_list(name: 'new_user_country').option(text: 'Sweden').select
-      expect(browser.select_list(name: 'new_user_country').option(text: 'Sweden')).to be_selected
-    end
-
-    # there's no onclick event for Option in IE / WebKit
-    # http://msdn.microsoft.com/en-us/library/ms535877(VS.85).aspx
-    compliant_on :firefox do
-      it "fires the onclick event (page context)" do
-        browser.option(text: "Username 3").select
-        expect(browser.textarea(id: 'delete_user_comment').value).to eq 'Don\'t do it!'
+    bug "Does not select the option", :marionette do
+      it "selects the chosen option (page context)" do
+        browser.option(text: "Denmark").select
+        expect(browser.select_list(name: "new_user_country").selected_options.map(&:text)).to eq ["Denmark"]
       end
     end
 
-    # there's no onclick event for Option in IE / WebKit
-    # http://msdn.microsoft.com/en-us/library/ms535877(VS.85).aspx
-    compliant_on :firefox do
-      it "fires onclick event (select_list context)" do
-        browser.select_list(id: 'delete_user_username').option(text: "Username 3").select
-        expect(browser.textarea(id: 'delete_user_comment').value).to eq 'Don\'t do it!'
+    bug "Does not select the option", :marionette do
+      it "selects the chosen option (select_list context)" do
+        browser.select_list(name: "new_user_country").option(text: "Denmark").select
+        expect(browser.select_list(name: "new_user_country").selected_options.map(&:text)).to eq ["Denmark"]
+      end
+    end
+
+    bug "Does not select the option", :marionette do
+      it "selects the option when found by text (page context)" do
+        browser.option(text: 'Sweden').select
+        expect(browser.option(text: 'Sweden')).to be_selected
+      end
+    end
+
+    bug "Does not select the option", :marionette do
+      it "selects the option when found by text (select_list context)" do
+        browser.select_list(name: 'new_user_country').option(text: 'Sweden').select
+        expect(browser.select_list(name: 'new_user_country').option(text: 'Sweden')).to be_selected
+      end
+    end
+
+    bug "Does not select the option", :marionette do
+      bug "https://code.google.com/p/selenium/issues/detail?id=4136", :safari do
+        bug "https://bugs.webkit.org/show_bug.cgi?id=3248", :phantomjs do
+          bug "https://code.google.com/p/chromium/issues/detail?id=5284", :chrome do
+            it "fires the onclick event (page context)" do
+              browser.option(text: "Username 3").select
+              expect(browser.textarea(id: 'delete_user_comment').value).to eq 'Don\'t do it!'
+            end
+          end
+        end
+      end
+    end
+
+    bug "Does not select the option", :marionette do
+      bug "https://code.google.com/p/selenium/issues/detail?id=4136", :safari do
+        bug "https://bugs.webkit.org/show_bug.cgi?id=3248", :phantomjs do
+          bug "https://code.google.com/p/chromium/issues/detail?id=5284", :chrome do
+            it "fires onclick event (select_list context)" do
+              browser.select_list(id: 'delete_user_username').option(text: "Username 3").select
+              expect(browser.textarea(id: 'delete_user_comment').value).to eq 'Don\'t do it!'
+            end
+          end
+        end
       end
     end
 

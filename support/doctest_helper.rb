@@ -1,5 +1,5 @@
 require 'watir'
-require 'spec/watirspec/lib/watirspec'
+require 'spec/lib/watirspec'
 
 #
 # 1. If example does not start browser, start new one, reuse until example

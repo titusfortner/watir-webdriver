@@ -16,9 +16,7 @@ describe "Button" do
       expect(browser.button(name: /new_user_reset/)).to exist
       expect(browser.button(value: "Button")).to exist
       expect(browser.button(value: /Button/)).to exist
-      not_compliant_on :internet_explorer do
-        expect(browser.button(src: "images/button.png")).to exist
-      end
+      expect(browser.button(src: "images/button.png")).to exist
       expect(browser.button(src: /button\.png/)).to exist
       expect(browser.button(text: "Button 2")).to exist
       expect(browser.button(text: /Button 2/)).to exist
@@ -133,31 +131,8 @@ describe "Button" do
   end
 
   describe "#style" do
-    not_compliant_on :internet_explorer, :safari,:phantomjs do
-      it "returns the style attribute if the button exists" do
-        expect(browser.button(id: 'delete_user_submit').style).to eq "border: 4px solid red;"
-      end
-    end
-
-    deviates_on :internet_explorer8 do
-      it "returns the style attribute if the button exists" do
-        expect(browser.button(id: 'delete_user_submit').style).to eq "BORDER-BOTTOM: red 4px solid; BORDER-LEFT: red 4px solid; BORDER-TOP: red 4px solid; BORDER-RIGHT: red 4px solid"
-      end
-    end
-
-    deviates_on :internet_explorer9, :safari do
-      it "returns the style attribute if the button exists" do
-        expect(browser.button(id: 'delete_user_submit').style).to eq "border: 4px solid red;"
-      end
-    end
-
-    deviates_on :phantomjs do
-      it "returns the style attribute if the button exists" do
-        style = browser.button(id: 'delete_user_submit').style
-        expect(style).to include("border-top-width: 4px;")
-        expect(style).to include("border-left-style: solid;")
-        expect(style).to include("border-right-color: red;")
-      end
+    it "returns the style attribute if the button exists" do
+      expect(browser.button(id: 'delete_user_submit').style).to eq "border: 4px solid red;"
     end
 
     it "returns an empty string if the element exists and the attribute doesn't exist" do
@@ -281,6 +256,4 @@ describe "Button" do
       expect { browser.button(value: "Disabled").click }.to raise_error(Watir::Exception::ObjectDisabledException)
     end
   end
-
-
 end

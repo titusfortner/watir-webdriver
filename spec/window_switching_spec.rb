@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-not_compliant_on :safari do
+bug "https://bugzilla.mozilla.org/show_bug.cgi?id=1128656", :marionette do
   describe "Browser" do
     before do
       url = WatirSpec.url_for("window_switching.html")
@@ -153,7 +153,7 @@ not_compliant_on :safari do
 
         it "does not change the current window" do
           expect(browser.title).to eq "window switching"
-          expect(browser.windows.find { |w| w.title ==  "closeable window" }).to_not be_nil
+          expect(browser.windows.find { |w| w.title == "closeable window" }).to_not be_nil
           expect(browser.title).to eq "window switching"
         end
       end
@@ -223,12 +223,10 @@ not_compliant_on :safari do
           expect(window).to_not be_present
         end
 
-        bug "https://code.google.com/p/chromedriver/issues/detail?id=950", :chrome do
-          it "returns false if closed window is referenced" do
-            browser.window(title: "closeable window").use
-            browser.a(id: "close").click
-            expect(browser.window).to_not be_present
-          end
+        it "returns false if closed window is referenced" do
+          browser.window(title: "closeable window").use
+          browser.a(id: "close").click
+          expect(browser.window).to_not be_present
         end
       end
 
@@ -319,7 +317,7 @@ not_compliant_on :safari do
           end
 
           it "by url" do
-            browser.window(url: /window_switching\.html/).use  { expect(browser.title).to be == "window switching" }
+            browser.window(url: /window_switching\.html/).use { expect(browser.title).to be == "window switching" }
           end
 
           it "by title" do
@@ -333,30 +331,31 @@ not_compliant_on :safari do
     context "manipulating size and position" do
       before do
         browser.goto WatirSpec.url_for("window_switching.html")
+        browser.window.resize_to(500, 500)
       end
 
-      compliant_on :firefox, :chrome do
-        it "should get the size of the current window" do
-          size = browser.window.size
+      it "should get the size of the current window" do
+        size = browser.window.size
 
-          expect(size.width).to be > 0
-          expect(size.height).to be > 0
-        end
+        expect(size.width).to be > 0
+        expect(size.height).to be > 0
+      end
 
-        it "should get the position of the current window" do
-          pos = browser.window.position
+      it "should get the position of the current window" do
+        pos = browser.window.position
 
-          expect(pos.x).to be >= 0
-          expect(pos.y).to be >= 0
-        end
+        expect(pos.x).to be >= 0
+        expect(pos.y).to be >= 0
       end
 
       it "should resize the window" do
         initial_size = browser.window.size
         browser.window.resize_to(
-          initial_size.width - 10,
-          initial_size.height - 10
+            initial_size.width - 10,
+            initial_size.height - 10
         )
+
+        browser.wait_until { browser.window.size != initial_size }
 
         new_size = browser.window.size
 
@@ -364,34 +363,33 @@ not_compliant_on :safari do
         expect(new_size.height).to eq initial_size.height - 10
       end
 
-      bug "https://github.com/detro/ghostdriver/issues/466", :phantomjs do
-        it "should move the window" do
-          initial_pos = browser.window.position
+      bug "https://github.com/SeleniumHQ/selenium/issues/1148", :safari do
+        bug "https://github.com/detro/ghostdriver/issues/466", :phantomjs do
+          it "should move the window" do
+            initial_pos = browser.window.position
 
-          browser.window.move_to(
-            initial_pos.x + 10,
-            initial_pos.y + 10
-          )
+            browser.window.move_to(
+              initial_pos.x + 10,
+              initial_pos.y + 10
+            )
 
-          new_pos = browser.window.position
-          expect(new_pos.x).to eq initial_pos.x + 10
-          expect(new_pos.y).to eq initial_pos.y + 10
+            new_pos = browser.window.position
+            expect(new_pos.x).to eq initial_pos.x + 10
+            expect(new_pos.y).to eq initial_pos.y + 10
+          end
         end
       end
 
-      compliant_on :firefox do
-        it "should maximize the window" do
-          initial_size = browser.window.size
+      it "should maximize the window" do
+        initial_size = browser.window.size
 
-          browser.window.maximize
-          browser.wait_until { browser.window.size != initial_size }
+        browser.window.maximize
+        browser.wait_until { browser.window.size != initial_size }
 
-          new_size = browser.window.size
-          expect(new_size.width).to be > initial_size.width
-          expect(new_size.height).to be > initial_size.height
-        end
+        new_size = browser.window.size
+        expect(new_size.width).to be > initial_size.width
+        expect(new_size.height).to be > initial_size.height
       end
     end
   end
-
 end

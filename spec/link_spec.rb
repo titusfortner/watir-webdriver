@@ -16,9 +16,7 @@ describe "Link" do
       expect(browser.link(title: /link_title_2/)).to exist
       expect(browser.link(text: "Link 2")).to exist
       expect(browser.link(text: /Link 2/i)).to exist
-      not_compliant_on :internet_explorer do
-        expect(browser.link(href: 'non_control_elements.html')).to exist
-      end
+      expect(browser.link(href: 'non_control_elements.html')).to exist
       expect(browser.link(href: /non_control_elements.html/)).to exist
       expect(browser.link(index: 1)).to exist
       expect(browser.link(xpath: "//a[@id='link_2']")).to exist
