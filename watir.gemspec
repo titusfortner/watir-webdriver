@@ -1,19 +1,19 @@
 # -*- encoding: utf-8 -*-
 $:.push File.expand_path("../lib", __FILE__)
-require "watir-webdriver/version"
+require "watir/version"
 
 Gem::Specification.new do |s|
-  s.name        = "watir-webdriver"
+  s.name        = "watir"
   s.version     = Watir::VERSION
   s.platform    = Gem::Platform::RUBY
-  s.authors     = ["Jari Bakken"]
-  s.email       = ["jari.bakken@gmail.com"]
-  s.homepage    = "http://github.com/watir/watir-webdriver"
-  s.summary     = %q{Watir on WebDriver}
-  s.description = %q{WebDriver-backed Watir}
+  s.authors     = ["Jari Bakken, Titus Fortner, Alex Rodionov"]
+  s.email       = ["titus.fortner@gmail.com", "p0deje@gmail.com"]
+  s.homepage    = "http://github.com/watir/watir"
+  s.summary     = %q{Watir}
+  s.description = %q{Watir}
   s.license     = 'MIT'
 
-  s.rubyforge_project = "watir-webdriver"
+  s.rubyforge_project = "watir"
 
   s.files         = `git ls-files`.split("\n")
   s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")

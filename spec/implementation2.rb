@@ -6,7 +6,7 @@ class ImplementationConfig
   end
 
   def configure
-    set_webdriver
+    set_driver
     set_browser_args
     set_guard_proc
     add_html_routes
@@ -16,7 +16,7 @@ class ImplementationConfig
 
   private
 
-  def set_webdriver
+  def set_driver
     @imp.name          = :webdriver
     @imp.browser_class = Watir::Browser
   end

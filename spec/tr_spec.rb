@@ -36,7 +36,7 @@ describe "TableRow" do
   end
 
   describe "#click" do
-    bug "http://github.com/watir/watir-webdriver/issues/issue/32",
+    bug "http://github.com/watir/watir/issues/issue/32",
       %i(webdriver internet_explorer),
       %i(webdriver chrome) do
       it "fires the row's onclick event" do

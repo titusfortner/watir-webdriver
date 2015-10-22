@@ -154,7 +154,7 @@ module Watir
       how, what = build_wd_selector(selector)
 
       unless how
-        raise Error, "internal error: unable to build WebDriver selector from #{selector.inspect}"
+        raise Error, "internal error: unable to build Selenium selector from #{selector.inspect}"
       end
 
       if how == :xpath && can_convert_regexp_to_contains?
@@ -413,7 +413,7 @@ module Watir
         'normalize-space(@href)'
       when :type
         # type attributes can be upper case - downcase them
-        # https://github.com/watir/watir-webdriver/issues/72
+        # https://github.com/watir/watir/issues/72
         XpathSupport.downcase('@type')
       else
         "@#{key.to_s.gsub("_", "-")}"
