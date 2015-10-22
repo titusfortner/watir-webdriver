@@ -41,7 +41,7 @@ describe "Browser#cookies" do
     end
   end
 
-  not_compliant_on %i(webdriver internet_explorer) do
+  not_compliant_on :internet_explorer do
     it 'adds a cookie' do
       browser.goto set_cookie_url
       verify_cookies_count 1
@@ -49,14 +49,14 @@ describe "Browser#cookies" do
       browser.cookies.add 'foo', 'bar'
       verify_cookies_count 2
 
-      compliant_on %i(webdriver safari) do
+      compliant_on :safari do
         $browser.close
         $browser = WatirSpec.new_browser
       end
     end
   end
 
-  not_compliant_on %i(webdriver chrome), %i(webdriver internet_explorer), %i(webdriver safari), :phantomjs do
+  not_compliant_on :chrome, :internet_explorer, :safari, :phantomjs do
     it 'adds a cookie with options' do
       browser.goto set_cookie_url
 
@@ -65,11 +65,6 @@ describe "Browser#cookies" do
                  secure: true,
                  expires: expires}
 
-      deviates_on :watir_classic do
-        # secure cookie can't be accessed running on WatirSpec test server
-        options.delete(:secure)
-      end
-
       browser.cookies.add 'a', 'b', options
       cookie = browser.cookies.to_a.find { |e| e[:name] == 'a' }
       expect(cookie).to_not be_nil
@@ -77,19 +72,17 @@ describe "Browser#cookies" do
       expect(cookie[:name]).to eq 'a'
       expect(cookie[:value]).to eq 'b'
 
-      not_compliant_on :watir_classic do
-        expect(cookie[:path]).to eq "/set_cookie"
-        expect(cookie[:secure]).to be true
+      expect(cookie[:path]).to eq "/set_cookie"
+      expect(cookie[:secure]).to be true
 
-        expect(cookie[:expires]).to be_kind_of(Time)
+      expect(cookie[:expires]).to be_kind_of(Time)
 
-        # a few ms slack
-        expect((cookie[:expires]).to_i).to be_within(2).of(expires.to_i)
-      end
+      # a few ms slack
+      expect((cookie[:expires]).to_i).to be_within(2).of(expires.to_i)
     end
   end
 
-  not_compliant_on %i(webdriver internet_explorer) do
+  not_compliant_on :internet_explorer do
     it 'removes a cookie' do
       browser.goto set_cookie_url
       verify_cookies_count 1
@@ -98,7 +91,7 @@ describe "Browser#cookies" do
       verify_cookies_count 0
     end
 
-    bug "https://code.google.com/p/selenium/issues/detail?id=5487", %i(webdriver safari) do
+    bug "https://code.google.com/p/selenium/issues/detail?id=5487", :safari do
       it 'clears all cookies' do
         browser.goto set_cookie_url
         browser.cookies.add 'foo', 'bar'
@@ -110,7 +103,7 @@ describe "Browser#cookies" do
     end
   end
 
-  not_compliant_on %i(webdriver internet_explorer), :phantomjs do
+  not_compliant_on :internet_explorer, :phantomjs do
     let(:file) { "#{Dir.tmpdir}/cookies" }
 
     before do

@@ -6,20 +6,16 @@ class ImplementationConfig
   end
 
   def configure
-    set_driver
+    @imp.browser_class = Watir::Browser
     set_browser_args
     set_guard_proc
     add_html_routes
 
-    WatirSpec.always_use_server = mobile? || ie? || safari? || phantomjs? || remote?
+    # TODO - verify necessary
+    WatirSpec.always_use_server = ie? || safari? || phantomjs? || remote?
   end
 
   private
-
-  def set_driver
-    @imp.name          = :webdriver
-    @imp.browser_class = Watir::Browser
-  end
 
   def set_browser_args
     args = case browser
@@ -42,12 +38,8 @@ class ImplementationConfig
     @imp.browser_args = args
   end
 
-  def mobile?
-    [:android, :iphone].include? browser
-  end
-
   def ie?
-    [:internet_explorer].include? browser
+    browser == :internet_explorer
   end
 
   def safari?
@@ -68,28 +60,25 @@ class ImplementationConfig
     browser_version = browser_instance.driver.capabilities.version
     matching_browser_with_version = "#{matching_browser}#{browser_version}".to_sym
     matching_guards = [
-      :webdriver,                     # guard only applies to webdriver
       matching_browser,               # guard only applies to this browser
       matching_browser_with_version,  # guard only applies to this browser with specific version
-      [:webdriver, matching_browser], # guard only applies to this browser on webdriver
-      [:webdriver, matching_browser_with_version],  # guard only applies to this browser with specific version on webdriver
       [matching_browser, Selenium::WebDriver::Platform.os] # guard only applies to this browser with this OS
     ]
 
     if native_events?
       # guard only applies to this browser on webdriver with native events enabled
-      matching_guards << [:webdriver, matching_browser, :native_events]
-      matching_guards << [:webdriver, matching_browser_with_version, :native_events]
+      matching_guards << [matching_browser, :native_events]
+      matching_guards << [matching_browser_with_version, :native_events]
     else
       # guard only applies to this browser on webdriver with native events disabled
-      matching_guards << [:webdriver, matching_browser, :synthesized_events]
-      matching_guards << [:webdriver, matching_browser_with_version, :synthesized_events]
+      matching_guards << [matching_browser, :synthesized_events]
+      matching_guards << [matching_browser_with_version, :synthesized_events]
     end
 
     if !Selenium::WebDriver::Platform.linux? || ENV['DESKTOP_SESSION']
       # some specs (i.e. Window#maximize) needs a window manager on linux
-      matching_guards << [:webdriver, matching_browser, :window_manager]
-      matching_guards << [:webdriver, matching_browser_with_version, :window_manager]
+      matching_guards << [matching_browser, :window_manager]
+      matching_guards << [matching_browser_with_version, :window_manager]
     end
 
     @imp.guard_proc = lambda { |args|
@@ -112,15 +101,15 @@ class ImplementationConfig
       native_events: native_events?
     }
 
-    if url = ENV['WATIR_WEBDRIVER_CHROME_SERVER']
+    if url = ENV['WATIR_CHROME_SERVER']
       opts[:url] = url
     end
 
-    if driver = ENV['WATIR_WEBDRIVER_CHROME_DRIVER']
+    if driver = ENV['WATIR_CHROME_DRIVER']
       Selenium::WebDriver::Chrome.driver_path = driver
     end
 
-    if path = ENV['WATIR_WEBDRIVER_CHROME_BINARY']
+    if path = ENV['WATIR_CHROME_BINARY']
       Selenium::WebDriver::Chrome.path = path
     end
 
@@ -132,7 +121,7 @@ class ImplementationConfig
   end
 
   def remote_args
-    [:remote, {url: ENV["WATIR_WEBDRIVER_REMOTE_URL"] || "http://127.0.0.1:8080"}]
+    [:remote, {url: ENV["WATIR_REMOTE_URL"] || "http://127.0.0.1:8080"}]
   end
 
   def add_html_routes
@@ -143,7 +132,7 @@ class ImplementationConfig
   end
 
   def browser
-    @browser ||= (ENV['WATIR_WEBDRIVER_BROWSER'] || :firefox).to_sym
+    @browser ||= (ENV['WATIR_BROWSER'] || :firefox).to_sym
   end
 
   def remote_browser
@@ -159,12 +148,8 @@ class ImplementationConfig
     elsif ENV['NATIVE_EVENTS'] == "false" && !ie?
       false
     else
-      native_events_by_default?
+      Selenium::WebDriver::Platform.windows? && browser == :firefox
     end
-  end
-
-  def native_events_by_default?
-    Selenium::WebDriver::Platform.windows? && [:firefox, :internet_explorer].include?(browser)
   end
 
   class SelectorListener < Selenium::WebDriver::Support::AbstractEventListener

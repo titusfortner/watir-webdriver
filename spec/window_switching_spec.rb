@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-not_compliant_on %i(webdriver iphone), %i(webdriver safari) do
+not_compliant_on :safari do
   describe "Browser" do
     before do
       url = WatirSpec.url_for("window_switching.html")
@@ -63,16 +63,14 @@ not_compliant_on %i(webdriver iphone), %i(webdriver safari) do
         expect(original_window.url).to match(/window_switching\.html/)
       end
 
-      bug "http://github.com/jarib/celerity/issues#issue/17", :celerity do
-        it "it executes the given block in the window" do
-          browser.window(title: "closeable window") do
-            link = browser.a(id: "close")
-            expect(link).to exist
-            link.click
-          end.wait_while_present
+      it "it executes the given block in the window" do
+        browser.window(title: "closeable window") do
+          link = browser.a(id: "close")
+          expect(link).to exist
+          link.click
+        end.wait_while_present
 
-          expect(browser.windows.size).to eq 1
-        end
+        expect(browser.windows.size).to eq 1
       end
 
       it "raises ArgumentError if the selector is invalid" do
@@ -225,7 +223,7 @@ not_compliant_on %i(webdriver iphone), %i(webdriver safari) do
           expect(window).to_not be_present
         end
 
-        bug "https://code.google.com/p/chromedriver/issues/detail?id=950", %i(webdriver chrome) do
+        bug "https://code.google.com/p/chromedriver/issues/detail?id=950", :chrome do
           it "returns false if closed window is referenced" do
             browser.window(title: "closeable window").use
             browser.a(id: "close").click
@@ -337,7 +335,7 @@ not_compliant_on %i(webdriver iphone), %i(webdriver safari) do
         browser.goto WatirSpec.url_for("window_switching.html")
       end
 
-      compliant_on %i(webdriver firefox), %i(webdriver chrome) do
+      compliant_on :firefox, :chrome do
         it "should get the size of the current window" do
           size = browser.window.size
 
@@ -381,7 +379,7 @@ not_compliant_on %i(webdriver iphone), %i(webdriver safari) do
         end
       end
 
-      compliant_on %i(webdriver firefox window_manager) do
+      compliant_on :firefox do
         it "should maximize the window" do
           initial_size = browser.window.size
 

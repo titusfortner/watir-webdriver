@@ -191,7 +191,7 @@ describe Watir::Browser do
     #
     # for IE9, this needs to be enabled in
     # View => Toolbars -> Status bar
-    not_compliant_on %i(webdriver firefox), :internet_explorer9, :internet_explorer10 do
+    not_compliant_on :firefox, :internet_explorer9, :internet_explorer10 do
       it "returns the current value of window.status" do
         browser.goto(WatirSpec.url_for("non_control_elements.html"))
 
@@ -203,16 +203,12 @@ describe Watir::Browser do
 
   describe "#name" do
     it "returns browser name" do
-      not_compliant_on :watir_classic, %i(webdriver phantomjs) do
+      not_compliant_on :phantomjs do
         expect(browser.name).to eq WatirSpec.implementation.browser_args[0]
       end
 
-      deviates_on %i(webdriver phantomjs) do
+      deviates_on :phantomjs do
         expect(browser.name).to be_an_instance_of(Symbol)
-      end
-
-      deviates_on :watir_classic do
-        expect(browser.name).to eq :internet_explorer
       end
     end
   end
@@ -264,31 +260,18 @@ describe Watir::Browser do
   end
 
   describe ".start" do
-    not_compliant_on %i(webdriver, safariwatir) do
-      it "goes to the given URL and return an instance of itself" do
-        browser = WatirSpec.implementation.browser_class.start(WatirSpec.url_for("non_control_elements.html"))
+    it "goes to the given URL and return an instance of itself" do
+      driver, args = WatirSpec.implementation.browser_args
+      browser = Watir::Browser.start(WatirSpec.url_for("non_control_elements.html"), driver, args)
 
-        expect(browser).to be_instance_of(WatirSpec.implementation.browser_class)
-        expect(browser.title).to eq "Non-control elements"
-        browser.close
-      end
-    end
-
-    # we need to specify what browser to use
-    deviates_on(:webdriver) do
-      it "goes to the given URL and return an instance of itself" do
-        driver, args = WatirSpec.implementation.browser_args
-        browser = Watir::Browser.start(WatirSpec.url_for("non_control_elements.html"), driver, args)
-
-        expect(browser).to be_instance_of(Watir::Browser)
-        expect(browser.title).to eq "Non-control elements"
-        browser.close
-      end
+      expect(browser).to be_instance_of(Watir::Browser)
+      expect(browser.title).to eq "Non-control elements"
+      browser.close
     end
   end
 
   describe "#goto" do
-    not_compliant_on %i(webdriver internet_explorer) do
+    not_compliant_on :internet_explorer do
       it "adds http:// to URLs with no URL scheme specified" do
         url = WatirSpec.host[%r{http://(.*)}, 1]
         expect(url).to_not be_nil
@@ -305,7 +288,7 @@ describe Watir::Browser do
       expect { browser.goto("about:blank") }.to_not raise_error
     end
 
-    not_compliant_on :internet_explorer, %i(webdriver safari) do
+    not_compliant_on :internet_explorer, :safari do
       it "goes to a data URL scheme address without raising errors" do
         expect { browser.goto("data:text/html;content-type=utf-8,foobar") }.to_not raise_error
       end
@@ -384,7 +367,7 @@ describe Watir::Browser do
     end
   end
 
-  not_compliant_on %i(webdriver safari) do
+  not_compliant_on :safari do
     describe "#back and #forward" do
       it "goes to the previous page" do
         browser.goto WatirSpec.url_for("non_control_elements.html")

@@ -1,19 +1,5 @@
 # encoding: utf-8
 
-# see http://redmine.ruby-lang.org/issues/5218
-if defined?(RUBY_ENGINE) && RUBY_ENGINE == "ruby" && RUBY_VERSION >= "1.9"
-  module Kernel
-    alias :__at_exit :at_exit
-    def at_exit(&block)
-      __at_exit do
-        exit_status = $!.status if $!.is_a?(SystemExit)
-        block.call
-        exit exit_status if exit_status
-      end
-    end
-  end
-end
-
 module WatirSpec
   class << self
     attr_accessor :browser_args, :persistent_browser, :unguarded, :implementation, :always_use_server
@@ -107,13 +93,10 @@ module WatirSpec
       info = []
       info << instance.class.name
 
-      if instance.respond_to?(:driver) && instance.driver.class.name == "Selenium::WebDriver::Driver"
-        info << "(webdriver)"
-        caps = instance.driver.capabilities
+      caps = instance.driver.capabilities
 
-        info << "#{caps.browser_name}"
-        info << "#{caps.version}"
-      end
+      info << "#{caps.browser_name}"
+      info << "#{caps.version}"
 
       $stderr.puts "running watirspec against #{info.join ' '} using args #{WatirSpec.implementation.browser_args.inspect}"
     rescue
