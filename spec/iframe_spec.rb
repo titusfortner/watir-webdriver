@@ -82,12 +82,14 @@ describe "IFrame" do
 
 
     bug "Unable to get title after navigation from inside nested frames", :marionette do
-      it "handles nested iframes" do
-        browser.goto(WatirSpec.url_for("nested_iframes.html"))
+      bug "https://github.com/detro/ghostdriver/issues/159", :phantomjs do
+          it "handles nested iframes" do
+          browser.goto(WatirSpec.url_for("nested_iframes.html"))
 
-        browser.iframe(id: "two").iframe(id: "three").link(id: "four").click
+          browser.iframe(id: "two").iframe(id: "three").link(id: "four").click
 
-        Watir::Wait.until { browser.title == "definition_lists" }
+          Watir::Wait.until { browser.title == "definition_lists" }
+        end
       end
     end
 

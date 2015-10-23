@@ -88,10 +88,10 @@ describe "Browser#cookies" do
 
       not_compliant_on :marionette do
         expect(cookie[:expires]).to be_kind_of(Time)
+        # a few ms slack
+        expect((cookie[:expires]).to_i).to be_within(2).of(expires.to_i)
       end
 
-      # a few ms slack
-      expect((cookie[:expires]).to_i).to be_within(2).of(expires.to_i)
     end
   end
 

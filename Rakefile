@@ -129,10 +129,16 @@ namespace :spec do
   task all_browsers: [:firefox,
                       :chrome,
                       :phantomjs,
+                      :remote_firefox,
+                      :remote_chrome,
                       (:marionette if ENV['MARIONETTE_PATH']),
+                      (:remote_marionette if ENV['MARIONETTE_PATH']),
                       (:safari if Selenium::WebDriver::Platform.os == :macosx),
+                      (:remote_safari if Selenium::WebDriver::Platform.os == :macosx),
                       (:ie if Selenium::WebDriver::Platform.os == :windows),
-                      (:edge if Selenium::WebDriver::Platform.os == :windows)].compact
+                      (:remote_ie if Selenium::WebDriver::Platform.os == :windows),
+                      (:edge if Selenium::WebDriver::Platform.os == :windows),
+                      (:remote_edge if Selenium::WebDriver::Platform.os == :windows)].compact
 
   %w(firefox marionette chrome safari phantomjs ie edge).each do |browser|
     desc "Run specs in #{browser}"
@@ -141,4 +147,14 @@ namespace :spec do
       Rake::Task['spec'].execute
     end
   end
+
+  %w(remote_firefox remote_chrome remote_safari remote_marionette remote_phantomjs remote_ie remote_edge).each do |browser|
+    desc "Run specs in #{browser.tr('_', ' ')}"
+    task browser do
+      ENV['WATIR_BROWSER'] = 'remote'
+      ENV['REMOTE_BROWSER'] =  browser.split('_').last
+      Rake::Task['spec'].execute
+    end
+  end
+
 end

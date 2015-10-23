@@ -8,6 +8,7 @@ class ImplementationConfig
   def configure
     @imp.browser_class = Watir::Browser
     set_browser_args
+    start_remote_server if @browser == :remote
     set_guard_proc
     add_html_routes
 
@@ -16,6 +17,36 @@ class ImplementationConfig
   end
 
   private
+
+  def start_remote_server
+    require 'selenium/server'
+
+    @server ||= Selenium::Server.new(remote_server_jar,
+                         :port       => Selenium::WebDriver::PortProber.above(4444),
+                         :log        => !!$DEBUG,
+                         :background => true,
+                         :timeout    => 60)
+
+
+    if browser == :marionette
+      @server << "-Dwebdriver.firefox.bin=#{ENV['MARIONETTE_PATH']}"
+    end
+    @server.start
+  end
+
+  def remote_server_jar
+    require 'open-uri'
+    file_name = "selenium-server-standalone.jar"
+    return file_name if File.exist? file_name
+
+    open(file_name, 'wb') do |file|
+      file << open('http://goo.gl/PJUZfa').read
+    end
+    file_name
+  rescue SocketError
+    raise Watir::Error, "unable to find or download selenium-server-standalone.jar in #{Dir.pwd}"
+  end
+
 
   def set_browser_args
     args = case browser
@@ -128,7 +159,15 @@ class ImplementationConfig
   end
 
   def remote_args
-    [:remote, {url: ENV["WATIR_REMOTE_URL"] || "http://127.0.0.1:8080"}]
+    url = ENV["WATIR_REMOTE_URL"] || "http://127.0.0.1:4444/wd/hub"
+    remote_browser_name = ENV['REMOTE_BROWSER']
+    caps = if remote_browser_name == 'marionette'
+             Selenium::WebDriver::Remote::W3CCapabilities.firefox
+           else
+             Selenium::WebDriver::Remote::Capabilities.send(remote_browser_name)
+           end
+    [:remote, { url: url,
+                desired_capabilities: caps}]
   end
 
   def add_html_routes

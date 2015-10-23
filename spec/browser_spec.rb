@@ -195,7 +195,12 @@ describe Watir::Browser do
   describe "#name" do
     it "returns browser name" do
       not_compliant_on :phantomjs do
-        expect(browser.name).to eq WatirSpec.implementation.browser_args[0]
+        if WatirSpec.implementation.browser_args[0] == :remote
+          actual_browser = WatirSpec.implementation.browser_args.last[:desired_capabilities][:browser_name].to_sym
+        else
+          actual_browser = WatirSpec.implementation.browser_args[0]
+        end
+        expect(browser.name).to eq actual_browser
       end
 
       deviates_on :phantomjs do
