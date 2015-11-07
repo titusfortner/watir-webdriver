@@ -1,4 +1,4 @@
-require File.expand_path("../spec_helper", __FILE__)
+require 'spec_helper'
 
 class ImplementationConfig
   def initialize(imp)
@@ -6,31 +6,59 @@ class ImplementationConfig
   end
 
   def configure
-    set_webdriver
+    @imp.browser_class = Watir::Browser
     set_browser_args
+    start_remote_server if @browser == :remote
     set_guard_proc
     add_html_routes
 
-    WatirSpec.always_use_server = mobile? || ie? || safari? || phantomjs? || remote?
+#    WatirSpec.always_use_server = ie? || safari? || phantomjs? || remote?
   end
 
   private
 
-  def set_webdriver
-    @imp.name          = :webdriver
-    @imp.browser_class = Watir::Browser
+  def start_remote_server
+    require 'selenium/server'
+
+    @server ||= Selenium::Server.new(remote_server_jar,
+                                     :port       => Selenium::WebDriver::PortProber.above(4444),
+                                     :log        => !!$DEBUG,
+                                     :background => true,
+                                     :timeout    => 60)
+
+
+    if browser == :marionette
+      @server << "-Dwebdriver.firefox.bin=#{ENV['MARIONETTE_PATH']}"
+    end
+    @server.start
   end
+
+  def remote_server_jar
+    require 'open-uri'
+    file_name = "selenium-server-standalone.jar"
+    return file_name if File.exist? file_name
+
+    open(file_name, 'wb') do |file|
+      file << open('http://goo.gl/PJUZfa').read
+    end
+    file_name
+  rescue SocketError
+    raise Watir::Error, "unable to find or download selenium-server-standalone.jar in #{Dir.pwd}"
+  end
+
 
   def set_browser_args
     args = case browser
-           when :firefox
-             firefox_args
-           when :chrome
-             chrome_args
-           when :remote
-             remote_args
-           else
-             [browser, {}]
+             when :firefox
+               firefox_args
+             when :marionette
+               marionette_args
+             when :chrome
+               chrome_args
+             when :remote
+               remote_args
+             else
+               [browser, {}]
            end
 
     if ENV['SELECTOR_STATS']
@@ -42,12 +70,8 @@ class ImplementationConfig
     @imp.browser_args = args
   end
 
-  def mobile?
-    [:android, :iphone].include? browser
-  end
-
   def ie?
-    [:internet_explorer].include? browser
+    browser == :internet_explorer
   end
 
   def safari?
@@ -68,28 +92,19 @@ class ImplementationConfig
     browser_version = browser_instance.driver.capabilities.version
     matching_browser_with_version = "#{matching_browser}#{browser_version}".to_sym
     matching_guards = [
-      :webdriver,                     # guard only applies to webdriver
       matching_browser,               # guard only applies to this browser
       matching_browser_with_version,  # guard only applies to this browser with specific version
-      [:webdriver, matching_browser], # guard only applies to this browser on webdriver
-      [:webdriver, matching_browser_with_version],  # guard only applies to this browser with specific version on webdriver
       [matching_browser, Selenium::WebDriver::Platform.os] # guard only applies to this browser with this OS
     ]
 
     if native_events?
       # guard only applies to this browser on webdriver with native events enabled
-      matching_guards << [:webdriver, matching_browser, :native_events]
-      matching_guards << [:webdriver, matching_browser_with_version, :native_events]
+      matching_guards << [matching_browser, :native_events]
+      matching_guards << [matching_browser_with_version, :native_events]
     else
       # guard only applies to this browser on webdriver with native events disabled
-      matching_guards << [:webdriver, matching_browser, :synthesized_events]
-      matching_guards << [:webdriver, matching_browser_with_version, :synthesized_events]
-    end
-
-    if !Selenium::WebDriver::Platform.linux? || ENV['DESKTOP_SESSION']
-      # some specs (i.e. Window#maximize) needs a window manager on linux
-      matching_guards << [:webdriver, matching_browser, :window_manager]
-      matching_guards << [:webdriver, matching_browser_with_version, :window_manager]
+      matching_guards << [matching_browser, :synthesized_events]
+      matching_guards << [matching_browser_with_version, :synthesized_events]
     end
 
     @imp.guard_proc = lambda { |args|
@@ -106,10 +121,14 @@ class ImplementationConfig
     [:firefox, {profile: profile}]
   end
 
+  def marionette_args
+    caps = Selenium::WebDriver::Remote::W3CCapabilities.firefox
+    [:firefox, {desired_capabilities: caps}]
+  end
+
   def chrome_args
     opts = {
-      args: ["--disable-translate"],
-      native_events: native_events?
+      args: ["--disable-translate"]
     }
 
     if url = ENV['WATIR_WEBDRIVER_CHROME_SERVER']
@@ -132,7 +151,15 @@ class ImplementationConfig
   end
 
   def remote_args
-    [:remote, {url: ENV["WATIR_WEBDRIVER_REMOTE_URL"] || "http://127.0.0.1:8080"}]
+    url = ENV["WATIR_WEBDRIVER_REMOTE_URL"] || "http://127.0.0.1:4444/wd/hub"
+    remote_browser_name = ENV['REMOTE_BROWSER']
+    caps = if remote_browser_name == 'marionette'
+             Selenium::WebDriver::Remote::W3CCapabilities.firefox
+           else
+             Selenium::WebDriver::Remote::Capabilities.send(remote_browser_name)
+           end
+    [:remote, { url: url,
+                desired_capabilities: caps}]
   end
 
   def add_html_routes
@@ -154,17 +181,7 @@ class ImplementationConfig
   end
 
   def native_events?
-    if ENV['NATIVE_EVENTS'] == "true"
-      true
-    elsif ENV['NATIVE_EVENTS'] == "false" && !ie?
-      false
-    else
-      native_events_by_default?
-    end
-  end
-
-  def native_events_by_default?
-    Selenium::WebDriver::Platform.windows? && [:firefox, :internet_explorer].include?(browser)
+    ENV['NATIVE_EVENTS'] == "true" || browser == :internet_explorer
   end
 
   class SelectorListener < Selenium::WebDriver::Support::AbstractEventListener
