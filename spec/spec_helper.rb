@@ -18,7 +18,7 @@ if ENV['PREFER_CSS']
   Watir.prefer_css = true
 end
 
-WEBDRIVER_SELECTORS = %i(class class_name css id tag_name xpath)
+SELENIUM_SELECTORS = %i(class class_name css id tag_name xpath)
 
 if ENV['TRAVIS']
   ENV['DISPLAY'] = ":99.0"

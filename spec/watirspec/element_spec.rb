@@ -158,7 +158,7 @@ describe Watir::Element do
     end
   end
 
-  bug "Can Not Get Active Element", :marionette do
+  bug "https://bugzilla.mozilla.org/show_bug.cgi?id=805475", :marionette do
     describe "#focused?" do
       it "knows if the element is focused" do
         expect(browser.element(id: 'new_user_first_name')).to be_focused

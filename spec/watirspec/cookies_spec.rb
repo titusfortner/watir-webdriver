@@ -61,13 +61,7 @@ describe "Browser#cookies" do
       expires = Time.now + 10000
       options = {path: "/set_cookie"}
 
-      bug "https://github.com/detro/ghostdriver/issues/451", :phantomjs do
-        bug 'https://code.google.com/p/chromedriver/issues/detail?id=1247', :chrome do
-          options[:secure] = true
-        end
-      end
-
-      bug "Failed to convert expiry to Date", :marionette do
+      bug "https://bugzilla.mozilla.org/show_bug.cgi?id=1217598", :marionette do
         options[:expires] = expires
       end
 
@@ -79,12 +73,6 @@ describe "Browser#cookies" do
       expect(cookie[:value]).to eq 'b'
 
       expect(cookie[:path]).to eq "/set_cookie"
-
-      bug "Secure set true, but returns false", :marionette do
-        not_compliant_on :chrome, :phantomjs do
-          expect(cookie[:secure]).to be true
-        end
-      end
 
       not_compliant_on :marionette do
         expect(cookie[:expires]).to be_kind_of(Time)

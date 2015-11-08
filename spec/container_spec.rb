@@ -1,4 +1,4 @@
-require File.expand_path('watirspec/spec_helper', File.dirname(__FILE__))
+require_relative 'watirspec/spec_helper'
 
 describe Watir::Container do
   before { @container = Object.new.extend(Watir::Container) }
@@ -29,6 +29,5 @@ describe Watir::Container do
     it "raises ArgumentError if given > 2 args" do
       expect {@container.public_extract_selector([:how, 'what', 'value'])}.to raise_error(ArgumentError)
     end
-
   end
 end

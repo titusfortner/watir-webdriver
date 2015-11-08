@@ -1,4 +1,4 @@
-require File.expand_path('watirspec/spec_helper', File.dirname(__FILE__))
+require_relative 'watirspec/spec_helper'
 
 describe Watir::Element do
 
@@ -131,18 +131,17 @@ describe Watir::Element do
 
   end
 
-  describe "#hover" do
-    not_compliant_on %i(webdriver firefox synthesized_events),
-                     %i(webdriver internet_explorer),
-                     %i(webdriver iphone),
-                     %i(webdriver safari) do
-      it "should hover over the element" do
-        browser.goto WatirSpec.url_for('hover.html')
-        link = browser.a
+  bug "Interactions Not Yet Supported", :marionette do
+    bug "https://code.google.com/p/selenium/issues/detail?id=4136", :safari do
+      describe "#hover" do
+        it "should hover over the element" do
+          browser.goto WatirSpec.url_for('hover.html')
+          link = browser.a
 
-        expect(link.style("font-size")).to eq "10px"
-        link.hover
-        expect(link.style("font-size")).to eq "20px"
+          expect(link.style("font-size")).to eq "10px"
+          link.hover
+          expect(link.style("font-size")).to eq "20px"
+        end
       end
     end
   end

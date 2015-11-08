@@ -12,7 +12,7 @@ class ImplementationConfig
     set_guard_proc
     add_html_routes
 
-#    WatirSpec.always_use_server = ie? || safari? || phantomjs? || remote?
+    WatirSpec.always_use_server = safari? || remote?
   end
 
   private
@@ -96,16 +96,6 @@ class ImplementationConfig
       matching_browser_with_version,  # guard only applies to this browser with specific version
       [matching_browser, Selenium::WebDriver::Platform.os] # guard only applies to this browser with this OS
     ]
-
-    if native_events?
-      # guard only applies to this browser on webdriver with native events enabled
-      matching_guards << [matching_browser, :native_events]
-      matching_guards << [matching_browser_with_version, :native_events]
-    else
-      # guard only applies to this browser on webdriver with native events disabled
-      matching_guards << [matching_browser, :synthesized_events]
-      matching_guards << [matching_browser_with_version, :synthesized_events]
-    end
 
     @imp.guard_proc = lambda { |args|
       args.any? { |arg| matching_guards.include?(arg) }

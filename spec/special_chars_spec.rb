@@ -1,4 +1,4 @@
-require File.expand_path('watirspec/spec_helper', File.dirname(__FILE__))
+require_relative 'watirspec/spec_helper'
 
 describe Watir::Browser do
 
@@ -9,5 +9,4 @@ describe Watir::Browser do
   it "finds elements with single quotes" do
     expect(browser.div(text: "single 'quotes'")).to exist
   end
-
 end
