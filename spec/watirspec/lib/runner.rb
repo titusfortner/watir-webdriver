@@ -7,7 +7,19 @@ module WatirSpec
     end
 
     module PersistentBrowserHelper
-      def browser; $browser; end
+      def browser
+        $browser
+      end
+
+      def reset_browser
+        $browser.close
+        $browser = WatirSpec.new_browser
+      end
+
+      def ensure_single_window
+        browser.window(index: 0).use
+        browser.windows[1..-1].each(&:close)
+      end
     end
 
     module MessagesHelper
@@ -45,7 +57,7 @@ module WatirSpec
         else
           config.include(PersistentBrowserHelper)
           $browser = WatirSpec.new_browser
-          at_exit { $browser.close }
+          config.after(:suite) { $browser.close }
         end
       end
     end

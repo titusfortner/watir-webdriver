@@ -143,6 +143,7 @@ describe Watir::Element do
 
       btn = browser.button(id: 'btn')
       btn.when_enabled(2).click
+      Watir::Wait.until { !btn.enabled? }
       expect(btn.disabled?).to be true
     end
 
@@ -172,7 +173,7 @@ describe Watir::Element do
 
     it "can be chained with #when_present" do
       browser.a(id: 'show_and_enable_btn').click
-      browser.button(id: 'btn2').when_present(1).when_enabled(1).click
+      browser.button(id: 'btn2').when_present(2).when_enabled(2).click
 
       expect(browser.button(id: 'btn2')).to exist
       expect(browser.button(id: 'btn2')).to be_enabled
@@ -195,7 +196,7 @@ describe Watir::Element do
   describe "#wait_while_present" do
     it "waits until the element disappears" do
       browser.a(id: 'hide_foo').click
-      browser.div(id: 'foo').wait_while_present(1)
+      browser.div(id: 'foo').wait_while_present(2)
     end
 
     it "times out if the element doesn't disappear" do

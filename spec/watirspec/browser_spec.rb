@@ -18,8 +18,10 @@ describe "Browser" do
       it "returns false if window is closed" do
         browser.goto WatirSpec.url_for("window_switching.html")
         browser.a(id: "open").click
+        Watir::Wait.until { browser.windows.size == 2 }
         browser.window(title: "closeable window").use
         browser.a(id: "close").click
+        Watir::Wait.until { browser.windows.size < 2 }
         expect(browser.exists?).to be false
       end
     end
@@ -127,11 +129,11 @@ describe "Browser" do
   describe ".start" do
     it "goes to the given URL and return an instance of itself" do
       driver, args = WatirSpec.implementation.browser_args
-      browser = Watir::Browser.start(WatirSpec.url_for("non_control_elements.html"), driver, args)
+      second_browser = Watir::Browser.start(WatirSpec.url_for("non_control_elements.html"), driver, args.dup)
 
-      expect(browser).to be_instance_of(Watir::Browser)
-      expect(browser.title).to eq "Non-control elements"
-      browser.close
+      expect(second_browser).to be_instance_of(Watir::Browser)
+      expect(second_browser.title).to eq "Non-control elements"
+      second_browser.close
     end
   end
 

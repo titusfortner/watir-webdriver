@@ -16,7 +16,7 @@ end
 
 module WatirSpec
   class << self
-    attr_accessor :browser_args, :persistent_browser, :unguarded, :implementation, :always_use_server
+    attr_accessor :browser_args, :persistent_browser, :unguarded, :always_use_server
 
     def html
       @html ||= File.expand_path("../../html", __FILE__)

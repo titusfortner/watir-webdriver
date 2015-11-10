@@ -126,15 +126,16 @@ namespace :spec do
   require 'selenium-webdriver'
 
   desc 'Run specs in all browsers'
-  task all_browsers: [:firefox,
-                      :chrome,
+  task all_browsers: [:chrome,
+                      :firefox,
                       :phantomjs,
-                      :remote_firefox,
                       :remote_chrome,
-                      (:safari if Selenium::WebDriver::Platform.os == :macosx),
-                      (:remote_safari if Selenium::WebDriver::Platform.os == :macosx),
+                      :remote_firefox,
+                      :remote_phantomjs,
                       (:marionette if ENV['MARIONETTE_PATH']),
                       (:remote_marionette if ENV['MARIONETTE_PATH']),
+                      (:safari if Selenium::WebDriver::Platform.os == :macosx),
+                      (:remote_safari if Selenium::WebDriver::Platform.os == :macosx),
                       (:ie if Selenium::WebDriver::Platform.os == :windows),
                       (:remote_ie if Selenium::WebDriver::Platform.os == :windows),
                       (:edge if Selenium::WebDriver::Platform.os == :windows),

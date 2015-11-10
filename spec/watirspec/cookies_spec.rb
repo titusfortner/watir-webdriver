@@ -49,8 +49,7 @@ describe "Browser#cookies" do
     verify_cookies_count 2
 
     compliant_on :safari do
-      $browser.close
-      $browser = WatirSpec.new_browser
+      reset_browser
     end
   end
 
