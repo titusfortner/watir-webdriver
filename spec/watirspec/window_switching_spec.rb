@@ -432,14 +432,15 @@ describe "Window" do
     end
 
     it "should maximize the window" do
-      initial_size = browser.window.size
+      browser.window.resize_to(400, 400)
+      browser.wait_until { browser.window.size.height == 400 && browser.window.size.width == 400 }
 
       browser.window.maximize
-      browser.wait_until { browser.window.size != initial_size }
+      browser.wait_until { browser.window.size.height != 400 && browser.window.size.width != 400 }
 
       new_size = browser.window.size
-      expect(new_size.width).to be > initial_size.width
-      expect(new_size.height).to be > initial_size.height
+      expect(new_size.width).to be > 400
+      expect(new_size.height).to be > 400
     end
   end
 end
