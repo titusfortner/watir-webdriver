@@ -27,7 +27,7 @@ class ImplementationConfig
                                      :timeout    => 60)
 
 
-    if browser == :marionette
+    if @remote_browser_name == :marionette
       @server << "-Dwebdriver.firefox.bin=#{ENV['MARIONETTE_PATH']}"
     end
     @server.start
@@ -142,12 +142,12 @@ class ImplementationConfig
 
   def remote_args
     url = ENV["WATIR_WEBDRIVER_REMOTE_URL"] || "http://127.0.0.1:4444/wd/hub"
-    remote_browser_name = ENV['REMOTE_BROWSER']
-    caps = if remote_browser_name == 'marionette'
-             Selenium::WebDriver::Remote::W3CCapabilities.firefox
-           else
-             Selenium::WebDriver::Remote::Capabilities.send(remote_browser_name)
-           end
+    @remote_browser_name = ENV['REMOTE_BROWSER'].to_sym
+    if @remote_browser_name == :marionette
+      caps = Selenium::WebDriver::Remote::W3CCapabilities.firefox
+    else
+      caps = Selenium::WebDriver::Remote::Capabilities.send(@remote_browser_name)
+    end
     [:remote, { url: url,
                 desired_capabilities: caps}]
   end
