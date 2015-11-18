@@ -7,8 +7,8 @@ class ImplementationConfig
 
   def configure
     @imp.browser_class = Watir::Browser
+    start_remote_server if browser == :remote
     set_browser_args
-    start_remote_server if @browser == :remote
     set_guard_proc
     add_html_routes
 
@@ -27,7 +27,7 @@ class ImplementationConfig
                                      :timeout    => 60)
 
 
-    if @remote_browser_name == :marionette
+    if remote_browser == :marionette
       @server << "-Dwebdriver.firefox.bin=#{ENV['MARIONETTE_PATH']}"
     end
     @server.start
@@ -141,12 +141,11 @@ class ImplementationConfig
   end
 
   def remote_args
-    url = ENV["WATIR_WEBDRIVER_REMOTE_URL"] || "http://127.0.0.1:4444/wd/hub"
-    @remote_browser_name = ENV['REMOTE_BROWSER'].to_sym
-    if @remote_browser_name == :marionette
+    url = ENV["WATIR_WEBDRIVER_REMOTE_URL"] || "http://127.0.0.1:#{@server.port}/wd/hub"
+    if remote_browser == :marionette
       caps = Selenium::WebDriver::Remote::W3CCapabilities.firefox
     else
-      caps = Selenium::WebDriver::Remote::Capabilities.send(@remote_browser_name)
+      caps = Selenium::WebDriver::Remote::Capabilities.send(remote_browser)
     end
     [:remote, { url: url,
                 desired_capabilities: caps}]
@@ -164,10 +163,7 @@ class ImplementationConfig
   end
 
   def remote_browser
-    remote_browser = WatirSpec.new_browser
-    remote_browser.browser.name
-  ensure
-    remote_browser.close
+    @remote_browser ||= (ENV['REMOTE_BROWSER'] || :firefox).to_sym
   end
 
   def native_events?

@@ -144,7 +144,6 @@ namespace :spec do
   %w(firefox marionette chrome safari phantomjs ie edge).each do |browser|
     desc "Run specs in #{browser}"
     task browser do
-      Selenium::WebDriver::Firefox::Binary.path = ENV['MARIONETTE_PATH'] if browser == 'marionette' && ENV['MARIONETTE_PATH']
       ENV['WATIR_WEBDRIVER_BROWSER'] = browser
       Rake::Task['spec'].execute
     end
@@ -155,7 +154,6 @@ namespace :spec do
     task browser do
       ENV['WATIR_WEBDRIVER_BROWSER'] = 'remote'
       ENV['REMOTE_BROWSER'] =  browser.split('_').last
-      Selenium::WebDriver::Firefox::Binary.path = ENV['MARIONETTE_PATH'] if ENV['REMOTE_BROWSER'] == 'marionette' && ENV['MARIONETTE_PATH']
       Rake::Task['spec'].execute
     end
   end
