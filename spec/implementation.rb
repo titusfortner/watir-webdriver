@@ -97,6 +97,10 @@ class ImplementationConfig
       [matching_browser, Selenium::WebDriver::Platform.os] # guard only applies to this browser with this OS
     ]
 
+    if !Selenium::WebDriver::Platform.linux? || ENV['DESKTOP_SESSION']
+      matching_guards << [:window_manager]
+    end
+
     @imp.guard_proc = lambda { |args|
       args.any? { |arg| matching_guards.include?(arg) }
     }

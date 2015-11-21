@@ -431,16 +431,18 @@ describe "Window" do
       end
     end
 
-    it "should maximize the window" do
-      browser.window.resize_to(400, 400)
-      browser.wait_until { browser.window.size.height == 400 && browser.window.size.width == 400 }
+    compliant_on :window_manager do
+      it "should maximize the window" do
+        browser.window.resize_to(400, 400)
+        browser.wait_until { browser.window.size.height == 400 && browser.window.size.width == 400 }
 
-      browser.window.maximize
-      browser.wait_until { browser.window.size.height != 400 && browser.window.size.width != 400 }
+        browser.window.maximize
+        browser.wait_until { browser.window.size.height != 400 && browser.window.size.width != 400 }
 
-      new_size = browser.window.size
-      expect(new_size.width).to be > 400
-      expect(new_size.height).to be > 400
+        new_size = browser.window.size
+        expect(new_size.width).to be > 400
+        expect(new_size.height).to be > 400
+      end
     end
   end
 end
