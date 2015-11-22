@@ -31,6 +31,7 @@ class ImplementationConfig
       @server << "-Dwebdriver.firefox.bin=#{ENV['MARIONETTE_PATH']}"
     end
     @server.start
+    at_exit { @server.stop }
   end
 
   def remote_server_jar
@@ -147,7 +148,7 @@ class ImplementationConfig
   def remote_args
     url = ENV["WATIR_WEBDRIVER_REMOTE_URL"] || "http://127.0.0.1:#{@server.port}/wd/hub"
     if remote_browser == :marionette
-      caps = Selenium::WebDriver::Remote::W3CCapabilities.firefox
+      caps = Selenium::WebDriver::Remote::Capabilities.firefox(marionette: true)
     else
       caps = Selenium::WebDriver::Remote::Capabilities.send(remote_browser)
     end
