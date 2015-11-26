@@ -101,14 +101,16 @@ describe "Browser" do
 
   describe "#url" do
     it "returns the current url" do
-      browser.goto(WatirSpec.url_for("non_control_elements.html"))
-      expect(browser.url).to eq WatirSpec.url_for("non_control_elements.html")
+      url = WatirSpec.url_for("non_control_elements.html", needs_server: true)
+      browser.goto(url)
+      expect(browser.url).to eq url
     end
 
     it "always returns top url" do
-      browser.goto(WatirSpec.url_for("frames.html"))
+      url = WatirSpec.url_for("frames.html", needs_server: true)
+      browser.goto(url)
       browser.frame.body.exists? # switches to frame
-      expect(browser.url).to eq WatirSpec.url_for("frames.html")
+      expect(browser.url).to eq url
     end
   end
 

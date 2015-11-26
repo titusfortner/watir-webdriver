@@ -102,7 +102,7 @@ bug "https://bugzilla.mozilla.org/show_bug.cgi?id=1223907", :marionette do
       end
     end
 
-    context 'file interactions'
+    context 'file interactions' do
       let(:file) { "#{Dir.tmpdir}/cookies" }
 
       before do
@@ -116,20 +116,24 @@ bug "https://bugzilla.mozilla.org/show_bug.cgi?id=1223907", :marionette do
         end
       end
 
-      describe '#load' do
-        it 'loads cookies from file' do
-          browser.cookies.clear
-          browser.cookies.load file
-          expected = browser.cookies.to_a
-          actual = YAML.load(IO.read(file))
+      # Chrome won't save cookies to localhost, which is how windows server is implemented
+      not_compliant_on [:chrome, :windows] do
+        describe '#load' do
+          it 'loads cookies from file' do
+            browser.cookies.clear
+            browser.cookies.load file
+            expected = browser.cookies.to_a
+            actual = YAML.load(IO.read(file))
 
-          # https://code.google.com/p/selenium/issues/detail?id=6834
-          expected.each { |cookie| cookie.delete(:expires) }
-          actual.each { |cookie| cookie.delete(:expires) }
+            # https://code.google.com/p/selenium/issues/detail?id=6834
+            expected.each { |cookie| cookie.delete(:expires) }
+            actual.each { |cookie| cookie.delete(:expires) }
 
-          expect(actual).to eq(expected)
+            expect(actual).to eq(expected)
+          end
         end
       end
+    end
 
     def set_cookie_url
       WatirSpec.url_for('set_cookie/index.html', needs_server: true) + "?t=#{Time.now.to_i + Time.now.usec}"

@@ -8,7 +8,7 @@ Bundler::GemHelper.install_tasks
 require 'rspec/core/rake_task'
 RSpec::Core::RakeTask.new(:spec) do |spec|
   spec.ruby_opts  = "-I lib:spec"
-  spec.rspec_opts = "--format documentation --backtrace"
+  spec.rspec_opts = %w[--color --require fuubar --format Fuubar]
   spec.pattern    = 'spec/**/*_spec.rb'
 end
 
@@ -133,7 +133,7 @@ namespace :spec do
                       :remote_firefox,
                       :remote_phantomjs,
                       (:marionette if ENV['MARIONETTE_PATH']),
-                      #(:remote_marionette if ENV['MARIONETTE_PATH']),
+                      (:remote_marionette if ENV['MARIONETTE_PATH']),
                       (:safari if Selenium::WebDriver::Platform.os == :macosx),
                       (:remote_safari if Selenium::WebDriver::Platform.os == :macosx),
                       (:ie if Selenium::WebDriver::Platform.os == :windows),

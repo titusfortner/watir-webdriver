@@ -145,22 +145,25 @@ describe "FileField" do
               expect(element.value).to include(File.basename(path)) # only some browser will return the full path
             end
 
-              it "does not raise an error if the file does not exist" do
-                path = File.join(Dir.tmpdir, 'unlikely-to-exist')
-                browser.file_field.value = path
+            it "does not raise an error if the file does not exist" do
+              path = File.join(Dir.tmpdir, 'unlikely-to-exist')
+              browser.file_field.value = path
 
-                expected = path
-                expected.gsub!("/", "\\") if WatirSpec.platform == :windows
+              expected = path
+              expected.gsub!("/", "\\") if WatirSpec.platform == :windows
 
-                expect(browser.file_field.value).to include(File.basename(expected)) # only some browser will return the full path
-              end
+              expect(browser.file_field.value).to include(File.basename(expected)) # only some browser will return the full path
+            end
 
+              # Windows + Chrome requires an absolute path
+            not_compliant_on [:chrome, :windows] do
               it "does not alter its argument" do
                 value = '/foo/bar'
                 browser.file_field.value = value
                 expect(value).to eq '/foo/bar'
               end
             end
+          end
         end
       end
     end

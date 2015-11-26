@@ -12,7 +12,7 @@ class ImplementationConfig
     set_guard_proc
     add_html_routes
 
-    WatirSpec.always_use_server = safari? || remote?
+    WatirSpec.always_use_server = safari? || remote? || phantomjs?
   end
 
   private
