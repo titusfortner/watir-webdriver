@@ -1,4 +1,4 @@
-require File.expand_path('../watirspec/spec_helper', __FILE__)
+require_relative 'watirspec/spec_helper'
 
 describe Watir::Element do
   describe "#click" do
