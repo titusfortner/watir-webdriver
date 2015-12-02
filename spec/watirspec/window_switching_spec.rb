@@ -1,4 +1,4 @@
-require File.expand_path("../spec_helper", __FILE__)
+require_relative 'spec_helper'
 
 not_compliant_on %i(webdriver iphone), %i(webdriver safari) do
   describe "Browser" do

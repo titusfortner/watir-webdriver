@@ -1,4 +1,4 @@
-require File.expand_path('watirspec/spec_helper', File.dirname(__FILE__))
+require_relative 'watirspec/spec_helper'
 
 describe 'Watir' do
   describe '#always_locate?' do
