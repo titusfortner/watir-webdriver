@@ -6,6 +6,7 @@ not_compliant_on %i(webdriver iphone), %i(webdriver safari) do
       url = WatirSpec.url_for("window_switching.html")
       browser.goto url
       browser.a(id: "open").click
+      Watir::Wait.until { browser.windows.size == 2 }
     end
 
     after do
@@ -98,6 +99,7 @@ not_compliant_on %i(webdriver iphone), %i(webdriver safari) do
       before do
         browser.goto WatirSpec.url_for("window_switching.html")
         browser.a(id: "open").click
+        Watir::Wait.until { browser.windows.size == 2 }
       end
 
       after do
@@ -107,20 +109,16 @@ not_compliant_on %i(webdriver iphone), %i(webdriver safari) do
 
       describe "#close" do
         it "closes a window" do
-          expect(browser.windows.size).to eq 2
-
           browser.a(id: "open").click
-          expect(browser.windows.size).to eq 3
+          Watir::Wait.until { browser.windows.size == 3 }
 
           browser.window(title: "closeable window").close
           expect(browser.windows.size).to eq 2
         end
 
         it "closes the current window" do
-          expect(browser.windows.size).to eq 2
-
           browser.a(id: "open").click
-          expect(browser.windows.size).to eq 3
+          Watir::Wait.until { browser.windows.size == 3 }
 
           window = browser.window(title: "closeable window").use
           window.close
@@ -148,7 +146,6 @@ not_compliant_on %i(webdriver iphone), %i(webdriver safari) do
       describe "#title" do
         it "returns the title of the window" do
           titles = browser.windows.map(&:title)
-          expect(titles.size).to eq 2
 
           expect(titles.sort).to eq ["window switching", "closeable window"].sort
         end
@@ -162,7 +159,6 @@ not_compliant_on %i(webdriver iphone), %i(webdriver safari) do
 
       describe "#url" do
         it "returns the url of the window" do
-          expect(browser.windows.size).to eq 2
           expect(browser.windows.select { |w| w.url =~ (/window_switching\.html/) }.size).to eq 1
           expect(browser.windows.select { |w| w.url =~ (/closeable\.html$/) }.size).to eq 1
         end
@@ -210,6 +206,7 @@ not_compliant_on %i(webdriver iphone), %i(webdriver safari) do
       before do
         browser.goto WatirSpec.url_for("window_switching.html")
         browser.a(id: "open").click
+        Watir::Wait.until { browser.windows.size == 2 }
       end
 
       after do
@@ -273,6 +270,7 @@ not_compliant_on %i(webdriver iphone), %i(webdriver safari) do
       before do
         browser.goto WatirSpec.url_for("window_switching.html")
         browser.a(id: "open").click
+        Watir::Wait.until { browser.windows.size == 2 }
         browser.window(title: "closeable window").use
         browser.a(id: "close").click
       end
