@@ -114,11 +114,9 @@ describe "Frame" do
   end
 
   describe "#html" do
-    not_compliant_on :iphone do
-      it "returns the full HTML source of the frame" do
-        browser.goto WatirSpec.url_for("frames.html")
-        expect(browser.frame.html.downcase).to include("<title>frame 1</title>")
-      end
+    it "returns the full HTML source of the frame" do
+      browser.goto WatirSpec.url_for("frames.html")
+      expect(browser.frame.html.downcase).to include("<title>frame 1</title>")
     end
   end
 end

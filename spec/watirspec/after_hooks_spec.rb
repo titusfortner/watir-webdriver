@@ -65,7 +65,7 @@ describe "Browser::AfterHooks" do
       expect(@yield).to be true
     end
 
-    not_compliant_on :iphone, :safari do
+    not_compliant_on :safari do
       it "runs after_hooks after Element#double_click" do
         browser.goto(WatirSpec.url_for("non_control_elements.html"))
         @page_after_hook = Proc.new { @yield = browser.title == "Non-control elements" }

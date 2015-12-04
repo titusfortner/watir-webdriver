@@ -163,7 +163,7 @@ describe "Div" do
     end
   end
 
-  not_compliant_on :iphone, :safari do
+  not_compliant_on :safari do
     describe "#double_click" do
       it "fires the ondblclick event" do
         browser.div(id: 'html_test').double_click
