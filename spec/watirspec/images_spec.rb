@@ -7,12 +7,8 @@ describe "Images" do
     browser.goto(WatirSpec.url_for("images.html"))
   end
 
-  bug "http://github.com/jarib/celerity/issues#issue/25", :celerity do
-    describe "with selectors" do
-      it "returns the matching elements" do
-        expect(browser.images(alt: "circle").to_a).to eq [browser.image(alt: "circle")]
-      end
-    end
+  it "returns the matching elements" do
+    expect(browser.images(alt: "circle").to_a).to eq [browser.image(alt: "circle")]
   end
 
   describe "#length" do

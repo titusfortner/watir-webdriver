@@ -35,24 +35,4 @@ end # WatirSpec
 if __FILE__ == $0
   require "rubygems"
   require 'rspec/autorun'
-
-  describe WatirSpec::Implementation do
-    before { @impl = WatirSpec::Implementation.new }
-
-    it "finds matching guards" do
-      guards = {
-        [:watir_classic] => [
-          {name: :not_compliant, data: {file: "./spec/watirspec/div_spec.rb:108"}},
-          {name: :deviates,      data: {file: "./spec/watirspec/div_spec.rb:114"}},
-          {name: :not_compliant, data: {file: "./spec/watirspec/div_spec.rb:200"}},
-          {name: :bug,           data: {file: "./spec/watirspec/div_spec.rb:228", key: "WTR-350"}}
-        ],
-        [:celerity] => [
-          {name: :deviates,      data: {file: "./spec/watirspec/div_spec.rb:143"}}
-        ]
-      }
-      @impl.name = :celerity
-      @impl.matching_guards_in(guards).should == [{name: :deviates, data: {file: "./spec/watirspec/div_spec.rb:143"}}]
-    end
-  end
 end

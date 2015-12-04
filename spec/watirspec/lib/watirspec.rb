@@ -16,7 +16,7 @@ end
 
 module WatirSpec
   class << self
-    attr_accessor :browser_args, :persistent_browser, :unguarded, :implementation, :always_use_server
+    attr_accessor :browser_args, :persistent_browser, :unguarded, :always_use_server
 
     def html
       @html ||= File.expand_path("../../html", __FILE__)
@@ -104,16 +104,10 @@ module WatirSpec
       return if defined?(@did_print_browser_info) && @did_print_browser_info
       @did_print_browser_info = true
 
-      info = []
-      info << instance.class.name
-
-      if instance.respond_to?(:driver) && instance.driver.class.name == "Selenium::WebDriver::Driver"
-        info << "(webdriver)"
-        caps = instance.driver.capabilities
-
-        info << "#{caps.browser_name}"
-        info << "#{caps.version}"
-      end
+      caps = instance.driver.capabilities
+      info = [instance.class.name,
+              caps.browser_name,
+              caps.version]
 
       $stderr.puts "running watirspec against #{info.join ' '} using args #{WatirSpec.implementation.browser_args.inspect}"
     rescue
