@@ -47,21 +47,25 @@ describe Watir::Browser do
   end
 
   describe "#send_key{,s}" do
-    it "sends keystrokes to the active element" do
-      browser.goto WatirSpec.url_for "forms_with_input_elements.html"
+    bug "https://bugzilla.mozilla.org/show_bug.cgi?id=805475", :marionette do
+      it "sends keystrokes to the active element" do
+        browser.goto WatirSpec.url_for "forms_with_input_elements.html"
 
-      browser.send_keys "hello"
-      expect(browser.text_field(id: "new_user_first_name").value).to eq "hello"
+        browser.send_keys "hello"
+        expect(browser.text_field(id: "new_user_first_name").value).to eq "hello"
+      end
     end
 
-    it "sends keys to a frame" do
-      browser.goto WatirSpec.url_for "frames.html"
-      tf = browser.frame.text_field(id: "senderElement")
-      tf.clear
+    bug "https://bugzilla.mozilla.org/show_bug.cgi?id=805475", :marionette do
+      it "sends keys to a frame" do
+        browser.goto WatirSpec.url_for "frames.html"
+        tf = browser.frame.text_field(id: "senderElement")
+        tf.clear
 
-      browser.frame.send_keys "hello"
+        browser.frame.send_keys "hello"
 
-      expect(tf.value).to eq "hello"
+        expect(tf.value).to eq "hello"
+      end
     end
   end
 

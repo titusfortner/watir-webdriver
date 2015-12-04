@@ -54,13 +54,15 @@ describe "Frame" do
       expect(browser.frame(xpath: "//frame[@id='no_such_id']")).to_not exist
     end
 
-    bug "https://github.com/detro/ghostdriver/issues/159", :phantomjs do
-      it "handles nested frames" do
-        browser.goto(WatirSpec.url_for("nested_frames.html"))
+    bug "Unable to get title after navigation from inside nested frames", :marionette do
+      bug "https://github.com/detro/ghostdriver/issues/159", :phantomjs do
+        it "handles nested frames" do
+          browser.goto(WatirSpec.url_for("nested_frames.html"))
 
-        browser.frame(id: "two").frame(id: "three").link(id: "four").click
+          browser.frame(id: "two").frame(id: "three").link(id: "four").click
 
-        Wait.until{ browser.title == "definition_lists" }
+          Wait.until{ browser.title == "definition_lists" }
+        end
       end
     end
 

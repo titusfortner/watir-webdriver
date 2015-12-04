@@ -163,14 +163,18 @@ describe "Div" do
     end
   end
 
-  not_compliant_on :safari do
-    describe "#double_click" do
-      it "fires the ondblclick event" do
-        browser.div(id: 'html_test').double_click
-        expect(messages).to include('double clicked')
+  bug "Interactions Not Yet Supported", :marionette do
+    not_compliant_on :safari do
+      describe "#double_click" do
+        it "fires the ondblclick event" do
+          browser.div(id: 'html_test').double_click
+          expect(messages).to include('double clicked')
+        end
       end
     end
+  end
 
+  bug "Interactions Not Yet Supported", :marionette do
     describe "#right_click" do
       it "fires the oncontextmenu event" do
         browser.goto(WatirSpec.url_for("right_click.html"))

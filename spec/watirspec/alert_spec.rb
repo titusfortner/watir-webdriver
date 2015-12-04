@@ -85,12 +85,14 @@ describe 'Alert API' do
       end
 
       context 'prompt' do
-        describe '#set' do
-          it 'enters text to prompt' do
-            browser.button(id: 'prompt').click
-            browser.alert.set 'My Name'
-            browser.alert.ok
-            expect(browser.button(id: 'prompt').value).to eq 'My Name'
+        bug "Marionette Error: keysToSend.join is not a function", :marionette do
+          describe '#set' do
+            it 'enters text to prompt' do
+              browser.button(id: 'prompt').click
+              browser.alert.set 'My Name'
+              browser.alert.ok
+              expect(browser.button(id: 'prompt').value).to eq 'My Name'
+            end
           end
         end
       end

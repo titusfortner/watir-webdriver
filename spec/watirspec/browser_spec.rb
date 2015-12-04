@@ -14,13 +14,16 @@ describe "Browser" do
       expect(browser).to exist
     end
 
-    it "returns false if window is closed" do
-      browser.goto WatirSpec.url_for("window_switching.html")
-      browser.a(id: "open").click
-      Watir::Wait.until { browser.windows.size == 2 }
-      browser.window(title: "closeable window").use
-      browser.a(id: "close").click
-      expect(browser.exists?).to be false
+    bug "https://bugzilla.mozilla.org/show_bug.cgi?id=1128656", :marionette do
+      it "returns false if window is closed" do
+        browser.goto WatirSpec.url_for("window_switching.html")
+        browser.a(id: "open").click
+        Watir::Wait.until { browser.windows.size == 2 }
+        browser.window(title: "closeable window").use
+        browser.a(id: "close").click
+        Watir::Wait.until { browser.windows.size == 1 }
+        expect(browser.exists?).to be false
+      end
     end
 
     it "returns false after Browser#close" do
@@ -112,14 +115,16 @@ describe "Browser" do
 
   describe "#url" do
     it "returns the current url" do
-      browser.goto(WatirSpec.url_for("non_control_elements.html"))
-      expect(browser.url).to eq WatirSpec.url_for("non_control_elements.html")
+      url = WatirSpec.url_for("non_control_elements.html", needs_server: true)
+      browser.goto(url)
+      expect(browser.url).to eq url
     end
 
     it "always returns top url" do
-      browser.goto(WatirSpec.url_for("frames.html"))
+      url = WatirSpec.url_for("frames.html", needs_server: true)
+      browser.goto(url)
       browser.frame.body.exists? # switches to frame
-      expect(browser.url).to eq WatirSpec.url_for("frames.html")
+      expect(browser.url).to eq url
     end
   end
 
@@ -289,7 +294,7 @@ describe "Browser" do
   end
 
   it "raises UnknownObjectException when trying to access DOM elements on plain/text-page" do
-    browser.goto(WatirSpec.url_for("plain_text"))
+    browser.goto(WatirSpec.url_for("plain_text", needs_server: true))
     expect { browser.div(id: 'foo').id }.to raise_error(Watir::Exception::UnknownObjectException)
   end
 end

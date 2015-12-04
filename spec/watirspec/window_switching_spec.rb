@@ -3,15 +3,19 @@ require_relative 'spec_helper'
 not_compliant_on :safari do
   describe "Browser" do
     before do
-      url = WatirSpec.url_for("window_switching.html")
-      browser.goto url
+      browser.goto WatirSpec.url_for("window_switching.html")
       browser.a(id: "open").click
       Watir::Wait.until { browser.windows.size == 2 }
     end
 
     after do
-      browser.window(index: 0).use
-      browser.windows[1..-1].each(&:close)
+      # Some issue with Marionette losing focus with window switching, unable to isolate
+      not_compliant_on :marionette do
+        ensure_single_window
+      end
+      deviates_on :marionette do
+        reset_browser
+      end
     end
 
     describe "#windows" do
@@ -64,14 +68,16 @@ not_compliant_on :safari do
         expect(original_window.url).to match(/window_switching\.html/)
       end
 
-      it "it executes the given block in the window" do
-        browser.window(title: "closeable window") do
-          link = browser.a(id: "close")
-          expect(link).to exist
-          link.click
-        end.wait_while_present
+      bug "https://bugzilla.mozilla.org/show_bug.cgi?id=1223277", :marionette do
+        it "it executes the given block in the window" do
+          browser.window(title: "closeable window") do
+            link = browser.a(id: "close")
+            expect(link).to exist
+            link.click
+          end.wait_while_present
 
-        expect(browser.windows.size).to eq 1
+          expect(browser.windows.size).to eq 1
+        end
       end
 
       it "raises ArgumentError if the selector is invalid" do
@@ -101,26 +107,38 @@ not_compliant_on :safari do
       end
 
       after do
-        browser.window(index: 0).use
-        browser.windows[1..-1].each(&:close)
+        not_compliant_on :marionette do
+          ensure_single_window
+        end
+        deviates_on :marionette do
+          reset_browser
+        end
       end
 
       describe "#close" do
-        it "closes a window" do
-          browser.a(id: "open").click
-          Watir::Wait.until { browser.windows.size == 3 }
+        bug "https://bugzilla.mozilla.org/show_bug.cgi?id=1128656", :marionette do
+          it "closes a window" do
+            browser.a(id: "open").click
+            Watir::Wait.until { browser.windows.size == 3 }
 
-          browser.window(title: "closeable window").close
-          expect(browser.windows.size).to eq 2
+            browser.window(title: "closeable window").close
+            Watir::Wait.until { browser.windows.size < 3 }
+
+            expect(browser.windows.size).to eq 2
+          end
         end
 
-        it "closes the current window" do
-          browser.a(id: "open").click
-          Watir::Wait.until { browser.windows.size == 3 }
+        bug "https://bugzilla.mozilla.org/show_bug.cgi?id=1128656", :marionette do
+          it "closes the current window" do
+            browser.a(id: "open").click
+            Watir::Wait.until { browser.windows.size == 3 }
 
-          window = browser.window(title: "closeable window").use
-          window.close
-          expect(browser.windows.size).to eq 2
+            window = browser.window(title: "closeable window").use
+            window.close
+
+            Watir::Wait.until { browser.windows.size < 3 }
+            expect(browser.windows.size).to eq 2
+          end
         end
       end
 
@@ -208,23 +226,35 @@ not_compliant_on :safari do
       end
 
       after do
-        browser.window(index: 0).use
-        browser.windows[1..-1].each(&:close)
+        not_compliant_on :marionette do
+          ensure_single_window
+        end
+        deviates_on :marionette do
+          reset_browser
+        end
       end
 
       describe "#exists?" do
-        it "returns false if previously referenced window is closed" do
-          window = browser.window(title: "closeable window")
-          window.use
-          browser.a(id: "close").click
-          expect(window).to_not be_present
+        bug "https://bugzilla.mozilla.org/show_bug.cgi?id=1223277", :marionette do
+          it "returns false if previously referenced window is closed" do
+            window = browser.window(title: "closeable window")
+            window.use
+            browser.a(id: "close").click
+            Watir::Wait.until { browser.windows.size < 2 }
+
+            expect(window).to_not be_present
+          end
         end
 
-        bug "https://code.google.com/p/chromedriver/issues/detail?id=950", :chrome do
-          it "returns false if closed window is referenced" do
-            browser.window(title: "closeable window").use
-            browser.a(id: "close").click
-            expect(browser.window).to_not be_present
+        bug "https://bugzilla.mozilla.org/show_bug.cgi?id=1223277", :marionette do
+          bug "https://code.google.com/p/chromedriver/issues/detail?id=950", :chrome do
+            it "returns false if closed window is referenced" do
+              browser.window(title: "closeable window").use
+              browser.a(id: "close").click
+              Watir::Wait.until { browser.windows.size < 2 }
+
+              expect(browser.window).to_not be_present
+            end
           end
         end
       end
@@ -234,6 +264,8 @@ not_compliant_on :safari do
           original_window = browser.window
           browser.window(title: "closeable window").use
           original_window.close
+          Watir::Wait.until { browser.windows.size < 2 }
+
           expect(original_window).to_not be_current
         end
       end
@@ -244,6 +276,8 @@ not_compliant_on :safari do
           other_window = browser.window(index: 1)
           other_window.use
           original_window.close
+          Watir::Wait.until { browser.windows.size < 2 }
+
           expect(other_window == original_window).to be false
         end
       end
@@ -256,75 +290,85 @@ not_compliant_on :safari do
           expect { original_window.use }.to raise_error(Watir::Exception::NoMatchingWindowFoundException)
         end
 
-        it "raises NoMatchingWindowFoundException error when attempting to use the current window if it is closed" do
-          browser.window(title: "closeable window").use
-          browser.a(id: "close").click
-          expect { browser.window.use }.to raise_error(Watir::Exception::NoMatchingWindowFoundException)
+        bug "https://bugzilla.mozilla.org/show_bug.cgi?id=1223277", :marionette do
+          it "raises NoMatchingWindowFoundException error when attempting to use the current window if it is closed" do
+            browser.window(title: "closeable window").use
+            browser.a(id: "close").click
+            Watir::Wait.until { browser.windows.size < 2 }
+
+            expect { browser.window.use }.to raise_error(Watir::Exception::NoMatchingWindowFoundException)
+          end
         end
       end
     end
 
-    context "with current window closed" do
-      before do
-        browser.goto WatirSpec.url_for("window_switching.html")
-        browser.a(id: "open").click
-        Watir::Wait.until { browser.windows.size == 2 }
-        browser.window(title: "closeable window").use
-        browser.a(id: "close").click
-      end
-
-      after do
-        browser.window(index: 0).use
-        browser.windows[1..-1].each(&:close)
-      end
-
-      describe "#present?" do
-        it "should find window by index" do
-          expect(browser.window(index: 0)).to be_present
+    bug "https://bugzilla.mozilla.org/show_bug.cgi?id=1223277", :marionette do
+      context "with current window closed" do
+        before do
+          browser.goto WatirSpec.url_for("window_switching.html")
+          browser.a(id: "open").click
+          Watir::Wait.until { browser.windows.size == 2 }
+          browser.window(title: "closeable window").use
+          browser.a(id: "close").click
+          Watir::Wait.until { browser.windows.size < 2 }
         end
 
-        it "should find window by url" do
-          expect(browser.window(url: /window_switching\.html/)).to be_present
-        end
-
-        it "should find window by title" do
-          expect(browser.window(title: "window switching")).to be_present
-        end
-      end
-
-      describe "#use" do
-
-        context "switching windows without blocks" do
-          it "by index" do
-            browser.window(index: 0).use
-            expect(browser.title).to be == "window switching"
+        after do
+          not_compliant_on :marionette do
+            ensure_single_window
           end
-
-          it "by url" do
-            browser.window(url: /window_switching\.html/).use
-            expect(browser.title).to be == "window switching"
-          end
-
-          it "by title" do
-            browser.window(title: "window switching").use
-            expect(browser.url).to match(/window_switching\.html/)
+          deviates_on :marionette do
+            reset_browser
           end
         end
 
-        context "Switching windows with blocks" do
-          it "by index" do
-            browser.window(index: 0).use { expect(browser.title).to be == "window switching" }
+        describe "#present?" do
+          it "should find window by index" do
+            expect(browser.window(index: 0)).to be_present
           end
 
-          it "by url" do
-            browser.window(url: /window_switching\.html/).use  { expect(browser.title).to be == "window switching" }
+          it "should find window by url" do
+            expect(browser.window(url: /window_switching\.html/)).to be_present
           end
 
-          it "by title" do
-            browser.window(title: "window switching").use { expect(browser.url).to match(/window_switching\.html/) }
+          it "should find window by title" do
+            expect(browser.window(title: "window switching")).to be_present
           end
         end
 
+        describe "#use" do
+
+          context "switching windows without blocks" do
+            it "by index" do
+              browser.window(index: 0).use
+              expect(browser.title).to be == "window switching"
+            end
+
+            it "by url" do
+              browser.window(url: /window_switching\.html/).use
+              expect(browser.title).to be == "window switching"
+            end
+
+            it "by title" do
+              browser.window(title: "window switching").use
+              expect(browser.url).to match(/window_switching\.html/)
+            end
+          end
+
+          context "Switching windows with blocks" do
+            it "by index" do
+              browser.window(index: 0).use { expect(browser.title).to be == "window switching" }
+            end
+
+            it "by url" do
+              browser.window(url: /window_switching\.html/).use { expect(browser.title).to be == "window switching" }
+            end
+
+            it "by title" do
+              browser.window(title: "window switching").use { expect(browser.url).to match(/window_switching\.html/) }
+            end
+          end
+        end
       end
     end
 
@@ -341,11 +385,13 @@ not_compliant_on :safari do
           expect(size.height).to be > 0
         end
 
-        it "should get the position of the current window" do
-          pos = browser.window.position
+        bug "Window Position is not currently in w3c spec", :marionette do
+          it "should get the position of the current window" do
+            pos = browser.window.position
 
-          expect(pos.x).to be >= 0
-          expect(pos.y).to be >= 0
+            expect(pos.x).to be >= 0
+            expect(pos.y).to be >= 0
+          end
         end
       end
 
@@ -355,25 +401,29 @@ not_compliant_on :safari do
           initial_size.width - 10,
           initial_size.height - 10
         )
+      browser.wait_until { browser.window.size != initial_size }
 
-        new_size = browser.window.size
+      new_size = browser.window.size
 
         expect(new_size.width).to eq initial_size.width - 10
         expect(new_size.height).to eq initial_size.height - 10
       end
 
-      bug "https://github.com/detro/ghostdriver/issues/466", :phantomjs do
-        it "should move the window" do
-          initial_pos = browser.window.position
+      bug "Window Position is not currently in w3c spec", :marionette do
+        bug "https://github.com/detro/ghostdriver/issues/466", :phantomjs do
+          it "should move the window" do
+            initial_pos = browser.window.position
 
-          browser.window.move_to(
-            initial_pos.x + 10,
-            initial_pos.y + 10
-          )
+            browser.window.move_to(
+              initial_pos.x + 10,
+              initial_pos.y + 10
+            )
+            Watir::Wait.until { browser.window.position !=  initial_pos}
 
-          new_pos = browser.window.position
-          expect(new_pos.x).to eq initial_pos.x + 10
-          expect(new_pos.y).to eq initial_pos.y + 10
+            new_pos = browser.window.position
+            expect(new_pos.x).to eq initial_pos.x + 10
+            expect(new_pos.y).to eq initial_pos.y + 10
+          end
         end
       end
 

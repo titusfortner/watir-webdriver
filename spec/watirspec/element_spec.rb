@@ -158,10 +158,12 @@ describe "Element" do
     end
   end
 
-  describe "#focused?" do
-    it "knows if the element is focused" do
-      expect(browser.element(id: 'new_user_first_name')).to be_focused
-      expect(browser.element(id: 'new_user_last_name')).to_not be_focused
+  bug "https://bugzilla.mozilla.org/show_bug.cgi?id=805475", :marionette do
+    describe "#focused?" do
+      it "knows if the element is focused" do
+        expect(browser.element(id: 'new_user_first_name')).to be_focused
+        expect(browser.element(id: 'new_user_last_name')).to_not be_focused
+      end
     end
   end
 
@@ -297,27 +299,31 @@ describe "Element" do
       expect(events).to eq 10
     end
 
-    bug "http://code.google.com/p/chromium/issues/detail?id=93879", :chrome do
-      not_compliant_on :safari do
-        it 'performs key combinations' do
-          receiver.send_keys 'foo'
-          receiver.send_keys [@c, 'a']
-          receiver.send_keys :backspace
-          expect(receiver.value).to be_empty
-          expect(events).to eq 6
-        end
+    bug "Interactions Not Yet Supported", :marionette do
+      bug "http://code.google.com/p/chromium/issues/detail?id=93879", :chrome do
+        not_compliant_on :safari do
+          context 'in combinations' do
+            it 'performs key combinations' do
+              receiver.send_keys 'foo'
+              receiver.send_keys [@c, 'a']
+              receiver.send_keys :backspace
+              expect(receiver.value).to be_empty
+              expect(events).to eq 6
+            end
 
-        it 'performs arbitrary list of key combinations' do
-          receiver.send_keys 'foo'
-          receiver.send_keys [@c, 'a'], [@c, 'x']
-          expect(receiver.value).to be_empty
-          expect(events).to eq 7
-        end
+            it 'performs arbitrary list of key combinations' do
+              receiver.send_keys 'foo'
+              receiver.send_keys [@c, 'a'], [@c, 'x']
+              expect(receiver.value).to be_empty
+              expect(events).to eq 7
+            end
 
-        it 'supports combination of strings and arrays' do
-          receiver.send_keys 'foo', [@c, 'a'], :backspace
-          expect(receiver.value).to be_empty
-          expect(events).to eq 6
+            it 'supports combination of strings and arrays' do
+              receiver.send_keys 'foo', [@c, 'a'], :backspace
+              expect(receiver.value).to be_empty
+              expect(events).to eq 6
+            end
+          end
         end
       end
     end

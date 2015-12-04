@@ -65,7 +65,7 @@ describe "Browser::AfterHooks" do
       expect(@yield).to be true
     end
 
-    not_compliant_on :safari do
+    not_compliant_on :safari, :marionette do
       it "runs after_hooks after Element#double_click" do
         browser.goto(WatirSpec.url_for("non_control_elements.html"))
         @page_after_hook = Proc.new { @yield = browser.title == "Non-control elements" }
@@ -75,7 +75,7 @@ describe "Browser::AfterHooks" do
       end
     end
 
-    not_compliant_on :safari do
+    not_compliant_on :safari, :marionette do
       it "runs after_hooks after Element#right_click" do
         browser.goto(WatirSpec.url_for("right_click.html"))
         @page_after_hook = Proc.new { @yield = browser.title == "Right Click Test" }
@@ -115,15 +115,17 @@ describe "Browser::AfterHooks" do
           end
         end
 
-        it "raises UnhandledAlertError error when running error checks with alert present" do
-          url = WatirSpec.url_for("alerts.html")
-          @page_after_hook = Proc.new { browser.url }
-          browser.after_hooks.add @page_after_hook
-          browser.goto url
-          expect { browser.button(id: "alert").click }.to raise_error(Selenium::WebDriver::Error::UnhandledAlertError)
+        bug "https://bugzilla.mozilla.org/show_bug.cgi?id=1206126", :marionette do
+          it "raises UnhandledAlertError error when running error checks with alert present" do
+            url = WatirSpec.url_for("alerts.html")
+            @page_after_hook = Proc.new { browser.url }
+            browser.after_hooks.add @page_after_hook
+            browser.goto url
+            expect { browser.button(id: "alert").click }.to raise_error(Selenium::WebDriver::Error::UnhandledAlertError)
 
-          not_compliant_on :firefox do
-            browser.alert.ok
+            not_compliant_on :firefox do
+              browser.alert.ok
+            end
           end
         end
 
@@ -148,17 +150,19 @@ describe "Browser::AfterHooks" do
       end
     end
 
-    it "does not raise error when running error checks on closed window" do
-      url = WatirSpec.url_for("window_switching.html")
-      @page_after_hook = Proc.new { browser.url }
-      browser.after_hooks.add @page_after_hook
-      browser.goto url
-      browser.a(id: "open").click
+    bug "https://bugzilla.mozilla.org/show_bug.cgi?id=1128656", :marionette do
+      it "does not raise error when running error checks on closed window" do
+        url = WatirSpec.url_for("window_switching.html")
+        @page_after_hook = Proc.new { browser.url }
+        browser.after_hooks.add @page_after_hook
+        browser.goto url
+        browser.a(id: "open").click
 
-      window = browser.window(title: "closeable window")
-      window.use
-      expect { browser.a(id: "close").click }.to_not raise_error
-      browser.window(index: 0).use
+        window = browser.window(title: "closeable window")
+        window.use
+        expect { browser.a(id: "close").click }.to_not raise_error
+        browser.window(index: 0).use
+      end
     end
   end
 end

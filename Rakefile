@@ -119,20 +119,21 @@ namespace :changes do
 end
 
 task default: [:spec, 'yard:doctest']
+ENV['MARIONETTE_PATH'] = "/opt/developer/firefox-bin"
 
 namespace :spec do
   require 'selenium-webdriver'
 
   desc 'Run specs in all browsers'
   task all_browsers: [:firefox,
-                      :firefox_nightly,
+                      :marionette,
                       :chrome,
                       (:safari if Selenium::WebDriver::Platform.os == :macosx),
                       (:ie if Selenium::WebDriver::Platform.os == :windows),
                       (:edge if Selenium::WebDriver::Platform.os == :windows),
                       :phantomjs].compact
 
-  %w(firefox firefox_nightly chrome safari phantomjs ie edge).each do |browser|
+  %w(firefox marionette chrome safari phantomjs ie edge).each do |browser|
     desc "Run specs in #{browser}"
     task browser do
       ENV['WATIR_WEBDRIVER_BROWSER'] = browser
