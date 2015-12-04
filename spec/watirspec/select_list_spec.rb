@@ -186,7 +186,7 @@ describe "SelectList" do
       expect { browser.select_list(name: 'no_such_name').clear }.to raise_error(Watir::Exception::UnknownObjectException)
     end
 
-    not_compliant_on :safari do
+    not_compliant_on :safari, :phantomjs2 do
       it "fires onchange event" do
         browser.select_list(name: "new_user_languages").clear
         expect(messages.size).to eq 2
@@ -258,23 +258,29 @@ describe "SelectList" do
       expect(browser.select_list(xpath: "//select[@name='new_user_country']").selected_options.map(&:text)).to eq ["Denmark"]
     end
 
-    it "selects multiple items using :name and a String" do
-      browser.select_list(name: "new_user_languages").clear
-      browser.select_list(name: "new_user_languages").select("Danish")
-      browser.select_list(name: "new_user_languages").select("Swedish")
-      expect(browser.select_list(name: "new_user_languages").selected_options.map(&:text)).to eq ["Danish", "Swedish"]
+    bug "New changes to Firefox in 2.49", :firefox do
+      it "selects multiple items using :name and a String" do
+        browser.select_list(name: "new_user_languages").clear
+        browser.select_list(name: "new_user_languages").select("Danish")
+        browser.select_list(name: "new_user_languages").select("Swedish")
+        expect(browser.select_list(name: "new_user_languages").selected_options.map(&:text)).to eq ["Danish", "Swedish"]
+      end
     end
 
-    it "selects multiple items using :name and a Regexp" do
-      browser.select_list(name: "new_user_languages").clear
-      browser.select_list(name: "new_user_languages").select(/ish/)
-      expect(browser.select_list(name: "new_user_languages").selected_options.map(&:text)).to eq ["Danish", "English", "Swedish"]
+    bug "New changes to Firefox in 2.49", :firefox do
+      it "selects multiple items using :name and a Regexp" do
+        browser.select_list(name: "new_user_languages").clear
+        browser.select_list(name: "new_user_languages").select(/ish/)
+        expect(browser.select_list(name: "new_user_languages").selected_options.map(&:text)).to eq ["Danish", "English", "Swedish"]
+      end
     end
 
-    it "selects multiple items using :xpath" do
-      browser.select_list(xpath: "//select[@name='new_user_languages']").clear
-      browser.select_list(xpath: "//select[@name='new_user_languages']").select(/ish/)
-      expect(browser.select_list(xpath: "//select[@name='new_user_languages']").selected_options.map(&:text)).to eq ["Danish", "English", "Swedish"]
+    bug "New changes to Firefox in 2.49", :firefox do
+      it "selects multiple items using :xpath" do
+        browser.select_list(xpath: "//select[@name='new_user_languages']").clear
+        browser.select_list(xpath: "//select[@name='new_user_languages']").select(/ish/)
+        expect(browser.select_list(xpath: "//select[@name='new_user_languages']").selected_options.map(&:text)).to eq ["Danish", "English", "Swedish"]
+      end
     end
 
     it "selects empty options" do
@@ -286,11 +292,13 @@ describe "SelectList" do
       expect(browser.select_list(name: "new_user_languages").select("Danish")).to eq "Danish"
     end
 
-    it "returns the first matching value if there are multiple matches" do
-      expect(browser.select_list(name: "new_user_languages").select(/ish/)).to eq "Danish"
+    bug "New changes to Firefox in 2.49", :firefox do
+      it "returns the first matching value if there are multiple matches" do
+        expect(browser.select_list(name: "new_user_languages").select(/ish/)).to eq "Danish"
+      end
     end
 
-    not_compliant_on :safari do
+    not_compliant_on :safari, :phantomjs2 do
       it "fires onchange event when selecting an item" do
         browser.select_list(id: "new_user_languages").select("Danish")
         expect(messages).to eq ['changed language']

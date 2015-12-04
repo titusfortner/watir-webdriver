@@ -61,7 +61,7 @@ class ImplementationConfig
     matching_browser = remote? ? remote_browser : browser
     browser_instance = WatirSpec.new_browser
     browser_version = browser_instance.driver.capabilities.version
-    matching_browser_with_version = "#{matching_browser}#{browser_version}".to_sym
+    matching_browser_with_version = "#{matching_browser}#{browser_version.to_i}".to_sym
     matching_guards = [
       matching_browser,               # guard only applies to this browser
       matching_browser_with_version,  # guard only applies to this browser with specific version
