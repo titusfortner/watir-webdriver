@@ -6,7 +6,6 @@ Coveralls.wear!
 
 require 'watir-webdriver'
 require 'locator_spec_helper'
-require 'rubygems'
 require 'rspec'
 
 include Watir

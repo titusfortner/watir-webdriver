@@ -124,15 +124,14 @@ namespace :spec do
   require 'selenium-webdriver'
 
   desc 'Run specs in all browsers'
-  task all_browsers: [:firefox,
-                      :firefox_nightly,
-                      :chrome,
+  task all_browsers: [:chrome,
+                      :firefox,
+                      :phantomjs,
                       (:safari if Selenium::WebDriver::Platform.os == :macosx),
                       (:ie if Selenium::WebDriver::Platform.os == :windows),
-                      (:edge if Selenium::WebDriver::Platform.os == :windows),
-                      :phantomjs].compact
+                      (:edge if Selenium::WebDriver::Platform.os == :windows)].compact
 
-  %w(firefox firefox_nightly chrome safari phantomjs ie edge).each do |browser|
+  %w(firefox chrome safari phantomjs ie edge).each do |browser|
     desc "Run specs in #{browser}"
     task browser do
       ENV['WATIR_WEBDRIVER_BROWSER'] = browser

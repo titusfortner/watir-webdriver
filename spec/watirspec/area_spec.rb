@@ -20,7 +20,6 @@ describe "Area" do
       end
 
       expect(browser.area(href: /tables/)).to exist
-
       expect(browser.area(index: 0)).to exist
       expect(browser.area(xpath: "//area[@id='NCE']")).to exist
     end
