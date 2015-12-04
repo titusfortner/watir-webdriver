@@ -147,5 +147,4 @@ describe "Option" do
       expect(browser.select_list(name: "new_user_country").option(text: 'Sweden')).to respond_to(:text)
     end
   end
-
 end

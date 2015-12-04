@@ -14,7 +14,6 @@ describe "SelectList" do
       expect(browser.select_list(id: /new_user_country/)).to exist
       expect(browser.select_list(name: 'new_user_country')).to exist
       expect(browser.select_list(name: /new_user_country/)).to exist
-
       expect(browser.select_list(class: 'country')).to exist
       expect(browser.select_list(class: /country/)).to exist
       expect(browser.select_list(index: 0)).to exist
@@ -359,5 +358,4 @@ describe "SelectList" do
       expect { browser.select_list(name: "new_user_languages").select_value(/no_such_option/) }.to raise_error(Watir::Exception::NoValueFoundException)
     end
   end
-
 end

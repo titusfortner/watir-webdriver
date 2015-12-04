@@ -260,5 +260,4 @@ describe "Radio" do
       expect { browser.radio(xpath: "//input[@id='no_such_id']").set?  }.to raise_error(Watir::Exception::UnknownObjectException)
     end
   end
-
 end

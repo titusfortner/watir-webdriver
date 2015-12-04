@@ -529,5 +529,4 @@ describe Watir::ElementLocator do
       end
     end
   end
-
 end

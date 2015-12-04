@@ -29,6 +29,5 @@ describe Watir::Container do
     it "raises ArgumentError if given > 2 args" do
       expect {@container.public_extract_selector([:how, 'what', 'value'])}.to raise_error(ArgumentError)
     end
-
   end
 end

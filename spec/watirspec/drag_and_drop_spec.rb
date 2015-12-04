@@ -1,6 +1,7 @@
 require_relative 'spec_helper'
 
 describe "Element" do
+
   context "drag and drop" do
     before { browser.goto WatirSpec.url_for("drag_and_drop.html") }
 
@@ -42,6 +43,5 @@ describe "Element" do
         expect(droppable.text).to eq 'Dropped!'
       end
     end
-
   end
 end

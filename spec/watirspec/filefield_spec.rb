@@ -169,5 +169,4 @@ describe "FileField" do
       end
     end
   end
-
 end

@@ -39,5 +39,4 @@ describe "Dds" do
       expect(count).to be > 0
     end
   end
-
 end

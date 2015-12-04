@@ -168,7 +168,5 @@ describe "Link" do
       browser.link(href: /definition_lists.html/).click
       expect(browser.title).to eq 'definition_lists'
     end
-
   end
-
 end

@@ -144,5 +144,4 @@ describe "Table" do
       expect(bodies[1].id).to eq "second"
     end
   end
-
 end

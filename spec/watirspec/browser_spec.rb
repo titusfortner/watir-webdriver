@@ -292,5 +292,4 @@ describe "Browser" do
     browser.goto(WatirSpec.url_for("plain_text"))
     expect { browser.div(id: 'foo').id }.to raise_error(Watir::Exception::UnknownObjectException)
   end
-
 end

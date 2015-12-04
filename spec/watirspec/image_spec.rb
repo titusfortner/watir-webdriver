@@ -12,7 +12,6 @@ describe "Image" do
     it "returns true when the image exists" do
       expect(browser.image(id: 'square')).to exist
       expect(browser.image(id: /square/)).to exist
-
       expect(browser.image(src: 'images/circle.png')).to exist
       expect(browser.image(src: /circle/)).to exist
       expect(browser.image(alt: 'circle')).to exist

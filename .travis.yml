@@ -11,8 +11,8 @@ addons:
 cache: bundler
 notifications:
   recipients:
-    - #p0deje@gmail.com
-    - #jarmo.p@gmail.com
+    #- p0deje@gmail.com
+    #- jarmo.p@gmail.com
     - titusfortner@gmail.com
   #irc: "irc.freenode.net#watir"
 before_script: support/travis.sh

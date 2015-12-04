@@ -391,5 +391,4 @@ not_compliant_on :iphone, :safari do
       end
     end
   end
-
 end

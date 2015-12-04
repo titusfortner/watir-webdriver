@@ -48,6 +48,4 @@ describe "Table" do
       end
     end
   end
-
-
 end

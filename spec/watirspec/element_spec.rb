@@ -189,7 +189,7 @@ describe "Element" do
     end
 
     it "raises UnknownObjectException exception if the element does not exist" do
-      expect {browser.text_field(id: "no_such_id").visible?}.to raise_error(Watir::Exception::UnknownObjectException)
+      expect { browser.text_field(id: "no_such_id").visible? }.to raise_error(Watir::Exception::UnknownObjectException)
     end
 
     it "raises UnknownObjectException exception if the element is stale" do

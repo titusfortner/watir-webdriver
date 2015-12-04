@@ -9,5 +9,4 @@ describe Watir::Browser do
   it "finds elements with single quotes" do
     expect(browser.div(text: "single 'quotes'")).to exist
   end
-
 end

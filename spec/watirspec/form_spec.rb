@@ -70,6 +70,5 @@ describe "Form" do
       expect(messages.size).to eq 1
       expect(messages[0]).to eq "submit"
     end
-
   end
 end

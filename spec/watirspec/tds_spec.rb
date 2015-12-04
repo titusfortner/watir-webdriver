@@ -13,21 +13,6 @@ describe "TableCells" do
     end
   end
 
-  #  describe "#length" do
-  #    it "returns the number of cells" do
-  #      browser.table(id: 'outer').cells.length.to eq 6
-  #      browser.table(id: 'inner').cells.length.to eq 2
-  #    end
-  #  end
-  #
-  #  describe "#[]" do
-  #    it "returns the row at the given index" do
-  #      browser.table(id: 'outer').cells[0].text.to eq "Table 1, Row 1, Cell 1"
-  #      browser.table(id: 'inner').cells[0].text.to eq "Table 2, Row 1, Cell 1"
-  #      browser.table(id: 'outer').cells[6].text.to eq "Table 1, Row 3, Cell 2"
-  #    end
-  #  end
-
   describe "#each" do
     it "iterates through all cells on the page correctly" do
       count = 0
@@ -49,6 +34,5 @@ describe "TableCells" do
         count += 1
       end
     end
-
   end
 end
