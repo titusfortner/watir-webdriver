@@ -7,6 +7,7 @@ class ImplementationConfig
 
   def configure
     @imp.browser_class = Watir::Browser
+    start_remote_server if browser == :remote
     set_browser_args
     set_guard_proc
     add_html_routes
@@ -15,6 +16,36 @@ class ImplementationConfig
   end
 
   private
+
+  def start_remote_server
+    require 'selenium/server'
+
+    @server ||= Selenium::Server.new(remote_server_jar,
+                                     :port       => Selenium::WebDriver::PortProber.above(4444),
+                                     :log        => !!$DEBUG,
+                                     :background => true,
+                                     :timeout    => 60)
+
+
+    if remote_browser == :marionette
+      @server << "-Dwebdriver.firefox.bin=#{ENV['MARIONETTE_PATH']}"
+    end
+    @server.start
+    at_exit { @server.stop }
+  end
+
+  def remote_server_jar
+    require 'open-uri'
+    file_name = "selenium-server-standalone.jar"
+    return file_name if File.exist? file_name
+
+    open(file_name, 'wb') do |file|
+      file << open('http://goo.gl/PJUZfa').read
+    end
+    file_name
+  rescue SocketError
+    raise Watir::Error, "unable to find or download selenium-server-standalone.jar in #{Dir.pwd}"
+  end
 
   def set_browser_args
     args = case browser
@@ -115,7 +146,14 @@ class ImplementationConfig
   end
 
   def remote_args
-    [:remote, {url: ENV["WATIR_WEBDRIVER_REMOTE_URL"] || "http://127.0.0.1:8080"}]
+    url = ENV["WATIR_WEBDRIVER_REMOTE_URL"] || "http://127.0.0.1:#{@server.port}/wd/hub"
+    if remote_browser == :marionette
+      caps = Selenium::WebDriver::Remote::Capabilities.firefox(marionette: true)
+    else
+      caps = Selenium::WebDriver::Remote::Capabilities.send(remote_browser)
+    end
+    [:remote, { url: url,
+                desired_capabilities: caps}]
   end
 
   def add_html_routes
@@ -130,10 +168,7 @@ class ImplementationConfig
   end
 
   def remote_browser
-    remote_browser = WatirSpec.new_browser
-    remote_browser.browser.name
-  ensure
-    remote_browser.close
+    @remote_browser ||= (ENV['REMOTE_BROWSER'] || :firefox).to_sym
   end
 
   def native_events?

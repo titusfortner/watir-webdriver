@@ -119,24 +119,39 @@ namespace :changes do
 end
 
 task default: [:spec, 'yard:doctest']
-ENV['MARIONETTE_PATH'] = "/opt/developer/firefox-bin"
 
 namespace :spec do
   require 'selenium-webdriver'
 
   desc 'Run specs in all browsers'
-  task all_browsers: [:firefox,
-                      :marionette,
-                      :chrome,
+  task all_browsers: [:chrome,
+                      :firefox,
+                      :phantomjs,
+                      :remote_chrome,
+                      :remote_firefox,
+                      :remote_phantomjs,
+                      (:marionette if ENV['MARIONETTE_PATH']),
+                      (:remote_marionette if ENV['MARIONETTE_PATH']),
                       (:safari if Selenium::WebDriver::Platform.os == :macosx),
+                      (:remote_safari if Selenium::WebDriver::Platform.os == :macosx),
                       (:ie if Selenium::WebDriver::Platform.os == :windows),
+                      (:remote_ie if Selenium::WebDriver::Platform.os == :windows),
                       (:edge if Selenium::WebDriver::Platform.os == :windows),
-                      :phantomjs].compact
+                      (:remote_edge if Selenium::WebDriver::Platform.os == :windows)].compact
 
   %w(firefox marionette chrome safari phantomjs ie edge).each do |browser|
     desc "Run specs in #{browser}"
     task browser do
       ENV['WATIR_WEBDRIVER_BROWSER'] = browser
+      Rake::Task['spec'].execute
+    end
+  end
+
+  %w(remote_firefox remote_chrome remote_safari remote_marionette remote_phantomjs remote_ie remote_edge).each do |browser|
+    desc "Run specs in #{browser.tr('_', ' ')}"
+    task browser do
+      ENV['WATIR_WEBDRIVER_BROWSER'] = 'remote'
+      ENV['REMOTE_BROWSER'] =  browser.split('_').last
       Rake::Task['spec'].execute
     end
   end
