@@ -3,15 +3,13 @@ require_relative 'spec_helper'
 not_compliant_on :iphone, :safari do
   describe "Browser" do
     before do
-      url = WatirSpec.url_for("window_switching.html")
-      browser.goto url
+      browser.goto WatirSpec.url_for("window_switching.html")
       browser.a(id: "open").click
       Watir::Wait.until { browser.windows.size == 2 }
     end
 
     after do
-      browser.window(index: 0).use
-      browser.windows[1..-1].each(&:close)
+      ensure_single_window
     end
 
     describe "#windows" do
@@ -101,8 +99,7 @@ not_compliant_on :iphone, :safari do
       end
 
       after do
-        browser.window(index: 0).use
-        browser.windows[1..-1].each(&:close)
+        ensure_single_window
       end
 
       describe "#close" do
@@ -111,6 +108,8 @@ not_compliant_on :iphone, :safari do
           Watir::Wait.until { browser.windows.size == 3 }
 
           browser.window(title: "closeable window").close
+          Watir::Wait.until { browser.windows.size < 3 }
+
           expect(browser.windows.size).to eq 2
         end
 
@@ -120,6 +119,7 @@ not_compliant_on :iphone, :safari do
 
           window = browser.window(title: "closeable window").use
           window.close
+          Watir::Wait.until { browser.windows.size < 3 }
           expect(browser.windows.size).to eq 2
         end
       end
@@ -144,7 +144,6 @@ not_compliant_on :iphone, :safari do
       describe "#title" do
         it "returns the title of the window" do
           titles = browser.windows.map(&:title)
-          expect(titles.size).to eq 2
 
           expect(titles.sort).to eq ["window switching", "closeable window"].sort
         end
@@ -209,8 +208,7 @@ not_compliant_on :iphone, :safari do
       end
 
       after do
-        browser.window(index: 0).use
-        browser.windows[1..-1].each(&:close)
+        ensure_single_window
       end
 
       describe "#exists?" do
@@ -237,6 +235,8 @@ not_compliant_on :iphone, :safari do
           original_window = browser.window
           browser.window(title: "closeable window").use
           original_window.close
+          Watir::Wait.until { browser.windows.size == 1 }
+
           expect(original_window).to_not be_current
         end
       end
@@ -247,6 +247,8 @@ not_compliant_on :iphone, :safari do
           other_window = browser.window(index: 1)
           other_window.use
           original_window.close
+          Watir::Wait.until { browser.windows.size == 1 }
+
           expect(other_window == original_window).to be false
         end
       end
@@ -279,8 +281,7 @@ not_compliant_on :iphone, :safari do
       end
 
       after do
-        browser.window(index: 0).use
-        browser.windows[1..-1].each(&:close)
+        ensure_single_window
       end
 
       describe "#present?" do
@@ -360,6 +361,7 @@ not_compliant_on :iphone, :safari do
           initial_size.width - 10,
           initial_size.height - 10
         )
+        Watir::Wait.until { browser.window.size != initial_size }
 
         new_size = browser.window.size
 
@@ -375,6 +377,7 @@ not_compliant_on :iphone, :safari do
             initial_pos.x + 10,
             initial_pos.y + 10
           )
+          Watir::Wait.until { browser.window.position !=  initial_pos}
 
           new_pos = browser.window.position
           expect(new_pos.x).to eq initial_pos.x + 10

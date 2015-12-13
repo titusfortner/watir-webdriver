@@ -111,14 +111,16 @@ describe "Browser" do
 
   describe "#url" do
     it "returns the current url" do
-      browser.goto(WatirSpec.url_for("non_control_elements.html"))
-      expect(browser.url).to eq WatirSpec.url_for("non_control_elements.html")
+      url = WatirSpec.url_for("non_control_elements.html", needs_server: true)
+      browser.goto(url)
+      expect(browser.url).to eq url
     end
 
     it "always returns top url" do
-      browser.goto(WatirSpec.url_for("frames.html"))
+      url = WatirSpec.url_for("frames.html", needs_server: true)
+      browser.goto(url)
       browser.frame.body.exists? # switches to frame
-      expect(browser.url).to eq WatirSpec.url_for("frames.html")
+      expect(browser.url).to eq url
     end
   end
 
@@ -288,7 +290,7 @@ describe "Browser" do
   end
 
   it "raises UnknownObjectException when trying to access DOM elements on plain/text-page" do
-    browser.goto(WatirSpec.url_for("plain_text"))
+    browser.goto(WatirSpec.url_for("plain_text", needs_server: true))
     expect { browser.div(id: 'foo').id }.to raise_error(Watir::Exception::UnknownObjectException)
   end
 

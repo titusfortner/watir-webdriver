@@ -128,10 +128,9 @@ namespace :spec do
                       :firefox,
                       :phantomjs,
                       (:safari if Selenium::WebDriver::Platform.os == :macosx),
-                      (:ie if Selenium::WebDriver::Platform.os == :windows),
-                      (:edge if Selenium::WebDriver::Platform.os == :windows)].compact
+                      (:ie if Selenium::WebDriver::Platform.os == :windows)].compact
 
-  %w(firefox chrome safari phantomjs ie edge).each do |browser|
+  %w(firefox chrome safari phantomjs ie).each do |browser|
     desc "Run specs in #{browser}"
     task browser do
       ENV['WATIR_WEBDRIVER_BROWSER'] = browser

@@ -144,6 +144,7 @@ not_compliant_on :safari do
 
         btn = browser.button(id: 'btn')
         btn.when_enabled(2).click
+        Watir::Wait.until { !btn.enabled? } # address race condition
         expect(btn.disabled?).to be true
       end
 
@@ -173,7 +174,7 @@ not_compliant_on :safari do
 
       it "can be chained with #when_present" do
         browser.a(id: 'show_and_enable_btn').click
-        browser.button(id: 'btn2').when_present(1).when_enabled(1).click
+        browser.button(id: 'btn2').when_present(2).when_enabled(2).click
 
         expect(browser.button(id: 'btn2')).to exist
         expect(browser.button(id: 'btn2')).to be_enabled
