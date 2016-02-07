@@ -4,10 +4,10 @@
     <title>Watir Project</title>
     <description>Watir stands for Web Application Testing In Ruby. It facilitates the writing of automated tests by mimicking the behavior of a user interacting with a website.
 </description>
-    <link>http://watir.github.io/watir-webdriver//</link>
-    <atom:link href="http://watir.github.io/watir-webdriver//feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Sun, 07 Feb 2016 12:37:06 -0600</pubDate>
-    <lastBuildDate>Sun, 07 Feb 2016 12:37:06 -0600</lastBuildDate>
+    <link>http://titusfortner.github.io/watir-webdriver//</link>
+    <atom:link href="http://titusfortner.github.io/watir-webdriver//feed.xml" rel="self" type="application/rss+xml"/>
+    <pubDate>Sun, 07 Feb 2016 12:43:45 -0600</pubDate>
+    <lastBuildDate>Sun, 07 Feb 2016 12:43:45 -0600</lastBuildDate>
     <generator>Jekyll v3.1.1</generator>
     
   </channel>
