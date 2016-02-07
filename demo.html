@@ -11,7 +11,7 @@
 ">
 
   <link rel="stylesheet" href="/css/main.css">
-  <link rel="canonical" href="http://watir.github.io/watir-webdriver//">
+  <link rel="canonical" href="http://watir.github.io/watir-webdriver//demo.html">
   <link rel="alternate" type="application/rss+xml" title="Watir Project" href="http://watir.github.io/watir-webdriver//feed.xml">
 </head>
 
@@ -55,25 +55,23 @@
       <div class="wrapper">
         <div class="home">
 
-  <h1 class="page-heading">Powered by Selenium!</h1>
+  <h1 class="page-heading">Watir Demonstration</h1>
 
-  <p>Watir, pronounced just like 'water,' is an open-source Ruby library for automating your UI tests.
-    It uses Selenium to 'drive' a browser to take actions the same way people do. It is simple and flexible
-    and allows you to write tests that are easy to read and maintain. .</p>
+  <p>If you have Ruby installed on your machine, just fire up an irb session and type this in:</p>
 
-  <p>Watir interacts with a browser the same way people do.
-    It navigates to pages, clicks links, fills in forms and presses buttons.
+  <p>
+    <figure class="highlight"><pre><code class="language-ruby" data-lang="ruby">    <span class="nb">require</span> <span class="s1">'watir-webdriver'</span>
+    <span class="n">b</span> <span class="o">=</span> <span class="no">Watir</span><span class="o">::</span><span class="no">Browser</span><span class="p">.</span><span class="nf">new</span>
+    <span class="n">b</span><span class="p">.</span><span class="nf">goto</span> <span class="s1">'bit.ly/watir-webdriver-demo'</span>
+    <span class="n">b</span><span class="p">.</span><span class="nf">text_field</span><span class="p">(</span><span class="ss">:id</span> <span class="o">=&gt;</span> <span class="s1">'entry_1000000'</span><span class="p">).</span><span class="nf">set</span> <span class="s1">'your name'</span>
+    <span class="n">b</span><span class="p">.</span><span class="nf">select_list</span><span class="p">(</span><span class="ss">:id</span> <span class="o">=&gt;</span> <span class="s1">'entry_1000001'</span><span class="p">).</span><span class="nf">select</span> <span class="s1">'Ruby'</span>
+    <span class="n">b</span><span class="p">.</span><span class="nf">select_list</span><span class="p">(</span><span class="ss">:id</span> <span class="o">=&gt;</span> <span class="s1">'entry_1000001'</span><span class="p">).</span><span class="nf">selected?</span> <span class="s1">'Ruby'</span>
+    <span class="n">b</span><span class="p">.</span><span class="nf">button</span><span class="p">(</span><span class="ss">:name</span> <span class="o">=&gt;</span> <span class="s1">'submit'</span><span class="p">).</span><span class="nf">click</span>
+    <span class="n">b</span><span class="p">.</span><span class="nf">text</span><span class="p">.</span><span class="nf">include?</span> <span class="s1">'Thank you'</span>
+    </code></pre></figure>
   </p>
 
-  <p><a href="demo.html">Here's a quick demonstration</a> of how easy it is to write commands to drive a browser.</p>
-
-  <p>Check out our <a href="https://github.com/watir/watir-webdriver">code</a> and our
-    <a href="http://www.rubydoc.info/gems/watir-webdriver">documentation</a> </p>
-
-  <br />
-  <br />
-
-  <p class="rss-subscribe">subscribe to our updates <a href="/feed.xml">via RSS</a></p>
+  <p>See how easy that is?</p>
 </div>
 
       </div>
