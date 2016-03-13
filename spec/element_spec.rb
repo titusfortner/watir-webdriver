@@ -55,7 +55,8 @@ describe Watir::Element do
       element = browser.div(:id, 'foo')
       expect(element).to exist
       browser.refresh
-      expect(element.exist?).to be false unless Watir.always_locate?
+      browser.div(:id, 'foo').wait_until_present
+      expect(element.exist?).to eql(Watir.always_locate?)
       element.send :reset!
       expect(element).to exist
     end
@@ -131,17 +132,19 @@ describe Watir::Element do
 
   end
 
-  describe "#hover" do
-    not_compliant_on %i(webdriver internet_explorer),
-                     %i(webdriver iphone),
-                     %i(webdriver safari) do
-      it "should hover over the element" do
-        browser.goto WatirSpec.url_for('hover.html')
-        link = browser.a
+  bug "Interactions Not Yet Supported", :marionette do
+    describe "#hover" do
+      not_compliant_on %i(webdriver internet_explorer),
+                       %i(webdriver iphone),
+                       %i(webdriver safari) do
+        it "should hover over the element" do
+          browser.goto WatirSpec.url_for('hover.html')
+          link = browser.a
 
-        expect(link.style("font-size")).to eq "10px"
-        link.hover
-        expect(link.style("font-size")).to eq "20px"
+          expect(link.style("font-size")).to eq "10px"
+          link.hover
+          expect(link.style("font-size")).to eq "20px"
+        end
       end
     end
   end
