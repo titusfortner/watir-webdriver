@@ -26,6 +26,10 @@ class ImplementationConfig
                                      :background => true,
                                      :timeout    => 60)
 
+    if remote_browser == :marionette
+      @server << "-Dwebdriver.marionette.driver=true"
+    end
+
     @server.start
     at_exit { @server.stop }
   end
@@ -52,6 +56,8 @@ class ImplementationConfig
     args = case browser
            when :firefox
              firefox_args
+           when :marionette
+             marionette_args
            when :chrome
              chrome_args
            when :remote
@@ -100,12 +106,13 @@ class ImplementationConfig
       matching_browser = browser
     end
 
-    browser_instance = WatirSpec.new_browser
-    browser_version = browser_instance.driver.capabilities.version
+    # Remote can't verify version due to: https://github.com/SeleniumHQ/selenium/issues/1150
+    browser_instance = WatirSpec.new_browser unless remote_browser == :marionette
+    browser_version = browser_instance.driver.capabilities.version if browser_instance
 
-    matching_browser_with_version = "#{browser}#{browser_version}".to_sym
-    matching_guards << matching_browser_with_version if browser_version
-    matching_guards << [:webdriver, matching_browser_with_version]
+    matching_browser_with_version = "#{browser}#{browser_version}".to_sym if browser_version
+    matching_guards << matching_browser_with_version if browser_version if browser_version
+    matching_guards << [:webdriver, matching_browser_with_version] if browser_version
 
     matching_guards << matching_browser
     matching_guards << [:webdriver, matching_browser]
@@ -114,7 +121,7 @@ class ImplementationConfig
     if !Selenium::WebDriver::Platform.linux? || ENV['DESKTOP_SESSION']
       # some specs (i.e. Window#maximize) needs a window manager on linux
       matching_guards << [:webdriver, matching_browser, :window_manager]
-      matching_guards << [:webdriver, matching_browser_with_version, :window_manager]
+      matching_guards << [:webdriver, matching_browser_with_version, :window_manager] if browser_version
     end
 
     @imp.guard_proc = lambda { |args|
@@ -125,7 +132,14 @@ class ImplementationConfig
   end
 
   def firefox_args
-    [:firefox, {}]
+    caps = Selenium::WebDriver::Remote::Capabilities.firefox(firefox_binary: ENV['FIREFOX_BINARY'])
+
+    [:firefox, {desired_capabilities: caps}]
+  end
+
+  def marionette_args
+    caps = Selenium::WebDriver::Remote::Capabilities.firefox(:firefox_binary => ENV['FIREFOX_BINARY'])
+    [:marionette, {desired_capabilities: caps, marionette: true}]
   end
 
   def chrome_args
@@ -154,8 +168,11 @@ class ImplementationConfig
 
   def remote_args
     url = ENV["REMOTE_SERVER_URL"] || "http://127.0.0.1:#{@server.port}/wd/hub"
-    remote_browser_name = ENV['REMOTE_BROWSER'].to_sym
-    caps =  Selenium::WebDriver::Remote::Capabilities.send(remote_browser_name)
+    caps = if remote_browser == :marionette
+             Selenium::WebDriver::Remote::Capabilities.firefox(marionette: true)
+           else
+             Selenium::WebDriver::Remote::Capabilities.send(@remote_browser)
+           end
     [:remote, {url: url, desired_capabilities: caps}]
   end
 

@@ -132,6 +132,8 @@ namespace :spec do
                       :remote_chrome,
                       :remote_firefox,
                       :remote_phantomjs,
+                      :marionette,
+                      :remote_marionette,
                       (:safari if Selenium::WebDriver::Platform.os == :macosx),
                       (:remote_safari if Selenium::WebDriver::Platform.os == :macosx),
                       (:ie if Selenium::WebDriver::Platform.os == :windows),
