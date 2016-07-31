@@ -20,7 +20,7 @@ module LocatorSpecHelper
     expect(driver).to receive(:find_element).with(*args)
   end
 
-  def expect_all(*args)
+  def expect_all(*args)gi
     expect(driver).to receive(:find_elements).with(*args)
   end
 
