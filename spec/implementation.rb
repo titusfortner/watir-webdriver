@@ -7,7 +7,7 @@ class ImplementationConfig
 
   def configure
     set_webdriver
-    start_remote_server if remote? && !ENV["REMOTE_SERVER_URL"]
+    start_remote_server if remote? && !ENV['REMOTE_SERVER_URL'] && !ENV['USE_SAUCE']
     set_browser_args
     set_guard_proc
     add_html_routes
@@ -21,10 +21,10 @@ class ImplementationConfig
     require 'selenium/server'
 
     @server ||= Selenium::Server.new(remote_server_jar,
-                                     :port       => Selenium::WebDriver::PortProber.above(4444),
-                                     :log        => !!$DEBUG,
-                                     :background => true,
-                                     :timeout    => 60)
+                                     port: Selenium::WebDriver::PortProber.above(4444),
+                                     log: !!$DEBUG,
+                                     background: true,
+                                     timeout: 60)
 
     @server.start
     at_exit { @server.stop }
@@ -44,20 +44,22 @@ class ImplementationConfig
   end
 
   def set_webdriver
-    @imp.name          = :webdriver
+    @imp.name = :webdriver
     @imp.browser_class = Watir::Browser
   end
 
   def set_browser_args
     args = case browser
-           when :firefox
-             firefox_args
            when :chrome
              chrome_args
            when :remote
-             remote_args
+             if ENV['USE_SAUCE']
+               use_sauce
+             else
+               remote_args
+             end
            else
-             [browser, {}]
+             {}
            end
 
     if ENV['SELECTOR_STATS']
@@ -66,7 +68,7 @@ class ImplementationConfig
       at_exit { listener.report }
     end
 
-    @imp.browser_args = args
+    @imp.browser_args = [browser, args]
   end
 
   def mobile?
@@ -100,8 +102,12 @@ class ImplementationConfig
       matching_browser = browser
     end
 
-    browser_instance = WatirSpec.new_browser
-    browser_version = browser_instance.driver.capabilities.version
+    browser_version = if ENV['USE_SAUCE']
+                        "0.0.1" # TODO - Fix this to make sense
+                      else
+                        browser_instance = WatirSpec.new_browser
+                        browser_instance.driver.capabilities.version
+                      end
 
     matching_browser_with_version = "#{browser}#{browser_version}".to_sym
     matching_guards << matching_browser_with_version if browser_version
@@ -124,14 +130,8 @@ class ImplementationConfig
     browser_instance.close if browser_instance
   end
 
-  def firefox_args
-    [:firefox, {}]
-  end
-
   def chrome_args
-    opts = {
-      args: ["--disable-translate"]
-    }
+    opts = {args: ["--disable-translate"]}
 
     if url = ENV['WATIR_WEBDRIVER_CHROME_SERVER']
       opts[:url] = url
@@ -149,14 +149,31 @@ class ImplementationConfig
       opts[:args] << "--no-sandbox" # https://github.com/travis-ci/travis-ci/issues/938
     end
 
-    [:chrome, opts]
+    opts
   end
 
   def remote_args
     url = ENV["REMOTE_SERVER_URL"] || "http://127.0.0.1:#{@server.port}/wd/hub"
     remote_browser_name = ENV['REMOTE_BROWSER'].to_sym
-    caps =  Selenium::WebDriver::Remote::Capabilities.send(remote_browser_name)
-    [:remote, {url: url, desired_capabilities: caps}]
+    caps = Selenium::WebDriver::Remote::Capabilities.send(remote_browser_name)
+    {url: url, desired_capabilities: caps}
+  end
+
+  def use_sauce
+    WatirSpec.use_remote_server  = true
+    WatirSpec::Server.autorun = false
+    WatirSpec.persistent_browser = false
+
+    sauce_username = 'watir-webdriver'
+    sauce_password = ENV['SAUCE_ACCESS_KEY']
+
+    remote_browser_name = ENV['REMOTE_BROWSER'].to_sym
+    caps = Selenium::WebDriver::Remote::Capabilities.send(remote_browser_name)
+    caps.platform = ENV['SAUCE_PLATFORM'] || 'OS X 10.10'
+    caps[:build] = "#{Time.now.to_i.to_s}"
+
+    {desired_capabilities: caps,
+     url: "http://#{sauce_username}:#{sauce_password}@ondemand.saucelabs.com:80/wd/hub"}
   end
 
   def add_html_routes

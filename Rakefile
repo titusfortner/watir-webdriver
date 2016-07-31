@@ -7,22 +7,30 @@ Bundler::GemHelper.install_tasks
 
 require 'rspec/core/rake_task'
 RSpec::Core::RakeTask.new(:spec) do |spec|
-  spec.ruby_opts  = "-I lib:spec"
+  spec.ruby_opts = "-I lib:spec"
   spec.rspec_opts = %w[--color --require fuubar --format Fuubar]
-  spec.pattern    = 'spec/**/*_spec.rb'
+  spec.pattern = 'spec/**/*_spec.rb'
+end
+
+desc 'Run tests in parallel'
+task :parallel do
+  require 'parallel_tests'
+  puts '===== Executing Tests in parallel'
+  sh "parallel_rspec spec/watirspec/cookies_spec.rb -n 5"
+  puts '====== Parallel execution finished ========='
 end
 
 namespace :spec do
   RSpec::Core::RakeTask.new(:html) do |spec|
-    spec.ruby_opts  = "-I lib:spec"
+    spec.ruby_opts = "-I lib:spec"
     spec.rspec_opts = "--format html --out #{ENV["SPEC_REPORT"] || "specs.html"}"
-    spec.pattern    = 'spec/**/*_spec.rb'
+    spec.pattern = 'spec/**/*_spec.rb'
   end
 end
 
 {
-  html: 'https://www.whatwg.org/specs/web-apps/current-work/',
-  svg: 'http://www.w3.org/TR/SVG2/single-page.html'
+    html: 'https://www.whatwg.org/specs/web-apps/current-work/',
+    svg: 'http://www.w3.org/TR/SVG2/single-page.html'
 }.each do |type, spec_uri|
   namespace type do
     spec_path = "support/#{type}.html"
@@ -122,35 +130,67 @@ load "spec/watirspec/watirspec.rake" if File.exist?("spec/watirspec/watirspec.ra
 
 task default: [:spec, 'yard:doctest']
 
+ENV['USE_SAUCE'] = 'true'
+
 namespace :spec do
   require 'selenium-webdriver'
 
   desc 'Run specs in all browsers'
-  task all_browsers: [:chrome,
-                      :firefox,
-                      :phantomjs,
-                      :remote_chrome,
-                      :remote_firefox,
-                      :remote_phantomjs,
-                      (:safari if Selenium::WebDriver::Platform.os == :macosx),
-                      (:remote_safari if Selenium::WebDriver::Platform.os == :macosx),
-                      (:ie if Selenium::WebDriver::Platform.os == :windows),
-                      (:remote_ie if Selenium::WebDriver::Platform.os == :windows),
-                      (:edge if Selenium::WebDriver::Platform.os == :windows),
-                      (:remote_edge if Selenium::WebDriver::Platform.os == :windows)].compact
+  task all_browsers: [:browsers, :remote_browsers]
+
+  desc 'Run specs locally for all browsers'
+  task browsers: [:chrome,
+                  :firefox,
+                  :phantomjs,
+                  (:safari if Selenium::WebDriver::Platform.os == :macosx),
+                  (:ie if Selenium::WebDriver::Platform.os == :windows),
+                  (:edge if Selenium::WebDriver::Platform.os == :windows)].compact
+
+  desc 'Run specs remotely for all browsers'
+  task foo: [:remote_chrome,
+             :remote_firefox,
+             :remote_phantomjs,
+             (:remote_safari if Selenium::WebDriver::Platform.os == :macosx),
+             (:remote_ie if Selenium::WebDriver::Platform.os == :windows),
+             (:remote_edge if Selenium::WebDriver::Platform.os == :windows)].compact
 
   %w(firefox marionette chrome safari phantomjs ie edge).each do |browser|
     desc "Run specs in #{browser}"
     task browser do
       ENV['WATIR_WEBDRIVER_BROWSER'] = browser
-      Rake::Task['spec'].execute
+      Rake::Task[:spec].execute
     end
 
     desc "Run specs in Remote #{browser}"
     task "remote_#{browser}" do
       ENV['WATIR_WEBDRIVER_BROWSER'] = 'remote'
-      ENV['REMOTE_BROWSER'] =  browser
-      Rake::Task['spec'].execute
+      ENV['REMOTE_BROWSER'] = browser
+      if ENV['USE_SAUCE'] == 'true'
+        Rake::Task[:parallel].execute
+      else
+        Rake::Task[:spec].execute
+      end
     end
+  end
+
+  desc 'Run specs on all platforms on Sauce'
+  task all_platforms: [:osx, :windows, :linux]
+
+  desc 'Run remote browsers on windows'
+  task :windows do
+    ENV['SAUCE_PLATFORM'] = 'Windows 7'
+    Rake::Task["spec:browsers"].invoke
+  end
+
+  desc 'Run remote browsers on osx'
+  task :osx do
+    ENV['SAUCE_PLATFORM'] = 'OS X 10.10'
+    Rake::Task["spec:foo"].invoke
+  end
+
+  desc 'Run remote browsers on linux'
+  task :linux do
+    ENV['SAUCE_PLATFORM'] = 'Linux'
+    Rake::Task["spec:foo"].invoke
   end
 end
