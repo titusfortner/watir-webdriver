@@ -38,21 +38,6 @@ module Watir
       driver.execute_script "return arguments[0].height", @element
     end
 
-    def file_created_date
-      assert_exists
-      raise NotImplementedError, "not currently supported by Selenium"
-    end
-
-    def file_size
-      assert_exists
-      raise NotImplementedError, "not currently supported by Selenium"
-    end
-
-    def save(path)
-      assert_exists
-      raise NotImplementedError, "not currently supported by Selenium"
-    end
-
   end # Image
 
   module Container

@@ -65,25 +65,57 @@ module Watir
       end
     end
 
+    DOM_CHANGES = %w[navigate_to click context_click accept_alert dismiss_alert
+                  double_click submit_element refresh]
+
+    ERROR_CHECKS = DOM_CHANGES.map { |action| "after_#{action}" }
+
     def initialize(browser)
       @browser = browser
-      @error_checks = ErrorChecks.new(self)
+      @watir_actions = {}
     end
 
-    def add(listener_action, action = nil, &block)
-      if block_given?
-        eval("#{listener_action}s") << block
-      elsif action.respond_to? :call
+    def add_error_checker(action)
+      ERROR_CHECKS.each do |listener_action|
         eval("#{listener_action}s") << action
-      else
-        raise ArgumentError, "expected block or object responding to #call"
       end
     end
 
+    def delete_error_checker(action)
+      ERROR_CHECKS.each do |listener_action|
+        eval("#{listener_action}s").delete(action)
+      end
+    end
+
+    # It needs to be an add and delete for Watir
+    # Implementation need not be limited to Selenium calls
+
+    # So what belongs in ErrorCheckers now?
+    # It just holds
+
+
+    def add(watir_method, action = nil, &block)
+      action_array = @watir_actions[watir_method] ||= []
+      if block_given?
+        action_array << block
+      elsif error_check.respond_to? :call
+        action_array << action
+      else
+        raise ArgumentError, "expected block or object responding to #call"
+      end
+      @loaded = true
+    end
     alias_method :<<, :add
 
+    def loaded?
+      @loaded
+    end
+
+    def find(watir_method)
+      @watir_actions[watir_method] || []
+    end
+
     def delete(listener_action, action)
-      eval("#{listener_action}s").delete(action)
     end
 
   end

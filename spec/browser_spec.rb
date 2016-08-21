@@ -4,8 +4,9 @@ describe Watir::Browser do
 
   describe ".new" do
     it "passes the args to Selenium" do
-      expect(Selenium::WebDriver).to receive(:for).with(:firefox, :foo).and_return(nil)
-      Watir::Browser.new(:firefox, :foo)
+      opt = {foo: 'bar'}
+      expect(Selenium::WebDriver).to receive(:for).with(:firefox, opt).and_return(nil)
+      Watir::Browser.new(:firefox, opt)
     end
 
     it "takes a Driver instance as argument" do

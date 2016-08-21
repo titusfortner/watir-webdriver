@@ -43,8 +43,10 @@ module Watir
     def initialize(browser = :chrome, *args)
       unless args.find {|a| a[:listener]}
         @listener = Watir::Listener.new(self)
-        args.last.merge!(listener: @listener)
-        @error_checks = @listener.error_checks
+        opt = args.last || {}
+        opt.merge!(listener: @listener)
+        @error_checks = ErrorChecks.new(@listener)
+        ElementPreconditions.load_static(@listener)
       end
 
       case browser

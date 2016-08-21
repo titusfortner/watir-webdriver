@@ -8,7 +8,6 @@ module Watir
     #
 
     def set(*args)
-      clear
       element_call { @element.send_keys(*args) }
     end
     alias_method :value=, :set
@@ -29,8 +28,6 @@ module Watir
     #
 
     def clear
-      assert_exists
-      assert_writable
       element_call { @element.clear }
     end
 

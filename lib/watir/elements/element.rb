@@ -78,7 +78,6 @@ module Watir
     #
 
     def text
-      assert_exists
       element_call { @element.text }
     end
 
@@ -89,7 +88,6 @@ module Watir
     #
 
     def tag_name
-      assert_exists
       element_call { @element.tag_name.downcase }
     end
 
@@ -111,9 +109,6 @@ module Watir
     #
 
     def click(*modifiers)
-      assert_exists
-      assert_enabled
-
       element_call do
         if modifiers.any?
           assert_has_input_devices_for "click(#{modifiers.join ', '})"
@@ -139,9 +134,6 @@ module Watir
     #
 
     def double_click
-      assert_exists
-      assert_has_input_devices_for :double_click
-
       element_call { driver.action.double_click(@element).perform }
     end
 
@@ -154,9 +146,6 @@ module Watir
     #
 
     def right_click
-      assert_exists
-      assert_has_input_devices_for :right_click
-
       element_call { driver.action.context_click(@element).perform }
     end
 
@@ -169,9 +158,6 @@ module Watir
     #
 
     def hover
-      assert_exists
-      assert_has_input_devices_for :hover
-
       element_call { driver.action.move_to(@element).perform }
     end
 
@@ -187,9 +173,6 @@ module Watir
 
     def drag_and_drop_on(other)
       assert_is_element other
-      assert_exists
-      assert_has_input_devices_for :drag_and_drop_on
-
       element_call do
         driver.action.
                drag_and_drop(@element, other.wd).
@@ -209,9 +192,6 @@ module Watir
     #
 
     def drag_and_drop_by(right_by, down_by)
-      assert_exists
-      assert_has_input_devices_for :drag_and_drop_by
-
       element_call do
         driver.action.
                drag_and_drop_by(@element, right_by, down_by).
@@ -264,7 +244,6 @@ module Watir
     #
 
     def attribute_value(attribute_name)
-      assert_exists
       element_call { @element.attribute attribute_name }
     end
 
@@ -279,7 +258,6 @@ module Watir
     #
 
     def outer_html
-      assert_exists
       element_call { execute_atom(:getOuterHtml, @element) }.strip
     end
 
@@ -296,7 +274,6 @@ module Watir
     #
 
     def inner_html
-      assert_exists
       element_call { execute_atom(:getInnerHtml, @element) }.strip
     end
 
@@ -310,8 +287,6 @@ module Watir
     #
 
     def send_keys(*args)
-      assert_exists
-      assert_writable
       element_call { @element.send_keys(*args) }
     end
 
@@ -323,7 +298,6 @@ module Watir
     #
 
     def focus
-      assert_exists
       element_call { driver.execute_script "return arguments[0].focus()", @element }
     end
 
@@ -334,7 +308,6 @@ module Watir
     #
 
     def focused?
-      assert_exists
       element_call { @element == driver.switch_to.active_element }
     end
 
@@ -351,9 +324,7 @@ module Watir
     #
 
     def fire_event(event_name)
-      assert_exists
       event_name = event_name.to_s.sub(/^on/, '').downcase
-
       element_call { execute_atom :fireEvent, @element, event_name }
     end
 
@@ -362,8 +333,6 @@ module Watir
     #
 
     def parent
-      assert_exists
-
       e = element_call { execute_atom :getParentElement, @element }
 
       if e.kind_of?(Selenium::WebDriver::Element)
@@ -395,7 +364,6 @@ module Watir
     #
 
     def visible?
-      assert_exists
       element_call { @element.displayed? }
     end
 
@@ -406,7 +374,6 @@ module Watir
     #
 
     def enabled?
-      assert_exists
       element_call { @element.enabled? }
     end
 
@@ -438,7 +405,6 @@ module Watir
 
     def style(property = nil)
       if property
-        assert_exists
         element_call { @element.style property }
       else
         attribute_value("style").to_s.strip
@@ -581,7 +547,6 @@ module Watir
     end
 
     def attribute?(attribute)
-      assert_exists
       element_call do
         !!execute_atom(:getAttribute, @element, attribute.to_s.downcase)
       end
@@ -602,6 +567,8 @@ module Watir
     end
 
     def assert_has_input_devices_for(name)
+      assert_exists
+
       unless driver.kind_of? Selenium::WebDriver::DriverExtensions::HasInputDevices
         raise NotImplementedError, "#{self.class}##{name} is not supported by this driver"
       end
@@ -614,6 +581,7 @@ module Watir
     end
 
     def element_call
+      ElementPreconditions.new(browser.listener).execute(self)
       yield
     rescue Selenium::WebDriver::Error::StaleElementReferenceError
       if Watir.always_locate? && !@selector[:element]
