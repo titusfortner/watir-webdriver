@@ -10,7 +10,7 @@ module Watir
     include Waitable
 
     attr_reader :driver
-    attr_reader :after_hooks
+    attr_reader :error_checks, :listener
     alias_method :wd, :driver # ensures duck typing with Watir::Element
 
     class << self
@@ -42,8 +42,9 @@ module Watir
 
     def initialize(browser = :chrome, *args)
       unless args.find {|a| a[:listener]}
-        @after_hooks = AfterHooks.new(self)
-        args.last.merge!(listener: @after_hooks)
+        @listener = Watir::Listener.new(self)
+        args.last.merge!(listener: @listener)
+        @error_checks = @listener.error_checks
       end
 
       case browser

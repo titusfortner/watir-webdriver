@@ -11,7 +11,7 @@ require 'watir/container'
 require 'watir/cookies'
 require 'watir/browser'
 require 'watir/screenshot'
-require 'watir/after_hooks'
+require 'watir/error_checkers'
 
 module Watir
   @always_locate = true
@@ -123,5 +123,6 @@ require 'watir/elements/text_field'
 
 require 'watir/locators'
 require 'watir/aliases'
+require 'watir/listener'
 
 Watir.tag_to_class.freeze
