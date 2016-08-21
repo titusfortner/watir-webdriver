@@ -1,3 +1,22 @@
+# TODO - remove this when implemented in Selenium
+module Selenium
+  module WebDriver
+    module Support
+      class EventFiringBridge
+
+        %i(accept_alert dismiss_alert double_click context_click
+            submit_element refresh).each do |method|
+          define_method(method) do |*args|
+            dispatch(method, driver) { @delegate.send method, *args }
+          end
+        end
+        alias_method :right_click, :context_click
+
+      end
+    end
+  end
+end
+
 module Watir
 
   #
@@ -10,7 +29,7 @@ module Watir
   #   4. Alert closing.
   #
 
-  class AfterHooks
+  class AfterHooks < Selenium::WebDriver::Support::AbstractEventListener
     include Enumerable
 
     def initialize(browser)
@@ -65,9 +84,16 @@ module Watir
     # Runs after hooks.
     #
 
-    def run
-      if @after_hooks.any? && @browser.window.present?
-        each { |after_hook| after_hook.call(@browser) }
+    %w[navigate_to click context_click accept_alert dismiss_alert double_click right_click
+       submit_element refresh].each do |method|
+      define_method("after_#{method}") do |*args|
+        if @after_hooks.any? && @browser.window.present?
+          each { |after_hook| after_hook.call(@browser) }
+        end
+      end
+      # TODO - remove this when implemented in Selenium
+      define_method("before_#{method}") do |*args|
+        # Do nothing
       end
     end
 

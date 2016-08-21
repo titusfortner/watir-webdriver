@@ -41,6 +41,11 @@ module Watir
     #
 
     def initialize(browser = :chrome, *args)
+      unless args.find {|a| a[:listener]}
+        @after_hooks = AfterHooks.new(self)
+        args.last.merge!(listener: @after_hooks)
+      end
+
       case browser
       when ::Symbol, String
         @driver = Selenium::WebDriver.for browser.to_sym, *args
@@ -50,7 +55,6 @@ module Watir
         raise ArgumentError, "expected Symbol or Selenium::WebDriver::Driver, got #{browser.class}"
       end
 
-      @after_hooks = AfterHooks.new(self)
       @current_frame  = nil
       @closed = false
     end
@@ -75,7 +79,6 @@ module Watir
       uri = "http://#{uri}" unless uri =~ URI.regexp
 
       @driver.navigate.to uri
-      @after_hooks.run
 
       uri
     end
@@ -200,7 +203,6 @@ module Watir
 
     def refresh
       @driver.navigate.refresh
-      @after_hooks.run
     end
 
     #
