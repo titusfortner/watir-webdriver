@@ -44,8 +44,8 @@ module Watir
                       find_first_by_multiple
                     end
 
-          # We don't need to validate the element if we built the xpath ourselves, unless it is an Input
-          return element unless @selector.key?(:xpath) || @selector.key?(:css) || @selector.key?(:type)
+          # Validation not necessary if watir builds the xpath
+          return element unless @selector.key?(:xpath) || @selector.key?(:css)
           element_validator.validate(element, @selector) if element
         rescue Selenium::WebDriver::Error::NoSuchElementError, Selenium::WebDriver::Error::StaleElementReferenceError
           nil
