@@ -1,5 +1,5 @@
 dist: trusty
-sudo: false
+sudo: require
 rvm:
   - 2.2.7
   - 2.3.4
@@ -24,4 +24,3 @@ env:
   - RAKE_TASK=spec:chrome
   - RAKE_TASK=spec:chrome RELAXED_LOCATE=false
   - RAKE_TASK=yard:doctest
-
