@@ -1,17 +1,15 @@
+sudo: false
 dist: trusty
-sudo: require
 rvm:
   - 2.2.7
   - 2.3.4
   - 2.4.1
 addons:
   firefox: latest
-  apt:
-    packages:
-      - unzip
-      - libxss1
-      - google-chrome-stable
-cache: bundler
+  chrome: stable
+cache:
+  directories:
+  - $HOME/.webdrivers
 notifications:
   recipients:
     - p0deje@gmail.com
