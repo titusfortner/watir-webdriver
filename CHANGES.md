@@ -1,3 +1,7 @@
+### 6.3.0 (Unreleased)
+
+* Significant performance updates
+
 ### 6.2.2 (Unreleased)
 
 * Allow locating elements by attribute presence/absence (#345)
