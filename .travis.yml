@@ -1,5 +1,5 @@
 dist: trusty
-sudo: false
+sudo: true
 rvm:
   - 2.2.7
   - 2.3.4
