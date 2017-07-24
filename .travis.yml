@@ -3,17 +3,6 @@
 # use host's /dev/shm.
 sudo: required
 dist: trusty
-rvm:
-  - 2.2.7
-  - 2.3.4
-  - 2.4.1
-addons:
-  firefox: latest
-  apt:
-    packages:
-      - unzip
-      - libxss1
-      - google-chrome-stable
 cache: bundler
 notifications:
   recipients:
