@@ -83,3 +83,4 @@ matrix:
       - env: RAKE_TASK=spec:remote_ff_legacy
         <<: *four
         <<: *firefox-legacy
+
