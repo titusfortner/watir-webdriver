@@ -28,7 +28,7 @@ _browsers:
       firefox: latest
   firefox-legacy: &firefox-legacy
     addons:
-      firefox: firefox: "45.9"
+      firefox: "45.9"
   firefox-nightly: &firefox-nightly
     addons:
       firefox: latest-nightly
