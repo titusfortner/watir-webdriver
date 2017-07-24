@@ -23,6 +23,9 @@ _browsers:
 
 matrix:
   include:
+      - env: RAKE_TASK=yard:doctest
+        <<: *four
+        <<: *chrome
       - env: RAKE_TASK=spec:chrome
         <<: *four
         <<: *chrome
