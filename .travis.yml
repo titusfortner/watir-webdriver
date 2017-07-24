@@ -12,11 +12,26 @@ before_script:
 script: bundle exec rake $RAKE_TASK
 
 _version:
+  two: &two
+    language: ruby
+    rvm: 2.2.7
+  three: &three
+    language: ruby
+    rvm: 2.3.4
   four: &four
     language: ruby
     rvm: 2.4.1
 
 _browsers:
+  firefox: &firefox-latest
+    addons:
+      firefox: latest
+  firefox-legacy: &firefox-legacy
+    addons:
+      firefox: "45.9"
+  firefox-nightly: &firefox-nightly
+    addons:
+      firefox: latest-nightly
   chrome: &chrome
      addons:
        chrome: stable
@@ -25,6 +40,12 @@ matrix:
   include:
       - env: RAKE_TASK=yard:doctest
         <<: *four
+        <<: *chrome
+      - env: RAKE_TASK=spec:chrome
+        <<: *two
+        <<: *chrome
+      - env: RAKE_TASK=spec:chrome
+        <<: *three
         <<: *chrome
       - env: RAKE_TASK=spec:chrome
         <<: *four
