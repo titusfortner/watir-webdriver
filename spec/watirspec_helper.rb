@@ -21,13 +21,11 @@ class ImplementationConfig
     set_guard_proc
   end
 
-  private
-
-  def start_remote_server
+  def start_remote_server(port = 4444)
     require 'selenium/server'
 
     @server ||= Selenium::Server.new(remote_server_jar,
-                                     port: Selenium::WebDriver::PortProber.above(4444),
+                                     port: Selenium::WebDriver::PortProber.above(port),
                                      log: !!$DEBUG,
                                      background: true,
                                      timeout: 60)
@@ -35,6 +33,8 @@ class ImplementationConfig
     @server.start
     at_exit { @server.stop }
   end
+
+  private
 
   def remote_server_jar
     if ENV['LOCAL_SELENIUM']
