@@ -44,7 +44,8 @@ module Watir
     def initialize(browser = :chrome, *args)
       case browser
       when ::Symbol, String
-        @driver = Selenium::WebDriver.for browser.to_sym, *args
+        opts = process_capabilities(browser.to_sym, *args)
+        @driver = Selenium::WebDriver.for browser.to_sym, opts
       when Selenium::WebDriver::Driver
         @driver = browser
       else
@@ -338,6 +339,48 @@ module Watir
 
     def wrap_element(scope, element)
       Watir.element_class_for(element.tag_name.downcase).new(scope, element: element)
+    end
+
+    def process_capabilities(browser, watir_opts={})
+      url = watir_opts.delete(:url)
+      client_timeout = watir_opts.delete(:client_timeout)
+      open_timeout = watir_opts.delete(:open_timeout)
+      read_timeout = watir_opts.delete(:read_timeout)
+
+      http_client = watir_opts.delete(:http_client)
+
+      %i(open_timeout read_timeout client_timeout).each do |t|
+        next if http_client.nil? || !respond_to?(t)
+        warn "You can now pass #{t} value directly into Watir::Browser opt without needing to use :http_client"
+      end
+
+      http_client ||= Selenium::WebDriver::Remote::Http::Default.new
+
+      http_client.timeout = client_timeout if client_timeout
+      http_client.open_timeout = open_timeout if open_timeout
+      http_client.read_timeout = read_timeout if read_timeout
+
+      selenium_opts = {}
+      selenium_opts[:url] = url if url
+      selenium_opts[:http_client] = http_client if http_client
+      selenium_opts[:service_args] = watir_opts.delete(:service_args) if watir_opts.key?(:service_args)
+      selenium_opts[:port] = watir_opts.delete(:port) if watir_opts.key?(:port)
+      selenium_opts[:firefox_options] = watir_opts.delete(:firefox_options) if watir_opts.key?(:firefox_options)
+      selenium_opts[:chrome_options] = watir_opts.delete(:chrome_options) if watir_opts.key?(:chrome_options)
+
+      browser = watir_opts.delete(:browser) if browser == :remote
+      return selenium_opts if browser.nil?
+
+      caps = watir_opts.delete(:desired_capabilities)
+      if caps
+        warn 'You can now pass values directly into Watir::Browser opt without needing to use :desired_capabilities'
+        selenium_opts.merge!(watir_opts)
+      else
+        caps = Selenium::WebDriver::Remote::Capabilities.send browser, watir_opts
+      end
+
+      selenium_opts[:desired_capabilities] = caps
+      selenium_opts
     end
 
   end # Browser
