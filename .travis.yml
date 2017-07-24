@@ -50,3 +50,18 @@ matrix:
       - env: RAKE_TASK=spec:chrome
         <<: *four
         <<: *chrome
+      - env: RAKE_TASK=spec:chrome RELAXED_LOCATE=false
+        <<: *four
+        <<: *chrome
+      - env: RAKE_TASK=spec:firefox
+        <<: *two
+        <<: *firefox
+      - env: RAKE_TASK=spec:firefox
+        <<: *three
+        <<: *firefox
+      - env: RAKE_TASK=spec:firefox
+        <<: *four
+        <<: *firefox
+      - env: RAKE_TASK=spec:firefox RELAXED_LOCATE=false
+        <<: *four
+        <<: *firefox
