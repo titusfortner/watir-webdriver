@@ -5,7 +5,10 @@ describe Watir::Browser do
   not_compliant_on :remote do
     describe ".new" do
       let(:url) { "http://localhost:4544/wd/hub/" }
-      before(:all) { ImplementationConfig.new(nil).start_remote_server(4544) }
+      before(:all) do
+        require 'watirspec/remote_server'
+        WatirSpec::RemoteServer.new.start(4544)
+      end
 
       it "uses remote client based on provided url" do
         new_browser = Watir::Browser.new(:chrome, url: url)

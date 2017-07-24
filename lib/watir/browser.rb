@@ -350,7 +350,7 @@ module Watir
       http_client = watir_opts.delete(:http_client)
 
       %i(open_timeout read_timeout client_timeout).each do |t|
-        next if http_client.nil? || t.nil?
+        next if http_client.nil? || !respond_to?(t)
         warn "You can now pass #{t} value directly into Watir::Browser opt without needing to use :http_client"
       end
 

@@ -147,8 +147,13 @@ namespace :spec do
 
     desc "Run specs in Remote #{browser}"
     task "remote_#{browser}" do
-      ENV['WATIR_BROWSER'] = 'remote'
-      ENV['REMOTE_BROWSER'] = browser
+      require 'watirspec/remote_server'
+
+      remote_server = WatirSpec::RemoteServer.new
+      remote_server.start
+      ENV["REMOTE_SERVER_URL"] = remote_server.server.webdriver_url
+
+      ENV['WATIR_BROWSER'] = browser
       Rake::Task[:spec].execute
     end
   end
