@@ -65,3 +65,21 @@ matrix:
       - env: RAKE_TASK=spec:firefox RELAXED_LOCATE=false
         <<: *four
         <<: *firefox-latest
+      - env: RAKE_TASK=spec:firefox_legacy
+        <<: *two
+        <<: *firefox-legacy
+      - env: RAKE_TASK=spec:firefox_legacy
+        <<: *three
+        <<: *firefox-legacy
+      - env: RAKE_TASK=spec:firefox_legacy
+        <<: *four
+        <<: *firefox-legacy
+      - env: RAKE_TASK=spec:remote_chrome
+        <<: *four
+        <<: *chrome
+      - env: RAKE_TASK=spec:remote_firefox
+        <<: *four
+        <<: *firefox-latest
+      - env: RAKE_TASK=spec:remote_ff_legacy
+        <<: *four
+        <<: *firefox-legacy
