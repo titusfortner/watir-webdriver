@@ -55,7 +55,6 @@ describe Watir::Browser do
       end
 
       it "accepts browser options for chrome" do
-        Selenium::WebDriver.logger.level = :info
         opts = {args: ['--user-agent=foo;bar']}
 
         new_browser = Watir::Browser.new(:chrome, options: opts)
