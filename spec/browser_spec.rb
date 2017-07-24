@@ -2,7 +2,7 @@ require 'watirspec_helper'
 
 describe Watir::Browser do
 
-  not_compliant_on :remote do
+  compliant_on :chrome do
     describe ".new" do
       let(:url) { "http://localhost:4544/wd/hub/" }
       before(:all) do
@@ -34,64 +34,37 @@ describe Watir::Browser do
       end
 
       it "accepts Remote::Capabilities instance as :desired_capabilities" do
-        caps = Selenium::WebDriver::Remote::Capabilities.firefox(platform: :mac)
-        new_browser = Watir::Browser.new(:firefox, url: url, desired_capabilities: caps)
-        expect(new_browser.name).to eq :firefox
-        expect(new_browser.wd.capabilities['platformName']).to eq 'darwin'
+        caps = Selenium::WebDriver::Remote::Capabilities.chrome('chromeOptions' => {args: ['--user-agent=foo;bar']})
+        new_browser = Watir::Browser.new(:chrome, url: url, desired_capabilities: caps)
+
+        ua = new_browser.execute_script 'return window.navigator.userAgent'
+        expect(ua).to eq('foo;bar')
+
         new_browser.close
       end
 
-      xit "accepts individual driver capabilities" do
-        caps = Selenium::WebDriver::Remote::Capabilities.chrome(browser_version: '59',
-                                                                platform_name: :mac,
-                                                                proxy: nil)
+      it "accepts individual driver capabilities" do
+        chrome_options = {'chromeOptions' => {args: ['--user-agent=foo;bar']}}
 
-       # allow_any_instance_of(Selenium::WebDriver::Remote::Bridge).to receive(:create_session).with(caps)
+        new_browser = Watir::Browser.new(:chrome, chrome_options)
 
-        opts = {url: url,
-                browser_version: '59',
-                platform_name: :mac,
-                #  accept_insecure_certs: true,
-                #  set_window_rect: true,
-                #  page_load_strategy: :eager,
-                proxy: nil,
-                # implicit_timeout: 1,
-                # page_load_timeout: 2,
-                # script_timeout: 3,
-                # unhandled_prompt_behavior: :accept}
-        }
-        Selenium::WebDriver.logger.level = :debug
-        new_browser = Watir::Browser.new(:chrome, opts)
-        capabilities = new_browser.driver.capabilities
-        expect(capabilities.browser).to eq :chrome
-        expect(capabilities.browser_version).to eq '59'
-        expect(capabilities.platform_name).to eq 'darwin'
-        #  expect(capabilities.accept_insecure_certs).to eq true
-        #  expect(capabilities.set_window_rect).to eq :true
-        #  expect(capabilities.page_load_strategy).to eq :eager
-        expect(capabilities.proxy).to eq nil
-        # expect(capabilities.timeouts).to eq({implicit_timeout: 1,
-        #                                     page_load_timeout: 2,
-        #                                    script_timeout: 3})
-        expect(capabilities.unhandled_prompt_behavior).to eq :accept
+        ua = new_browser.execute_script 'return window.navigator.userAgent'
+        expect(ua).to eq('foo;bar')
+
         new_browser.close
       end
 
       it "accepts browser options for chrome" do
-        allow(File).to receive(:file?).and_return(true)
-
-        opts = {args: ['foo', 'bar'],
-                binary: '/path/to/chrome',
-                prefs: {foo: 'bar'},
-                extensions: ['/foo.crx'],
-                options: {foo: :bar},
-                emulation: {c: 3},
-                encoded_extensions: ['foo']}
+        Selenium::WebDriver.logger.level = :info
+        opts = {args: ['--user-agent=foo;bar']}
 
         new_browser = Watir::Browser.new(:chrome, options: opts)
+
+        ua = new_browser.execute_script 'return window.navigator.userAgent'
+        expect(ua).to eq('foo;bar')
+
         new_browser.close
       end
-
 
       it "takes a driver instance as argument" do
         mock_driver = double(Selenium::WebDriver::Driver)

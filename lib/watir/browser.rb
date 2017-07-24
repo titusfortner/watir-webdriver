@@ -365,8 +365,15 @@ module Watir
       selenium_opts[:http_client] = http_client if http_client
       selenium_opts[:service_args] = watir_opts.delete(:service_args) if watir_opts.key?(:service_args)
       selenium_opts[:port] = watir_opts.delete(:port) if watir_opts.key?(:port)
-      selenium_opts[:firefox_options] = watir_opts.delete(:firefox_options) if watir_opts.key?(:firefox_options)
-      selenium_opts[:chrome_options] = watir_opts.delete(:chrome_options) if watir_opts.key?(:chrome_options)
+      if watir_opts.key?(:options)
+        opts = case browser
+               when :chrome
+                 Selenium::WebDriver::Chrome::Options.new(watir_opts.delete(:options))
+               when :firefox
+                 Selenium::WebDriver::Firefox::Options.new(watir_opts.delete(:options))
+               end
+        selenium_opts[:options] = opts
+      end
 
       browser = watir_opts.delete(:browser) if browser == :remote
       return selenium_opts if browser.nil?
