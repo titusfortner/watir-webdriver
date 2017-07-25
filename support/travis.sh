@@ -12,4 +12,5 @@ fi
 
 if [[ "$RAKE_TASK" = "spec:remote_chrome" ]] || [[ "$RAKE_TASK" = "spec:remote_firefox" ]] || [[ "$RAKE_TASK" = "spec:remote_ff_legacy" ]]; then
   curl -L -O "https://goo.gl/s4o9Vx"
+  echo $PWD
 fi

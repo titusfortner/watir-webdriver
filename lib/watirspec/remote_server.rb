@@ -23,12 +23,16 @@ module WatirSpec
       end
 
       if File.exist?(ENV['REMOTE_SERVER_BINARY'] || '')
+        warn "found it specified at #{ENV['REMOTE_SERVER_BINARY']}"
         ENV['REMOTE_SERVER_BINARY']
       elsif ENV['LOCAL_SELENIUM'] && File.exists?(local)
+        warn "found it local at #{ENV['LOCAL_SELENIUM']}"
         local
       elsif !Dir.glob('*selenium*.jar').empty?
+        warn "found it local already}"
         Dir.glob('*selenium*.jar').first
       else
+        warn "downloading it to #{Dir.pwd}"
         Selenium::Server.download :latest
       end
     rescue SocketError
