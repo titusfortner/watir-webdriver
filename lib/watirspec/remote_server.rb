@@ -12,6 +12,8 @@ module WatirSpec
                                        timeout: 60)
 
       @server.start
+
+      puts Nokogiri::XML.parse(OpenURI.open_uri(@server.webdriver_url)).text
       at_exit { @server.stop }
     end
 
