@@ -18,8 +18,7 @@ module WatirSpec
     private
 
     def jar
-      warn "locating JAR warn"
-      puts "locating JAR puts"
+      warn "locating JAR"
       if ENV['LOCAL_SELENIUM']
         local = File.expand_path('../selenium/buck-out/gen/java/server/src/org/openqa/grid/selenium/selenium.jar')
       end
