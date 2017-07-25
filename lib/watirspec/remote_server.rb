@@ -1,3 +1,5 @@
+require 'nokogiri'
+
 module WatirSpec
   class RemoteServer
     attr_reader :server
@@ -13,6 +15,7 @@ module WatirSpec
 
       @server.start
 
+      puts @server.webdriver_url
       puts Nokogiri::XML.parse(OpenURI.open_uri(@server.webdriver_url)).text
       at_exit { @server.stop }
     end
