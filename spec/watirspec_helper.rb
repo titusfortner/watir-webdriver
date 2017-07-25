@@ -124,6 +124,7 @@ class RemoteConfig < LocalConfig
     ENV["REMOTE_SERVER_URL"] ||= begin
       require 'watirspec/remote_server'
 
+      puts "Staring server inside RemoteConfig"
       remote_server = WatirSpec::RemoteServer.new.tap(&:start)
       remote_server.server.webdriver_url
     end
@@ -131,6 +132,7 @@ class RemoteConfig < LocalConfig
   end
 
   def add_guards
+    puts 'adding remote guards'
     matching_guards = super
     matching_guards << :remote
     matching_guards << [:remote, browser]
@@ -144,8 +146,10 @@ class RemoteConfig < LocalConfig
 end
 
 if ENV["REMOTE_SERVER_URL"]
+  puts "Running Remote Config"
   RemoteConfig.new(WatirSpec.implementation).configure
 else
+  puts "Running Local Config"
   LocalConfig.new(WatirSpec.implementation).configure
 end
 WatirSpec.run!
