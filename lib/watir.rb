@@ -1,5 +1,5 @@
 require 'selenium-webdriver'
-
+Selenium::WebDriver.logger.level = :debug
 require 'watir/legacy_wait'
 require 'watir/wait'
 require 'watir/exception'
