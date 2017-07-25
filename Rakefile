@@ -149,6 +149,7 @@ namespace :spec do
     task "remote_#{browser}" do
       require 'watirspec/remote_server'
 
+      warn "Starting Remote Server"
       remote_server = WatirSpec::RemoteServer.new
       remote_server.start
       ENV["REMOTE_SERVER_URL"] = remote_server.server.webdriver_url
