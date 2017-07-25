@@ -154,6 +154,7 @@ namespace :spec do
       remote_server.start
       ENV["REMOTE_SERVER_URL"] = remote_server.server.webdriver_url
 
+      system "chromedriver --version"
       ENV['WATIR_BROWSER'] = browser
       Rake::Task[:spec].execute
     end
