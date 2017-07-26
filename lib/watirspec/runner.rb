@@ -35,8 +35,13 @@ module WatirSpec
         config.include(BrowserHelper)
         config.include(MessagesHelper)
 
-        $browser = WatirSpec.new_browser
-        at_exit { $browser.close }
+        config.before(:suite) do
+          $browser = WatirSpec.new_browser
+        end
+
+        config.after(:suite) do
+          $browser.close
+        end
       end
     end
 
