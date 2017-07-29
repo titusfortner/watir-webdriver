@@ -40,6 +40,39 @@ module Watir
     alias_method :size, :length
 
     #
+    # Returns true if no elements are found
+    #
+    # @example
+    #   browser.select_list(name: "new_user_languages").options(class: 'not_here').empty?
+    #   #=> true
+    #
+    # @example
+    #   browser.select_list(name: "new_user_languages").options(id: 'danish').empty?
+    #   #=> false
+    #
+
+    def empty?
+      length == 0
+    end
+
+    #
+    # Returns true if no elements are found
+    #
+    # @example
+    #   browser.select_list(name: "new_user_languages").options(class: 'not_here').exist?
+    #   #=> false
+    #
+    # @example
+    #   browser.select_list(name: "new_user_languages").options(id: 'danish').exist?
+    #   #=> true
+    #
+
+    def exist?
+      !empty?
+    end
+    alias_method :exists?, :exist?
+
+    #
     # Get the element at the given index.
     #
     # Also note that because of Watir's lazy loading, this will return an Element
@@ -96,6 +129,7 @@ module Watir
             end
           end
     end
+    alias_method :locate, :to_a
 
     #
     # Returns true if two element collections are equal.
