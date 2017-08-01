@@ -102,6 +102,8 @@ module Watir
       opt = opt.dup
       index = opt.delete :index
       tag_name = opt.delete :tag_name
+      class_name = opt.delete(:class) || opt.delete(:class_name)
+
       unless opt.empty?
         caller = caller_locations(1, 1)[0].label
         raise ArgumentError, "unsupported locators: #{opt.inspect} for ##{caller} method"
@@ -109,10 +111,21 @@ module Watir
 
       if index
         klass = tag_name ? self.send(tag_name).class : HTMLElement
-        klass.new(self, xpath: "./#{direction}#{tag_name || '*'}[#{index + 1}]")
+        xpath = "./#{direction}#{tag_name || '*'}"
+
+        if class_name
+          xpath = "#{xpath}[contains(concat(' ', @class, ' '), ' #{class_name} ')]"
+        end
+
+        klass.new(self, xpath: "#{xpath}[#{index + 1}]")
       else
         klass = tag_name ? Object.const_get("#{self.send(tag_name).class}Collection") : HTMLElementCollection
-        klass.new(self, xpath: "./#{direction}#{tag_name || '*'}")
+        xpath = "./#{direction}#{tag_name || '*'}"
+        if  class_name
+          xpath = "#{xpath}[contains(concat(' ', @class, ' '), ' #{class_name} ')]"
+        end
+
+        klass.new(self, xpath: xpath)
       end
     end
 
