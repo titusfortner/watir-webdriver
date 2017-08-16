@@ -32,12 +32,6 @@ _browsers:
 
 matrix:
   include:
-      - env: RAKE_TASK=spec:remote_firefox
-        <<: *four
-        <<: *firefox-latest
-      - env: RAKE_TASK=spec:remote_chrome
-        <<: *four
-        <<: *chrome
       - env: RAKE_TASK=spec:firefox RELAXED_LOCATE=false
         <<: *four
         <<: *firefox-latest
