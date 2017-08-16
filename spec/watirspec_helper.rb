@@ -123,9 +123,19 @@ class RemoteConfig < LocalConfig
       remote_server.server.webdriver_url
     end
     super
+    load_webdrivers
   end
 
   private
+
+  def load_webdrivers
+    case browser
+    when :chrome
+      Webdrivers::Chromedriver.update
+    when :firefox
+      Webdrivers::Geckodriver.update
+    end
+  end
 
   def add_guards
     matching_guards = common_guards
