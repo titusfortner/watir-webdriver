@@ -99,7 +99,6 @@ describe Watir::Element do
 
         expect(link.style("font-size")).to eq "10px"
         link.hover
-        sleep 3
         expect(link.style("font-size")).to eq "20px"
       end
     end
