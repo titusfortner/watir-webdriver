@@ -92,13 +92,14 @@ describe Watir::Element do
   end
 
   describe "#hover" do
-    not_compliant_on :internet_explorer, :safari, %i(remote firefox) do
+    not_compliant_on :internet_explorer, :safari do
       it "should hover over the element" do
         browser.goto WatirSpec.url_for('hover.html')
         link = browser.a
 
         expect(link.style("font-size")).to eq "10px"
         link.hover
+        sleep 3
         expect(link.style("font-size")).to eq "20px"
       end
     end
