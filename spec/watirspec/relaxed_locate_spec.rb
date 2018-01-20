@@ -21,6 +21,39 @@ describe 'Watir#relaxed_locate?' do
             Watir.default_timeout = 30
           end
         end
+
+        it 'ignores implicit wait' do
+          Watir.default_timeout = 0
+          args = WatirSpec.implementation.browser_args
+          time_out = 10
+
+          begin
+            # Reset the implicit wait method
+            class Selenium::WebDriver::Timeouts
+              def implicit_wait=(seconds)
+                @bridge.implicit_wait_timeout = Integer(seconds * 1000)
+              end
+            end
+
+            driver = Selenium::WebDriver.for args.first
+            driver.manage.timeouts.implicit_wait = time_out
+            new_browser = Watir::Browser.new(driver)
+            new_browser.goto WatirSpec.url_for("wait.html")
+            element = new_browser.link(id: 'not_there')
+            start_time = ::Time.now
+            element.exist?
+            expect(::Time.now - start_time).to be < time_out
+          ensure
+            driver.quit
+            Watir.default_timeout = 30
+          end
+
+        end
+
+        it 'throws warning about implicit waits not being respected' do
+          message = /WARN Watir Implicit Waits are not respected by Watir/
+          expect {browser.wd.manage.timeouts.implicit_wait = 4}.to output(message).to_stdout_from_any_process
+        end
       end
 
       context 'when acting on an element that is already present' do

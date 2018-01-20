@@ -42,6 +42,7 @@ module Watir
     #
 
     def initialize(browser = :chrome, *args)
+      zero_implicit_wait(browser)
       case browser
       when ::Symbol, String
         selenium_args = Watir::Capabilities.new(browser, *args).to_args
@@ -343,6 +344,13 @@ module Watir
 
     def wrap_element(scope, element)
       Watir.element_class_for(element.tag_name.downcase).new(scope, element: element)
+    end
+
+    def zero_implicit_wait(browser)
+      return unless Watir.relaxed_locate? && @no_implicit_wait.nil?
+      browser.manage.timeouts.implicit_wait = 0 if browser.is_a?(Selenium::WebDriver::Driver)
+      load 'watir/extensions/timeouts.rb'
+      @no_implicit_wait = true
     end
 
   end # Browser
