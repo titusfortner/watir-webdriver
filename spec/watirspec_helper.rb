@@ -11,6 +11,7 @@ class LocalConfig
   end
 
   def configure
+    use_coveralls
     set_webdriver
     set_browser_args
     set_guard_proc
@@ -19,7 +20,13 @@ class LocalConfig
 
   private
 
+  def use_coveralls
+    require 'coveralls'
+    Coveralls.wear!
+  end
+
   def load_webdrivers
+    require 'webdrivers'
     case browser
     when :chrome
       Webdrivers::Chromedriver.update
@@ -125,6 +132,7 @@ end
 
 class RemoteConfig < LocalConfig
   def configure
+    use_coveralls
     load_webdrivers
     @url = ENV["REMOTE_SERVER_URL"] || begin
       require 'watirspec/remote_server'
@@ -135,7 +143,9 @@ class RemoteConfig < LocalConfig
       remote_server.start(4444, args: args)
       remote_server.server.webdriver_url
     end
-    super
+    set_webdriver
+    set_browser_args
+    set_guard_proc
   end
 
   private
@@ -152,7 +162,36 @@ class RemoteConfig < LocalConfig
   end
 end
 
-if ENV["REMOTE_SERVER_URL"] || ENV["USE_REMOTE"]
+class SauceConfig < LocalConfig
+  def configure
+    set_sauce
+    set_browser_args
+    set_guard_proc
+  end
+
+  def create_args
+    url = "https://#{ENV['SAUCE_USERNAME']}:#{ENV['SAUCE_ACCESS_KEY']}@ondemand.saucelabs.com/wd/hub"
+    super.merge(url: url)
+  end
+
+  def set_sauce
+    @imp.name          = :sauce
+    @imp.browser_class = Watir::Browser
+  end
+
+  def add_guards
+    matching_guards = common_guards
+    matching_guards << :remote
+    matching_guards << [:remote, browser]
+    matching_guards << :sauce
+    matching_guards << [:sauce, browser]
+    matching_guards
+  end
+end
+
+if ENV["USE_SAUCE"]
+  SauceConfig.new(WatirSpec.implementation).configure
+elsif ENV["REMOTE_SERVER_URL"] || ENV["USE_REMOTE"]
   RemoteConfig.new(WatirSpec.implementation).configure
 else
   LocalConfig.new(WatirSpec.implementation).configure

@@ -1,11 +1,8 @@
 $LOAD_PATH.unshift(File.dirname(__FILE__))
 $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
 
-require 'coveralls'
-Coveralls.wear!
-
 require 'watir'
-require 'webdrivers'
+
 require 'locator_spec_helper'
 require 'rspec'
 

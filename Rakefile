@@ -150,4 +150,13 @@ namespace :spec do
       Rake::Task[:spec].execute
     end
   end
+
+  desc "Run on Saucelabs"
+  task :sauce do
+    ENV['USE_SAUCE'] = 'true'
+    ENV['BUILD_TAG'] ||= "Unknown Build - #{Time.now.to_i}"
+    ENV['PARALLEL_SPLIT_TEST_PROCESSES'] ||= ENV['THREADS'] || '5'
+
+    system "parallel_split_test spec/watirspec --format d"
+  end
 end
