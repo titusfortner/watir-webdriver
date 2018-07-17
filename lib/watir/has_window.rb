@@ -53,6 +53,10 @@ module Watir
 
     #
     # Waits for and returns second window if present
+    #
+    # browser.window(title: "foo").use
+    # browser.switch_window(title: "foo")
+    #
     # See Window#use
     #
     # @example
@@ -61,14 +65,19 @@ module Watir
     # @return [Window]
     #
 
-    def switch_window
-      current_window = window
-      wins = windows
-      wait_until { (wins = windows) && wins.size > 1 } if wins.size == 1
-      raise StandardError, 'Unable to determine which window to switch to' if wins.size > 2
+    def switch_window(opt)
+      raise Watir::Error, "#switch_window does not accept blocks" if block_given?
 
-      wins.find { |w| w != current_window }.use
-      window
+      if args.empty?
+        current_window = window
+        wins = windows
+        wait_until { (wins = windows) && wins.size > 1 } if wins.size == 1
+        raise StandardError, 'Unable to determine which window to switch to' if wins.size > 2
+
+        wins.find { |w| w != current_window }.use
+      else
+        window(opt).use
+      end
     end
 
     private
