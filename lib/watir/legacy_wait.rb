@@ -14,7 +14,7 @@ module Watir
     end
 
     def method_missing(method, *args, &block)
-      unless @element.respond_to?(m)
+      unless @element.respond_to?(method)
         raise NoMethodError, "undefined method `#{method}' for #{@element.inspect}:#{@element.class}"
       end
 
