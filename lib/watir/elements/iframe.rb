@@ -147,6 +147,7 @@ module Watir
     private
 
     def method_missing(meth, *args, &blk)
+      raise StandardError, "What the heck is hitting this code?"
       if @driver.respond_to?(meth)
         switch!
         @driver.send(meth, *args, &blk)
