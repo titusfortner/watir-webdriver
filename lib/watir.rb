@@ -19,6 +19,7 @@ require 'watir/browser'
 require 'watir/screenshot'
 require 'watir/after_hooks'
 require 'watir/logger'
+require 'watir/framed_driver'
 
 module Watir
   @relaxed_locate = true
