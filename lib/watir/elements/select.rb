@@ -226,17 +226,6 @@ module Watir
       elements.each { |e| e.click unless e.selected? }
       elements.first.exist? ? elements.first.text : ''
     end
-
-    def matches_regexp?(how, element, exp)
-      case how
-      when :text
-        element.text =~ exp || element.label =~ exp
-      when :value
-        element.value =~ exp
-      else
-        raise Exception::Error, "unknown how: #{how.inspect}"
-      end
-    end
   end # Select
 
   module Container
