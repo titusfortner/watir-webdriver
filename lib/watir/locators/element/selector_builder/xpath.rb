@@ -23,6 +23,7 @@ module Watir
 
             # the remaining entries should be attributes
             xpath << add_attributes(selector, scope_tag_name)
+            xpath << process_text(selector) if selector.key?(:text)
 
             xpath << "[#{selector.delete(:index) + 1}]" if adjacent && selector.key?(:index)
 
@@ -35,6 +36,15 @@ module Watir
             Watir.logger.debug(xpath: xpath, selector: selector)
 
             {xpath: xpath}
+          end
+
+          def process_text(selector)
+            if simple_regexp? selector[:text]
+              return "[contains(text(), '#{selector.delete(:text).source}')]"
+            elsif selector[:text].is_a?(Regexp)
+              return ''
+            end
+            "[#{lhs_for(nil, :text)}=#{XpathSupport.escape selector[:text]}]"
           end
 
           def default_start
@@ -83,7 +93,7 @@ module Watir
           # @todo Get rid of building
           def attribute_expression(building, selector)
             selector.map { |key, val|
-              next if %i[visible visible_text visible_label index].include?(key) || val.is_a?(Regexp)
+              next if %i[visible visible_text visible_label index text].include?(key) || val.is_a?(Regexp)
 
               locator_expression(building, key, val)
             }.compact.join(' and ')
@@ -194,10 +204,15 @@ module Watir
 
             # This is taking as much as it can before the first special character to do a better partial match
             captures = match.captures.reject(&:empty?)
-            selector.delete(key) if regexp.source == captures.first
+            selector.delete(key) if simple_regexp?(regexp)
             captures.map do |literals|
               "contains(#{lhs}, #{XpathSupport.escape(literals)})"
             end
+          end
+
+          def simple_regexp?(regexp)
+            regexp.is_a?(Regexp) &&
+                regexp.source.match(CONVERTABLE_REGEXP).captures.reject(&:empty?).first == regexp.source
           end
         end
       end

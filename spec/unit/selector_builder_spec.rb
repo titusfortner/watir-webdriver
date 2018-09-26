@@ -69,7 +69,7 @@ describe 'Current behavior' do
   end
 end
 
-describe Watir::Locators::Element::SelectorBuilder do
+xdescribe Watir::Locators::Element::SelectorBuilder do
   let(:attributes) { Watir::HTMLElement.attribute_list }
   let(:tag_name) { nil }
   let(:selector_builder) { described_class.new(tag_name, attributes) }
