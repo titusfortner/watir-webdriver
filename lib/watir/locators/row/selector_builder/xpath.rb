@@ -3,16 +3,27 @@ module Watir
     class Row
       class SelectorBuilder
         class XPath < Element::SelectorBuilder::XPath
-          def add_attributes(selector, scope_tag_name)
-            attr_expr = attribute_expression(nil, selector)
 
+          def build(selector, scope_tag_name)
+            @selector = selector
+
+            index = @selector.delete(:index)
+
+            wd_locator = super(@selector)
+
+            @selector[:index] = index if index&.negative?
+            index_xpath = index&.positive? ? "[#{index + 1}]" : ''
+
+            attr_expr = wd_locator[:xpath]
             expressions = generate_expressions(scope_tag_name)
-            expressions.map! { |e| "#{e}[#{attr_expr}]" } unless attr_expr.empty?
-            expressions.join(' | ')
+            expressions.map! { |e| "#{e}#{attr_expr}" } unless attr_expr.empty?
+            xpath = "(#{expressions.join(' | ')})#{index_xpath}"
+
+            {xpath: xpath}
           end
 
-          def add_tag_name(selector)
-            selector.delete(:tag_name)
+          def add_tag_name
+            @selector.delete(:tag_name)
             ''
           end
 

@@ -130,18 +130,12 @@ describe 'Div' do
   describe 'Deprecation Warnings' do
     describe 'text locator with RegExp values' do
       it 'does not throw deprecation when still matched by text content' do
-        expect { browser.div(text: /some visible/).exists? }.not_to have_deprecated_text_regexp
+        expect { browser.a(text: /some visible/).exists? }.not_to have_deprecated_text_regexp
       end
 
       not_compliant_on :watigiri do
         it 'throws deprecation when no longer matched by text content' do
-          expect { browser.div(text: /some visible$/).exists? }.to have_deprecated_text_regexp
-        end
-      end
-
-      not_compliant_on :watigiri do
-        it 'throws deprecation when begins to be matched by text content' do
-          expect { browser.div(text: /some hidden/).exists? }.to have_deprecated_text_regexp
+          expect { browser.a(text: /some visible$/).exists? }.to have_deprecated_text_regexp
         end
       end
 

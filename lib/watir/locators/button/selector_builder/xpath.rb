@@ -3,41 +3,64 @@ module Watir
     class Button
       class SelectorBuilder
         class XPath < Element::SelectorBuilder::XPath
-          def add_tag_name(selector)
-            selector[:tag_name] = 'button'
-            super
-          end
+          def build(selector, scope_tag_name)
+            @selector = selector
+            @selector[:tag_name] = 'button'
 
-          def add_attributes(selector, _scope_tag_name)
-            selector = selector.dup
-            button_attr_exp = attribute_expression(:button, selector)
-            xpath = button_attr_exp.empty? ? '' : "[#{button_attr_exp}]"
-            return xpath if selector[:type].eql? false
-
-            selector[:type] = Watir::Button::VALID_TYPES if [nil, true].include?(selector[:type])
-            xpath << " | .//*[local-name()='input']"
-            input_attr_exp = attribute_expression(:input, selector)
-            xpath << "[#{input_attr_exp}]" unless input_attr_exp.empty?
-          end
-
-          def lhs_for(building, key)
-            if building == :input && key == :text
-              '@value'
-            else
-              super
+            if @selector[:type].eql?(false)
+              @selector.delete :type
+              return super(@selector)
             end
+
+            index = @selector.delete(:index)
+
+            wd_locator = super(@selector)
+
+            @selector[:index] = index if index&.negative?
+
+            first = ".//*[local-name()='button']"
+            common = wd_locator[:xpath].gsub(first, '')
+
+            # TODO: Figure out why sometimes it doesn't have parenthesis
+            if common[/\(\)\[/]
+              common.gsub!('()', '')
+              first = "(#{first})"
+            end
+
+            types = input_types(@selector[:type])
+            type_text = types.empty? ? '' : "[#{types}]"
+
+            button_xpath = "#{first}#{common}"
+            input_xpath = "#{first.gsub('button', 'input')}#{type_text}#{common}"
+            index_xpath = index&.positive? ? "[#{index + 1}]" : ''
+
+            xpath = if @selector[:type].eql?(true)
+                      "#{input_xpath}#{index_xpath}"
+                    else
+                      "(#{button_xpath} | #{input_xpath})#{index_xpath}"
+                    end
+
+            {xpath: xpath}
           end
 
-          private
-
-          def convert_regexp_to_contains?
-            # regexp conversion won't work with the complex xpath selector
-            false
+          def input_types(type)
+            return '' if type.eql? false
+            types = [nil, true].include?(type) ? Watir::Button::VALID_TYPES : [type]
+            types.map do |type|
+              "#{XpathSupport.downcase '@type'}=#{XpathSupport.escape type}"
+            end.compact.join(' or ')
           end
 
-          def equal_pair(building, key, value)
-            if building == :button && key == :value
-              # :value should look for both node text and @value attribute
+          # TODO: Remove this method once we remove value_button deprecation
+          def attribute_predicate(key, value)
+            return super unless key == :value
+            "#{super(key, value)} or #{super(:text, value)}"
+          end
+
+          # TODO: Remove this method once we remove value_button deprecation
+          def equal_pair(key, value)
+            if key == :value
+              Watir.logger.deprecate(':value locator key for finding button text', 'use :text', ids: ['value_button'])
               text = XpathSupport.escape(value)
               "(text()=#{text} or @value=#{text})"
             else

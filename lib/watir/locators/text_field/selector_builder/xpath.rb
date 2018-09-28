@@ -3,24 +3,20 @@ module Watir
     class TextField
       class SelectorBuilder
         class XPath < Element::SelectorBuilder::XPath
-          def add_attributes(selector, _scope_tag_name)
-            input_attr_exp = attribute_expression(:input, selector)
+          def add_predicates(_scope_tag_name = nil)
+            input_attr_exp = attribute_expression
             xpath = "[(not(@type) or (#{negative_type_expr}))"
             xpath << " and #{input_attr_exp}" unless input_attr_exp.empty?
             xpath << ']'
           end
 
-          def add_tag_name(selector)
-            selector.delete(:tag_name)
-            "[local-name()='input']"
+          def add_tag_name
+            @selector[:tag_name] = 'input'
+            super
           end
 
-          def lhs_for(building, key)
-            if building == :input && key == :text
-              '@value'
-            else
-              super
-            end
+          def lhs_for(key)
+            key.to_s == 'text' ? '@value' : super
           end
 
           private

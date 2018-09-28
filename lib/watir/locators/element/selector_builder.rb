@@ -14,6 +14,7 @@ module Watir
         end
 
         def build(selector)
+          sel = selector.dup
           @selector = selector
           normalize_selector
 
@@ -28,18 +29,17 @@ module Watir
                     xpath_css
                   end
 
-          @selector.delete(:index) if @selector[:index]&.zero?
-
-          Watir.logger.debug "Converted #{@selector.inspect} to #{built}"
+          Watir.logger.debug "Converted #{sel.inspect} to #{built}"
           [built, @selector]
         end
 
-        def normalize_selector
-          @selector.keys.each do |key|
-            check_type(key, @selector[key])
+        def normalize_selector(selector = nil)
+          selector ||= @selector
+          selector.keys.each do |key|
+            check_type(key, selector[key])
 
-            how, what = normalize_locator(key, @selector.delete(key))
-            @selector[how] = what
+            how, what = normalize_locator(key, selector.delete(key))
+            selector[how] = what
           end
         end
 

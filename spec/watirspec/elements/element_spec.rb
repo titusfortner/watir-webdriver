@@ -397,6 +397,10 @@ describe 'Element' do
         expect(browser.div(class: /c/)).to exist
       end
 
+      it 'does matches when given an optional regexp' do
+        expect(browser.div(class: /cz?/)).to exist
+      end
+
       context 'with multiple classes' do
         it 'matches when the element has a single class' do
           e = browser.div(class: ['a'])
@@ -420,6 +424,14 @@ describe 'Element' do
           e = browser.div(class: ['a', '!c', 'b'])
           expect(e).to exist
           expect(e.class_name).to eq 'a b'
+        end
+
+        it 'matches part of the class name when given multiple regexp' do
+          expect(browser.div(class: [/c/, /b/])).to exist
+        end
+
+        it 'matches part of the class name when given a string and a regexp' do
+          expect(browser.div(class: [/c/, 'b'])).to exist
         end
       end
     end
@@ -681,7 +693,7 @@ describe 'Element' do
   not_compliant_on %i[remote firefox] do
     describe '#scroll_into_view' do
       it 'scrolls element into view' do
-        el = browser.button(name: 'new_user_image')
+        el = browser.button(name: 'new_popup_window')
         element_center = el.center['y']
 
         bottom_viewport_script = 'return window.pageYOffset + window.innerHeight'

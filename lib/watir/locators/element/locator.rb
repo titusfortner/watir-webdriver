@@ -59,9 +59,16 @@ module Watir
             return nil
           end
 
+          # TODO: Remove this after deprecating text_regexp
+          text = @selector[:text].dup if @selector[:text].is_a?(Regexp)
+
           selector, values_to_match = selector_builder.build(@selector)
 
           validate_built_selector(selector, values_to_match)
+
+          # TODO: Remove this after deprecating text_regexp
+          # This is forcing the check
+          values_to_match[:text] ||= text if text
 
           if filter == :all || values_to_match.any?
             locate_matching_elements(selector, values_to_match, filter)

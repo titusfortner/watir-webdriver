@@ -10,8 +10,8 @@ describe 'Strong' do
     it 'returns true if the element exists' do
       expect(browser.strong(id: 'descartes')).to exist
       expect(browser.strong(id: /descartes/)).to exist
-      expect(browser.strong(text: 'Dubito, ergo cogito, ergo sum.')).to exist
-      expect(browser.strong(text: /Dubito, ergo cogito, ergo sum/)).to exist
+      expect(browser.strong(visible_text: 'Dubito, ergo cogito, ergo sum.')).to exist
+      expect(browser.strong(visible_text: /Dubito, ergo cogito, ergo sum/)).to exist
       expect(browser.strong(class: 'descartes')).to exist
       expect(browser.strong(class: /descartes/)).to exist
       expect(browser.strong(index: 0)).to exist

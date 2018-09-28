@@ -257,12 +257,12 @@ describe 'Button' do
     end
 
     it "raises UnknownObjectException when clicking a button that doesn't exist" do
-      expect { browser.button(value: 'no_such_value').click }.to raise_unknown_object_exception
+      expect { browser.button(text: 'No Such Text').click }.to raise_unknown_object_exception
       expect { browser.button(id: 'no_such_id').click }.to raise_unknown_object_exception
     end
 
     it 'raises ObjectDisabledException when clicking a disabled button' do
-      expect { browser.button(value: 'Disabled').click }.to raise_object_disabled_exception
+      expect { browser.button(id: 'disabled_button').click }.to raise_object_disabled_exception
     end
   end
 end
