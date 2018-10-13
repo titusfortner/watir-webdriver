@@ -55,15 +55,27 @@ module Watir
           def predicate_conversion(key, regexp)
             lhs = lhs_for(key)
 
-            if !XpathSupport.simple_regexp?(regexp)
+            starts_with = regexp.source[0] == '^'
+
+            eval_regexp = if starts_with
+                            /#{regexp.source.tr('^', '')}/
+                          else
+                            regexp
+                          end
+
+            if XpathSupport.simple_regexp?(eval_regexp)
+              if starts_with
+                "starts-with(#{lhs}, '#{eval_regexp.source}')"
+              else
+                "contains(#{lhs}, '#{eval_regexp.source}')"
+              end
+            else
               if key == :class
                 @requires_matches[:class] << regexp
               else
                 @requires_matches[key] = regexp
               end
               lhs
-            else
-              "contains(#{lhs}, '#{regexp.source}')"
             end
           end
 

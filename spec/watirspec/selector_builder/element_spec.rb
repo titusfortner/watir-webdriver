@@ -150,7 +150,7 @@ describe Watir::Locators::Element::SelectorBuilder do
         @data_locator = 'first div'
       end
 
-      it 'single Regexp contains' do
+      it 'simple Regexp contains' do
         @selector = {class_name: /use/}
         @wd_locator = {xpath: ".//*[contains(@class, 'use')]"}
         @data_locator = 'form'
@@ -274,6 +274,12 @@ describe Watir::Locators::Element::SelectorBuilder do
       it 'with Regexp' do
         @selector = {name: /user/}
         @wd_locator = {xpath: ".//*[contains(@name, 'user')]"}
+        @data_locator = 'form'
+      end
+
+      it 'with Regexp at beginning' do
+        @selector = {action: /^post/}
+        @wd_locator = {xpath: ".//*[starts-with(@action, 'post')]"}
         @data_locator = 'form'
       end
 
@@ -521,12 +527,6 @@ describe Watir::Locators::Element::SelectorBuilder do
     end
 
     context 'returns locators that can not be directly translated' do
-      it 'attribute with complicated Regexp at beginning' do
-        @selector = {action: /^post/}
-        @wd_locator = {xpath: './/*[@action]'}
-        @remaining = {action: /^post/}
-      end
-
       it 'attribute with complicated Regexp at end' do
         @selector = {action: /me$/}
         @wd_locator = {xpath: './/*[@action]'}
@@ -534,9 +534,9 @@ describe Watir::Locators::Element::SelectorBuilder do
       end
 
       it 'class with complicated Regexp' do
-        @selector = {class: /^her/}
+        @selector = {class: /he?r/}
         @wd_locator = {xpath: './/*[@class]'}
-        @remaining = {class: [/^her/]}
+        @remaining = {class: [/he?r/]}
       end
 
       it 'text with any Regexp' do

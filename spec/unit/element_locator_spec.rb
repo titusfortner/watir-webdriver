@@ -241,8 +241,8 @@ describe Watir::Locators::Element::Locator do
       end
     end
 
-    describe 'with regexp selectors' do
-      it 'handles selector with tag name and a single regexp attribute' do
+    describe 'with simple regexp selectors' do
+      it 'handles selector with tag name and a simple regexp attribute' do
         element = element(tag_name: 'div', attributes: {class: 'foob'})
 
         expect_one(:xpath, ".//*[local-name()='div'][contains(@class, 'oob')]").and_return(element)
@@ -250,7 +250,7 @@ describe Watir::Locators::Element::Locator do
         expect(locate_one(tag_name: 'div', class: /oob/)).to eq element
       end
 
-      it 'handles :tag_name, :index and a single regexp attribute' do
+      it 'handles :tag_name, :index and a simple regexp attribute' do
         element = element(tag_name: 'div', attributes: {class: 'foo'})
 
         expect_one(:xpath, "(.//*[local-name()='div'][contains(@class, 'foo')])[2]").and_return(element)
@@ -355,7 +355,7 @@ describe Watir::Locators::Element::Locator do
 
         expect_all(:xpath, './/*[@class]').and_return(elements1, elements2)
 
-        expect(locate_one(class: /^foo/)).to eq elements2[0]
+        expect(locate_one(class: /foo?/)).to eq elements2[0]
       end
 
       it 'raises error if too many attempts to relocate a stale element during filtering' do
@@ -372,8 +372,8 @@ describe Watir::Locators::Element::Locator do
 
         expect_all(:xpath, './/*[@class]').and_return(elements1, elements2, elements3)
 
-        msg = 'Unable to locate element from {:class=>[/^foo/]} due to changing page'
-        expect { locate_one(class: /^foo/) }.to raise_exception(Watir::Exception::LocatorException, msg)
+        msg = 'Unable to locate element from {:class=>[/fo?o/]} due to changing page'
+        expect { locate_one(class: /fo?o/) }.to raise_exception(Watir::Exception::LocatorException, msg)
       end
     end
 
