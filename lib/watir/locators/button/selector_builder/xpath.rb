@@ -3,68 +3,57 @@ module Watir
     class Button
       class SelectorBuilder
         class XPath < Element::SelectorBuilder::XPath
-          def build(selector)
-            return super if selector.key?(:adjacent)
+          private
 
-            selector[:tag_name] = 'button'
+          def tag_string
+            return super if @adjacent
 
-            type = selector.delete :type
-            return super(selector) if type.eql?(false)
+            @selector.delete(:tag_name)
 
-            # both :value and :text selectors will locate elements by value attribute or text content
-            selector[:text] = selector.delete(:value) if selector.key?(:value)
+            type = @selector.delete :type
 
-            wd_locator = super(selector)
-
-            start_string = default_start
-
-            button_string = "local-name()='button'"
-            common_string = wd_locator[:xpath].gsub(start_string, '').gsub("[#{button_string}]", '')
-
-            input_string = "(local-name()='input' and #{input_types(type)})"
-
-            tag_string = if type.nil?
-                           "[#{button_string} or #{input_string}]"
-                         else
-                           "[#{input_string}]"
-                         end
-
-            xpath = "#{start_string}#{tag_string}#{common_string}"
-
-            {xpath: xpath}
+            if type
+              "[(local-name()='input' and #{input_types(type)})]"
+            elsif type.nil?
+              "[local-name()='button' or (local-name()='input' and #{input_types(type)})]"
+            else
+              "[local-name()='button']"
+            end
           end
 
-          protected
+          # This is special because text locator for buttons match text or value
+          def text_string
+            return super if @adjacent
+
+            text = @selector.delete(:text) || @selector.delete(:value)
+
+            case text
+            when nil
+              ''
+            when Regexp
+              res = "[#{predicate_conversion(:contains_text, text)} or #{predicate_conversion(:value, text)}]"
+              if @requires_matches.key?(:contains_text)
+                @requires_matches[:text] = @requires_matches.delete(:contains_text)
+                @requires_matches.delete(:value)
+              end
+              res
+            else
+              "[#{predicate_expression(:text, text)} or #{predicate_expression(:value, text)}]"
+            end
+          end
 
           def use_index?
             false
           end
 
-          # This is special because text locator for buttons match text or value
-          def add_text
-            return '' unless @selector.key?(:text)
-
-            text = @selector.delete :text
-            if !text.is_a?(Regexp)
-              "[normalize-space()='#{text}' or @value='#{text}']"
-            elsif XpathSupport.simple_regexp?(text)
-              "[contains(text(), '#{text.source}') or contains(@value, '#{text.source}')]"
-            else
-              @requires_matches[:text] = text
-              ''
-            end
-          end
-
-          private
-
           def input_types(type)
             types = if [nil, true].include?(type)
                       Watir::Button::VALID_TYPES
-                    elsif !Watir::Button::VALID_TYPES.include?(type)
+                    elsif Watir::Button::VALID_TYPES.include?(type)
+                      [type]
+                    else
                       msg = "Button Elements can not be located by input type: #{type}"
                       raise LocatorException, msg
-                    else
-                      [type]
                     end
             types.map { |button_type|
               "#{XpathSupport.downcase '@type'}=#{XpathSupport.escape button_type}"

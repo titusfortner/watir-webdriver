@@ -105,7 +105,7 @@ describe Watir::Locators::TextField::SelectorBuilder do
 
       it 'returns complicated Regexp to the locator as a value' do
         @selector = {text: /^foo$/}
-        @wd_locator = {xpath: ".//*[local-name()='input'][not(@type) or (#{negative_types})]"}
+        @wd_locator = {xpath: ".//*[local-name()='input'][not(@type) or (#{negative_types})][@value]"}
         @remaining = {value: /^foo$/}
       end
     end
@@ -117,8 +117,8 @@ describe Watir::Locators::TextField::SelectorBuilder do
 
       it 'locates using tag name, class, attributes and text' do
         @selector = {text: 'Developer', class: /c/, id: true}
-        @wd_locator = {xpath: ".//*[local-name()='input'][not(@type) or (#{negative_types})]" \
-"[contains(@class, 'c')][@id][@value='Developer']"}
+        @wd_locator = {xpath: ".//*[local-name()='input'][contains(@class, 'c')][not(@type) or (#{negative_types})]" \
+"[@id and @value='Developer']"}
         @data_locator = 'dev'
       end
 

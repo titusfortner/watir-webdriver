@@ -100,7 +100,8 @@ describe Watir::Locators::Button::SelectorBuilder do
 
       it 'returns complicated Regexp to the locator' do
         @selector = {text: /^foo$/}
-        @wd_locator = {xpath: ".//*[local-name()='button' or (local-name()='input' and #{default_types})]"}
+        @wd_locator = {xpath: ".//*[local-name()='button' or (local-name()='input' and #{default_types})]" \
+'[text() or @value]'}
         @remaining = {text: /^foo$/}
       end
     end

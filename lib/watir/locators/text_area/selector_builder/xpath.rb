@@ -3,11 +3,14 @@ module Watir
     class TextArea
       class SelectorBuilder
         class XPath < Element::SelectorBuilder::XPath
-          def convert_predicate(key, regexp)
-            return super unless key == :value
+          private
 
-            @requires_matches[:value] = regexp
-            nil
+          # This is special because text locator is the value
+          def text_string
+            return super if @adjacent
+
+            @selector[:value] = @selector.delete(:text) if @selector.key?(:text)
+            ''
           end
         end
       end
