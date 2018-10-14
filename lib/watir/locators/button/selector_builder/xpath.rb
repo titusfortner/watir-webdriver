@@ -37,23 +37,24 @@ module Watir
             end
           end
 
-          # This is special because text locator for buttons match text or value
+          # value locator needs to match input value, button text or button value
           def text_string
             return super if @adjacent
 
-            text = @selector.delete(:text)
+            # :text locator is already dealt with in #tag_name_string
+            value = @selector.delete(:value)
 
-            case text
+            case value
             when nil
               ''
             when Regexp
-              res = "[#{predicate_conversion(:contains_text, text)}]"
+              res = "[#{predicate_conversion(:contains_text, value)} or #{predicate_conversion(:value, value)}]"
               if @requires_matches.key?(:contains_text)
-                @requires_matches[:text] = @requires_matches.delete(:contains_text)
+                @requires_matches[:value] = @requires_matches.delete(:contains_text)
               end
               res
             else
-              "[#{predicate_expression(:text, text)}]"
+              "[#{predicate_expression(:text, value)} or #{predicate_expression(:value, value)}]"
             end
           end
 

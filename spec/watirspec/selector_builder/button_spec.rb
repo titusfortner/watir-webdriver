@@ -125,37 +125,52 @@ describe Watir::Locators::Button::SelectorBuilder do
     context 'with value' do
       before(:each) { browser.goto(WatirSpec.url_for('forms_with_input_elements.html')) }
 
-      it 'input element with String' do
+      it 'input element value with String' do
         @selector = {value: 'Preview'}
         @wd_locator = {xpath: ".//*[local-name()='button' or (local-name()='input' and (#{default_types}))]" \
-"[@value='Preview']"}
+"[normalize-space()='Preview' or @value='Preview']"}
         @data_locator = 'preview'
       end
 
-      it 'button element with String' do
+      it 'button element value with String' do
         @selector = {value: 'button_2'}
         @wd_locator = {xpath: ".//*[local-name()='button' or (local-name()='input' and (#{default_types}))]" \
-"[@value='button_2']"}
+"[normalize-space()='button_2' or @value='button_2']"}
         @data_locator = 'Benjamin'
       end
 
-      it 'input element with simple Regexp' do
+      it 'input element value with simple Regexp' do
         @selector = {value: /Prev/}
         @wd_locator = {xpath: ".//*[local-name()='button' or (local-name()='input' and (#{default_types}))]" \
-"[contains(@value, 'Prev')]"}
+"[contains(text(), 'Prev') or contains(@value, 'Prev')]"}
         @data_locator = 'preview'
       end
 
-      it 'button element with simple Regexp' do
+      it 'button element value with simple Regexp' do
         @selector = {value: /on_2/}
         @wd_locator = {xpath: ".//*[local-name()='button' or (local-name()='input' and (#{default_types}))]" \
-"[contains(@value, 'on_2')]"}
+"[contains(text(), 'on_2') or contains(@value, 'on_2')]"}
+        @data_locator = 'Benjamin'
+      end
+
+      it 'button element text with String' do
+        @selector = {value: 'Button 2'}
+        @wd_locator = {xpath: ".//*[local-name()='button' or (local-name()='input' and (#{default_types}))]" \
+"[normalize-space()='Button 2' or @value='Button 2']"}
+        @data_locator = 'Benjamin'
+      end
+
+      it 'button element text with simple Regexp' do
+        @selector = {value: /ton 2/}
+        @wd_locator = {xpath: ".//*[local-name()='button' or (local-name()='input' and (#{default_types}))]" \
+"[contains(text(), 'ton 2') or contains(@value, 'ton 2')]"}
         @data_locator = 'Benjamin'
       end
 
       it 'returns complex Regexp to the locator' do
         @selector = {value: /^foo$/}
-        @wd_locator = {xpath: ".//*[local-name()='button' or (local-name()='input' and (#{default_types}))][@value]"}
+        @wd_locator = {xpath: ".//*[local-name()='button' or (local-name()='input' and (#{default_types}))]" \
+"[text() or @value]"}
         @remaining = {value: /^foo$/}
       end
     end
