@@ -36,7 +36,7 @@ describe 'TextField' do
     end
 
     it 'locates value of text_field using text locators' do
-      browser.text_field(id: 'new_user_occupation').set "Firefighter"
+      browser.text_field(id: 'new_user_occupation').set 'Firefighter'
 
       expect(browser.text_field(text: 'Firefighter')).to exist
       expect(browser.text_field(text: /Fire/)).to exist

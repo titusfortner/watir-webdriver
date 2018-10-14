@@ -25,7 +25,6 @@ module Watir
         def text_regexp_deprecation(*)
           # does not apply to text_field
         end
-
       end
     end
   end
