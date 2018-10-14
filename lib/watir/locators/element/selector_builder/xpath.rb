@@ -22,6 +22,7 @@ module Watir
             xpath << tag_string
             xpath << class_string
             xpath << text_string
+            xpath << additional_string
             xpath << attribute_string
 
             xpath = index ? add_index(xpath, index) : xpath
@@ -126,6 +127,11 @@ module Watir
               process_attribute(key, @selector.delete(key))
             }.flatten.compact
             attributes.empty? ? '' : "[#{attributes.join(' and ')}]"
+          end
+
+          def additional_string
+            # to be used by subclasses as necessary
+            ''
           end
 
           # TODO: Remove this on refactor of index

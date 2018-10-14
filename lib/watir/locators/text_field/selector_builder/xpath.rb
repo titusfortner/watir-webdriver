@@ -3,24 +3,17 @@ module Watir
     class TextField
       class SelectorBuilder
         class XPath < Element::SelectorBuilder::XPath
-          # TODO: Consider adding to the superclass an overridable method for adding subclass specific methods
-          def build(selector)
-            index = selector.delete(:index)
-            xpath = super[:xpath]
-            xpath << type_string(@selector.delete(:type))
-
-            xpath = index ? add_index(xpath, index) : xpath
-
-            @selector.merge! @requires_matches
-
-            {xpath: xpath}
-          end
-
           def text_string
             return super if @adjacent
 
             @requires_matches[:text] = @selector.delete(:text) if @selector.key?(:text)
+            ''
+          end
 
+          def additional_string
+            return '' if @adjacent
+
+            type_string(@selector.delete(:type))
           end
 
           def tag_string
