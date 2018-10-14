@@ -8,16 +8,32 @@ module Watir
           def tag_string
             return super if @adjacent
 
+            # Selector builder ignores tag name and builds for both button elements and input elements of type button
             @selector.delete(:tag_name)
 
             type = @selector.delete :type
+            text = @selector.delete :text
 
-            if type
-              "[(local-name()='input' and #{input_types(type)})]"
+            if type.nil? && text.is_a?(String)
+              "[(local-name()='button' and normalize-space()='#{text}') or " \
+"(local-name()='input' and (#{input_types}) and @value='#{text}')]"
+            elsif type.nil? && XpathSupport.simple_regexp?(text)
+              "[(local-name()='button' and contains(text(), '#{text.source}')) or " \
+"(local-name()='input' and (#{input_types}) and contains(@value, '#{text.source}'))]"
+            elsif type.nil? && text
+              @requires_matches[:text] = text
+              "[(local-name()='button' and text()) or (local-name()='input' and (#{input_types}) and @value)]"
             elsif type.nil?
-              "[local-name()='button' or (local-name()='input' and #{input_types(type)})]"
-            else
+              "[local-name()='button' or (local-name()='input' and (#{input_types}))]"
+            elsif type.eql?(false)
+              @selector[:type] = false
               "[local-name()='button']"
+            elsif type.eql?(true)
+              @selector[:type] = true
+              "[local-name()='button' or (local-name()='input' and (#{input_types}))]"
+            else
+              @selector[:text] = text if text
+              "[local-name()='button' or local-name()='input'][#{input_types(type)}]"
             end
           end
 
@@ -25,20 +41,19 @@ module Watir
           def text_string
             return super if @adjacent
 
-            text = @selector.delete(:text) || @selector.delete(:value)
+            text = @selector.delete(:text)
 
             case text
             when nil
               ''
             when Regexp
-              res = "[#{predicate_conversion(:contains_text, text)} or #{predicate_conversion(:value, text)}]"
+              res = "[#{predicate_conversion(:contains_text, text)}]"
               if @requires_matches.key?(:contains_text)
                 @requires_matches[:text] = @requires_matches.delete(:contains_text)
-                @requires_matches.delete(:value)
               end
               res
             else
-              "[#{predicate_expression(:text, text)} or #{predicate_expression(:value, text)}]"
+              "[#{predicate_expression(:text, text)}]"
             end
           end
 
@@ -46,8 +61,8 @@ module Watir
             false
           end
 
-          def input_types(type)
-            types = if [nil, true].include?(type)
+          def input_types(type = nil)
+            types = if type.eql?(nil)
                       Watir::Button::VALID_TYPES
                     elsif Watir::Button::VALID_TYPES.include?(type)
                       [type]
