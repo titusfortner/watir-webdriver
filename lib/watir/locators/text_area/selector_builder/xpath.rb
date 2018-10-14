@@ -5,12 +5,12 @@ module Watir
         class XPath < Element::SelectorBuilder::XPath
           private
 
-          # This is special because text locator is the value
-          def text_string
-            return super if @adjacent
+          # value always requires a wire call since we want the property not the attribute
+          def predicate_conversion(key, regexp)
+            return super unless key == :value
 
-            @selector[:value] = @selector.delete(:text) if @selector.key?(:text)
-            ''
+            @requires_matches[:value] = regexp
+            nil
           end
         end
       end

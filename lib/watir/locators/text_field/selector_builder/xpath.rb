@@ -3,14 +3,24 @@ module Watir
     class TextField
       class SelectorBuilder
         class XPath < Element::SelectorBuilder::XPath
-          # This is special because text locator is the value
+          # TODO: Consider adding to the superclass an overridable method for adding subclass specific methods
+          def build(selector)
+            index = selector.delete(:index)
+            xpath = super[:xpath]
+            xpath << type_string(@selector.delete(:type))
+
+            xpath = index ? add_index(xpath, index) : xpath
+
+            @selector.merge! @requires_matches
+
+            {xpath: xpath}
+          end
+
           def text_string
             return super if @adjacent
 
-            @selector[:value] = @selector.delete(:text) if @selector.key?(:text)
+            @requires_matches[:text] = @selector.delete(:text) if @selector.key?(:text)
 
-            # No this doesn't really belong here, but it works for now
-            create_type_string(@selector.delete(:type))
           end
 
           def tag_string
@@ -22,7 +32,7 @@ module Watir
             false
           end
 
-          def create_type_string(type)
+          def type_string(type)
             if type.eql?(true)
               "[#{negative_type_text}]"
             elsif Watir::TextField::NON_TEXT_TYPES.include?(type)

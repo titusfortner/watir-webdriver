@@ -52,8 +52,6 @@ module Watir
           end
 
           def predicate_conversion(key, regexp)
-            return if regexp.casefold?
-
             lhs = lhs_for(key)
 
             if !XpathSupport.simple_regexp?(regexp)
@@ -124,10 +122,10 @@ module Watir
           end
 
           def attribute_string
-            attributes = @selector.keys.map do |key|
+            attributes = @selector.keys.map { |key|
               process_attribute(key, @selector.delete(key))
-            end
-            attributes.empty? ? '' : "[#{attributes.flatten.compact.join(' and ')}]"
+            }.flatten.compact
+            attributes.empty? ? '' : "[#{attributes.join(' and ')}]"
           end
 
           # TODO: Remove this on refactor of index
