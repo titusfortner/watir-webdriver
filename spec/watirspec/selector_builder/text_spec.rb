@@ -73,8 +73,7 @@ describe Watir::Locators::TextField::SelectorBuilder do
 
       it 'false locates text field without type specified' do
         @selector = {type: false}
-        @wd_locator = {xpath: ".//*[local-name()='input']" \
-"[not(translate(@type,'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'))]"}
+        @wd_locator = {xpath: ".//*[local-name()='input'][not(@type)]"}
         @data_locator = 'input name'
       end
 

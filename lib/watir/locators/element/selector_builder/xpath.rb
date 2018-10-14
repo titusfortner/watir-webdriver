@@ -187,11 +187,12 @@ module Watir
           end
 
           def attribute_presence(attribute)
-            lhs_for(attribute)
+            attribute == :type ? '@type' : lhs_for(attribute)
           end
 
           def attribute_absence(attribute)
-            "not(#{lhs_for(attribute)})"
+            lhs = attribute == :type ? '@type' : lhs_for(attribute)
+            "not(#{lhs})"
           end
 
           def equal_pair(key, value)
