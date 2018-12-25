@@ -84,7 +84,6 @@ class LocalConfig
   def common_guards
     matching_guards = [browser]
     matching_guards << [browser, Selenium::WebDriver::Platform.os]
-    matching_guards << :relaxed_locate if Watir.relaxed_locate?
     matching_guards << :headless if @imp.browser_args.last[:headless]
     # TODO: Replace this with Selenium::WebDriver::Platform.ci after next Selenium Release
     if ENV['APPVEYOR']
