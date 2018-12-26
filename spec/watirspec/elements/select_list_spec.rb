@@ -236,7 +236,7 @@ describe 'SelectList' do
 
       it "raises UnknownObjectException if the option doesn't exist" do
         expect { browser.select_list(name: 'new_user_country').selected?('missing_option') }
-            .to raise_unknown_object_exception
+          .to raise_unknown_object_exception
       end
     end
   end
@@ -346,14 +346,14 @@ describe 'SelectList' do
     it "raises NoValueFoundException if the option doesn't exist" do
       message = /#<Watir::Select: located: false; {:name=>"new_user_country", :tag_name=>"select"}>/
       expect { browser.select_list(name: 'new_user_country').select('missing_option') }
-          .to raise_no_value_found_exception message
+        .to raise_no_value_found_exception message
       expect { browser.select_list(name: 'new_user_country').select(/missing_option/) }
-          .to raise_no_value_found_exception message
+        .to raise_no_value_found_exception message
     end
 
     it 'raises ObjectDisabledException if the option is disabled' do
       expect { browser.select_list(name: 'new_user_languages').select('Russian') }
-          .to raise_object_disabled_exception
+        .to raise_object_disabled_exception
     end
 
     it 'raises a TypeError if argument is not a String, Regexp or Numeric' do
@@ -447,15 +447,15 @@ describe 'SelectList' do
 
     it "raises NoValueFoundException if the option doesn't exist" do
       expect { browser.select_list(id: 'new_user_country').select!('missing_option') }
-          .to raise_no_value_found_exception
+        .to raise_no_value_found_exception
       expect { browser.select_list(id: 'new_user_country').select!(/missing_option/) }
-          .to raise_no_value_found_exception
+        .to raise_no_value_found_exception
     end
 
     it 'raises ObjectDisabledException if the option is disabled' do
       browser.select_list(id: 'new_user_languages').clear
       expect { browser.select_list(id: 'new_user_languages').select!('Russian') }
-          .to raise_object_disabled_exception
+        .to raise_object_disabled_exception
     end
 
     it 'raises a TypeError if argument is not a String, Regexp or Numeric' do
