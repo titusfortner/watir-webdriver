@@ -3,6 +3,7 @@ require 'time'
 
 require 'watir/scroll'
 require 'watir/legacy_wait'
+require 'watir/element_call'
 require 'watir/wait'
 require 'watir/exception'
 require 'watir/window'
