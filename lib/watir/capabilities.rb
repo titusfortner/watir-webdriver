@@ -1,27 +1,103 @@
 module Watir
   class Capabilities
-    attr_reader :options
+    attr_reader :browser
 
-    def initialize(browser, options = {})
-      @options = options.dup
-      Watir.logger.info "Creating Browser instance of #{browser} with user provided options: #{@options.inspect}"
-      @browser = if browser == :remote && @options.key?(:browser)
-                   @options.delete(:browser)
-                 elsif browser == :remote && @options.key?(:desired_capabilities)
-                   @options[:desired_capabilities].browser_name.to_sym
+    SE_CLASSES = {chrome: 'Chrome',
+                  firefox: 'Firefox',
+                  ie: 'IE',
+                  internet_explorer: 'IE',
+                  edge: 'Edge',
+                  safari: 'Safari'}
+
+
+    def initialize(browser, **watir_options)
+      @browser = if browser.nil? || browser.is_a?(Hash)
+                   raise unless watir_options.empty?
+
+                   watir_options = browser.nil? ? {} : browser
+                   :chrome
                  else
-                   browser.to_sym
+                   browser.downcase.to_sym
                  end
-      @selenium_browser = browser == :remote || options[:url] ? :remote : browser
 
-      @selenium_opts = {}
+      @watir_options = watir_options || {}
+
+      Watir.logger.info "Creating Browser instance of #{@browser} with user provided options: " \
+"#{watir_options.inspect}"
+
+      #convert_browser(browser)
+      #selenium_browser
+      #create_options
+      #@selenium_opts = {}
     end
+
+    def options
+      browser_options = @watir_options[:options] || {}
+      @options ||= Selenium::WebDriver.const_get(SE_CLASSES[@browser])::Options.new(browser_options)
+    end
+
+    def capabilities
+      caps = @watir_options[:capabilities]
+    end
+
+    def service
+      service_params = @watir_options[:service] || {}
+      driver_path = service_params[:driver_path] || Selenium::WebDriver.const_get(SE_CLASSES[@browser]).driver_path
+      port = service_params[:port] || Selenium::WebDriver.const_get(SE_CLASSES[@browser])::Service::DEFAULT_PORT
+      opt = service_params[:opt] || {}
+
+      @service ||= Selenium::WebDriver.const_get(SE_CLASSES[@browser])::Service.new(driver_path, port, opt)
+    end
+
+    def http_client
+      http = @watir_options[:http_client] || {}
+      open = http[:open_timeout] || http[:timeout]
+      read = http[:read_timeout] || http[:timeout]
+
+      @http_client ||= Selenium::WebDriver::Remote::Http::Default.new(open_timeout: open, read_timeout: read)
+    end
+
+    def listener
+      @listener ||= @watir_options[:listener]
+    end
+
+    def proxy
+      @proxy ||= @watir_options[:proxy]
+    end
+
+    def url
+      @url ||= @watir_options[:url]
+    end
+
+
+
+
 
     def to_args
       [@selenium_browser, process_arguments]
     end
 
     private
+
+    def create_options_old
+      options = @options.delete(options)
+      return
+
+    end
+
+    def convert_browser(browser)
+      if browser == :remote && @options.key?(:browser)
+        @options.delete(:browser)
+      elsif browser == :remote && @options.key?(:desired_capabilities)
+        @options[:desired_capabilities].browser_name.to_sym
+      else
+        browser.to_sym
+      end
+    end
+
+    def selenium_browser
+      @selenium_browser = @browser == :remote || @options[:url] ? :remote : @browser
+    end
 
     def process_arguments
       url = @options.delete(:url)
@@ -126,6 +202,7 @@ module Watir
         @selenium_opts[:options] = browser_options
       end
     end
+
     # rubocop:enable Metrics/AbcSize
     # rubocop:enable Metrics/MethodLength
     # rubocop:enable Metrics/PerceivedComplexity:
