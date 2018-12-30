@@ -1,6 +1,6 @@
 module Watir
   class Capabilities
-    attr_reader :browser
+    attr_reader :browser, :service, :http_client, :options
 
     SE_CLASSES = {chrome: 'Chrome',
                   firefox: 'Firefox',
@@ -21,6 +21,7 @@ module Watir
                  end
 
       @watir_options = watir_options || {}
+      create_defaults
 
       Watir.logger.info "Creating Browser instance of #{@browser} with user provided options: " \
 "#{watir_options.inspect}"
@@ -31,30 +32,35 @@ module Watir
       #@selenium_opts = {}
     end
 
-    def options
-      browser_options = @watir_options[:options] || {}
-      @options ||= Selenium::WebDriver.const_get(SE_CLASSES[@browser])::Options.new(browser_options)
+    def create_defaults
+      self.service = @watir_options.delete(:service) || {}
+      self.options = @watir_options.delete(:options) || {}
+      self.http_client = @watir_options.delete(:http_client) || {}
+
+    end
+
+    def service=(service = {})
+      return if @watir_options.key?(:url)
+
+      service[:path] ||= Selenium::WebDriver.const_get(SE_CLASSES[@browser]).driver_path
+      service[:port] ||= Selenium::WebDriver.const_get(SE_CLASSES[@browser])::Service::DEFAULT_PORT
+      service[:opt] ||= {}
+      @service = service
+    end
+
+    def options=(options = {})
+      @options = Selenium::WebDriver.const_get(SE_CLASSES[@browser])::Options.new(options)
+    end
+
+    def http_client=(http_client = {})
+      open = http_client[:open_timeout] || http_client[:timeout]
+      read = http_client[:read_timeout] || http_client[:timeout]
+
+      @http_client = Selenium::WebDriver::Remote::Http::Default.new(open_timeout: open, read_timeout: read)
     end
 
     def capabilities
       caps = @watir_options[:capabilities]
-    end
-
-    def service
-      service_params = @watir_options[:service] || {}
-      driver_path = service_params[:driver_path] || Selenium::WebDriver.const_get(SE_CLASSES[@browser]).driver_path
-      port = service_params[:port] || Selenium::WebDriver.const_get(SE_CLASSES[@browser])::Service::DEFAULT_PORT
-      opt = service_params[:opt] || {}
-
-      @service ||= Selenium::WebDriver.const_get(SE_CLASSES[@browser])::Service.new(driver_path, port, opt)
-    end
-
-    def http_client
-      http = @watir_options[:http_client] || {}
-      open = http[:open_timeout] || http[:timeout]
-      read = http[:read_timeout] || http[:timeout]
-
-      @http_client ||= Selenium::WebDriver::Remote::Http::Default.new(open_timeout: open, read_timeout: read)
     end
 
     def listener

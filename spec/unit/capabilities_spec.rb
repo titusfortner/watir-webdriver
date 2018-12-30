@@ -34,24 +34,16 @@ module Watir
           expect(capabilities.browser).to eq :chrome
         end
 
-        it 'allows additional options without specifying a browser' do
-          @options = {foo: 'bar'}
-          expect(capabilities.browser).to eq :chrome
+        it 'chromedriver service' do
+          allow(Selenium::WebDriver::Chrome).to receive(:driver_path).and_return('default/path')
+          default_service = {path: 'default/path', port: 9515, opt: {}}
+          expect(capabilities.service).to eq default_service
         end
 
         it 'chrome options' do
           default_options = Selenium::WebDriver::Chrome::Options.new
 
           expect(capabilities.options.as_json).to eq default_options.as_json
-        end
-
-        it 'chromedriver service' do
-          default_service = Selenium::WebDriver::Chrome::Service.new(nil, 9515, {})
-
-          %i[executable_path port args].all? do |instance|
-            default_value = default_service.instance_variable_get("@#{instance}")
-            expect(capabilities.service.instance_variable_get("@#{instance}")).to eq default_value
-          end
         end
 
         it 'http client' do
@@ -71,13 +63,12 @@ module Watir
           expect(capabilities.proxy).to be_nil
         end
 
-        # TODO: Does url need to be its own method?
         it 'does not create default url' do
           expect(capabilities.url).to be_nil
         end
       end
 
-      context 'with specific browser options' do
+      context 'with specific parameters' do
         it 'specifies browser' do
           @options = :firefox
           expect(capabilities.browser).to eq :firefox
@@ -89,8 +80,16 @@ module Watir
           expect(capabilities.url).to eq url
         end
 
+        it 'does not create a service if a url is specified' do
+          url = 'http://localhost:4444/wd/hub'
+          @options = {url: url}
+          expect(capabilities.service).to be_nil
+        end
 
 
+      end
+
+      context 'other stuff' do
         it 'does not allow args to be passed in directly' do
           @options = {args: %w[--foo]}
 
