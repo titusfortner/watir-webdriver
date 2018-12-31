@@ -6,7 +6,7 @@ require_relative 'unit_helper'
 # :proxy
 #
 # Optional Local
-# :service
+# :service or :driver ?
 # :options
 #
 # Required Remote
@@ -29,16 +29,49 @@ module Watir
     describe '#new' do
       let(:capabilities) { described_class.new(@options || {}) }
 
-      context 'with defaults' do
-        it 'browser to Chrome' do
+      context 'browser arguments' do
+        it 'defaults to Chrome' do
           expect(capabilities.browser).to eq :chrome
         end
 
-        it 'chromedriver service' do
-          allow(Selenium::WebDriver::Chrome).to receive(:driver_path).and_return('default/path')
-          default_service = {path: 'default/path', port: 9515, opt: {}}
-          expect(capabilities.service).to eq default_service
+        it 'specifies browser' do
+          expect(an_instance_of(Watir::Capabilities)).to receive(:service=).and_return({})
+        #  %i[firefox ie chrome edge safari].each do |browser|
+            @options = :ie
+            expect(capabilities.browser).to eq :ie
+         # end
         end
+      end
+
+      context 'driver arguments' do
+        it 'defaults to chromedriver service' do
+          path = 'default/path'
+          allow(Selenium::WebDriver::Chrome).to receive(:driver_path).and_return(path)
+
+          driver_opts = {path: path, port: 9515, opt: {}}
+          expect(capabilities.driver).to eq driver_opts
+        end
+
+        it 'does not create a service if a url is specified' do
+          url = 'http://localhost:4444/wd/hub'
+          @options = {url: url}
+          expect(capabilities.driver).to be_nil
+        end
+
+        it 'builds Service class from parameters' do
+          driver_opts = {path: '/path/to/driver', port: 5678, opt: {verbose: true}}
+
+          @options = {driver: input_services}
+
+          expect(capabilities.driver).to eq(driver_opts)
+        end
+
+        # TODO: this is not currently supported by Selenium
+        it 'sets service with Selenium class'
+
+      end
+
+      context 'more' do
 
         it 'chrome options' do
           default_options = Selenium::WebDriver::Chrome::Options.new
@@ -69,21 +102,10 @@ module Watir
       end
 
       context 'with specific parameters' do
-        it 'specifies browser' do
-          @options = :firefox
-          expect(capabilities.browser).to eq :firefox
-        end
-
         it 'uses remote if url is specified' do
           url = 'http://localhost:4444/wd/hub'
           @options = {url: url}
           expect(capabilities.url).to eq url
-        end
-
-        it 'does not create a service if a url is specified' do
-          url = 'http://localhost:4444/wd/hub'
-          @options = {url: url}
-          expect(capabilities.service).to be_nil
         end
 
 
@@ -262,12 +284,6 @@ module Watir
           expect(capabilities.options.emulation).to eq(emulation)
         end
 
-        it 'builds Service Class' do
-          expected_service = Selenium::WebDriver::Chrome::Service.new('/path/to/driver', 5678, {verbose: true})
-
-          capabilities = described_class.new(driver: {path: '/path/to/driver', port: 5678, verbose: true})
-          expect(capabilities.service).to eq(expected_service)
-        end
 
         it 'builds Profile Class' do
           profile_path = '/path/to/profile'
