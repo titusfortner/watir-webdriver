@@ -269,14 +269,6 @@ describe Watir::Element do
       expect(element.wait_while(&:present?)).to eq element
     end
 
-    not_compliant_on :safari do
-      it 'accepts self in block' do
-        element = browser.div(id: 'foo')
-        browser.a(id: 'hide_foo').click
-        expect { element.wait_while { |el| el.text == 'foo' } }.to_not raise_exception
-      end
-    end
-
     it 'accepts any values in block' do
       element = browser.div(id: 'foo')
       expect { element.wait_while { false } }.to_not raise_exception
