@@ -208,6 +208,7 @@ module Watir
         nil
       elsif @selector.key?(:index)
         Watir.logger.deprecate 'Using :index as a selector for Window', ':title or :url',
+                               reference: 'http://watir.com/window_indexes',
                                ids: [:window_index]
         @driver.window_handles[Integer(@selector[:index])]
       else
