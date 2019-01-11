@@ -35,21 +35,30 @@ module Watir
         end
 
         it 'specifies browser' do
-          expect(an_instance_of(Watir::Capabilities)).to receive(:service=).and_return({})
-        #  %i[firefox ie chrome edge safari].each do |browser|
-            @options = :ie
-            expect(capabilities.browser).to eq :ie
-         # end
+          %i[firefox ie chrome edge safari].each do |browser|
+            capabilities = described_class.new(browser)
+            expect(capabilities.browser).to eq browser
+          end
         end
       end
 
       context 'driver arguments' do
         it 'defaults to chromedriver service' do
-          path = 'default/path'
-          allow(Selenium::WebDriver::Chrome).to receive(:driver_path).and_return(path)
+          path = '/driver/path'
+          port = Selenium::WebDriver::Chrome::Service::DEFAULT_PORT
+          driver_opts = {opt: {}, path: path, port: port}
 
-          driver_opts = {path: path, port: 9515, opt: {}}
-          expect(capabilities.driver).to eq driver_opts
+          expect(Selenium::WebDriver::Chrome).to receive(:driver_path).and_return(path)
+          expect(capabilities.driver).to eq(driver_opts)
+        end
+
+        it 'uses the service based on browser provided' do
+          path = '/driver/path'
+          port = Selenium::WebDriver::Firefox::Service::DEFAULT_PORT
+          driver_opts = {opt: {}, path: path, port: port}
+
+          expect(Selenium::WebDriver::Firefox).to receive(:driver_path).and_return(path)
+          expect(described_class.new(:firefox).driver).to eq(driver_opts)
         end
 
         it 'does not create a service if a url is specified' do
@@ -59,16 +68,19 @@ module Watir
         end
 
         it 'builds Service class from parameters' do
-          driver_opts = {path: '/path/to/driver', port: 5678, opt: {verbose: true}}
+          driver_opts = {path: '/path/to/driver', port: 5678, opt: {foo: 'bar'}}
 
-          @options = {driver: input_services}
+          @options = {driver: driver_opts}
 
           expect(capabilities.driver).to eq(driver_opts)
         end
 
-        # TODO: this is not currently supported by Selenium
-        it 'sets service with Selenium class'
+        it 'using driver_path directly is deprecated'
+      end
 
+      # TODO: If Selenium supports setting Service class directly
+      context 'service arguments' do
+        it 'sets service with Selenium class'
       end
 
       context 'more' do

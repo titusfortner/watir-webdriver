@@ -1,6 +1,6 @@
 module Watir
   class Capabilities
-    attr_reader :browser, :service, :http_client, :options
+    attr_reader :browser, :driver, :http_client, :options
 
     SE_CLASSES = {chrome: 'Chrome',
                   firefox: 'Firefox',
@@ -33,19 +33,18 @@ module Watir
     end
 
     def create_defaults
-      self.service = @watir_options.delete(:service) || {}
+      self.driver = @watir_options.delete(:driver) || {}
       self.options = @watir_options.delete(:options) || {}
       self.http_client = @watir_options.delete(:http_client) || {}
-
     end
 
-    def service=(service = {})
+    def driver=(driver = {})
       return if @watir_options.key?(:url)
 
-      service[:path] ||= Selenium::WebDriver.const_get(SE_CLASSES[@browser]).driver_path
-      service[:port] ||= Selenium::WebDriver.const_get(SE_CLASSES[@browser])::Service::DEFAULT_PORT
-      service[:opt] ||= {}
-      @service = service
+      driver[:path] ||= Selenium::WebDriver.const_get(SE_CLASSES[@browser]).driver_path
+      driver[:port] ||= Selenium::WebDriver.const_get(SE_CLASSES[@browser])::Service::DEFAULT_PORT
+      driver[:opt] ||= {}
+      @driver = driver
     end
 
     def options=(options = {})
