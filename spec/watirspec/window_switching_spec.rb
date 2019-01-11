@@ -60,18 +60,20 @@ describe 'Browser' do
 
     it 'stores the reference to a window when no argument is given' do
       original_window = browser.window
-      browser.window(index: 1).use
+      browser.window(title: 'closeable window').use
       expect(original_window.url).to match(/window_switching\.html/)
     end
 
-    it 'it executes the given block in the window' do
-      browser.window(title: 'closeable window') {
-        link = browser.a(id: 'close')
-        expect(link).to exist
-        link.click
-      }.wait_while(&:present?)
+    bug 'Clicking an Element that Closes a Window is returning NoMatchingWindowFoundException', :safari do
+      it 'it executes the given block in the window' do
+        browser.window(title: 'closeable window') {
+          link = browser.a(id: 'close')
+          expect(link).to exist
+          link.click
+        }.wait_while(&:present?)
 
-      expect(browser.windows.size).to eq 1
+        expect(browser.windows.size).to eq 1
+      end
     end
 
     it 'raises ArgumentError if the selector is invalid' do
@@ -108,7 +110,7 @@ describe 'Window' do
     bug 'Focus is on newly opened window instead of the first', :safari do
       it 'allows actions on first window after opening second' do
         browser.a(id: 'open').click
-        expect { browser.wait_until(timeout: 1) { |b| b.windows.size == 3 } }.to_not raise_exception
+        expect { browser.wait_until { |b| b.windows.size == 3 } }.to_not raise_exception
       end
     end
 
@@ -123,13 +125,15 @@ describe 'Window' do
           expect(browser.windows.size).to eq 2
         end
 
-        it 'closes the current window' do
-          browser.a(id: 'open').click
-          Watir::Wait.until { browser.windows.size == 3 }
+        bug 'Focus is on newly opened window instead of the first', :safari do
+          it 'closes the current window' do
+            browser.a(id: 'open').click
+            Watir::Wait.until { browser.windows.size == 3 }
 
-          window = browser.window(title: 'closeable window').use
-          window.close
-          expect(browser.windows.size).to eq 2
+            window = browser.window(title: 'closeable window').use
+            window.close
+            expect(browser.windows.size).to eq 2
+          end
         end
       end
     end
@@ -181,12 +185,12 @@ describe 'Window' do
 
     describe '#eql?' do
       it 'knows when two windows are equal' do
-        expect(browser.window).to eq browser.window(index: 0)
+        expect(browser.window).to eq browser.window(title: 'window switching')
       end
 
       it 'knows when two windows are not equal' do
-        win1 = browser.window(index: 0)
-        win2 = browser.window(index: 1)
+        win1 = browser.window(title: 'window switching')
+        win2 = browser.window(title: 'closeable window')
 
         expect(win1).to_not eq win2
       end
@@ -215,34 +219,35 @@ describe 'Window' do
       browser.windows.reject(&:current?).each(&:close)
     end
 
-    describe '#exists?' do
-      it 'returns false if previously referenced window is closed' do
-        window = browser.window(title: 'closeable window')
-        window.use
-        browser.a(id: 'close').click
-        Watir::Wait.until { browser.windows.size == 1 }
-        expect(window).to_not be_present
-      end
+    bug 'Clicking an Element that Closes a Window is returning NoMatchingWindowFoundException', :safari do
+      describe '#exists?' do
+        it 'returns false if previously referenced window is closed' do
+          window = browser.window(title: 'closeable window')
+          window.use
+          browser.a(id: 'close').click
+          Watir::Wait.until { browser.windows.size == 1 }
+          expect(window).to_not be_present
+        end
 
-      it 'returns false if closed window is referenced' do
-        browser.window(title: 'closeable window').use
-        browser.a(id: 'close').click
-        Watir::Wait.until { browser.windows.size == 1 }
-        expect(browser.window).to_not exist
-      end
+        it 'returns false if closed window is referenced' do
+          browser.window(title: 'closeable window').use
+          browser.a(id: 'close').click
+          Watir::Wait.until { browser.windows.size == 1 }
+          expect(browser.window).to_not exist
+        end
 
-      it 'returns false if window closes during iteration' do
-        browser.window(title: 'closeable window').use
-        original_handle = browser.original_window.instance_variable_get('@handle')
-        handles = browser.windows.map { |w| w.instance_variable_get('@handle') }
+        it 'returns false if window closes during iteration' do
+          browser.window(title: 'closeable window').use
+          original_handle = browser.original_window.instance_variable_get('@handle')
+          handles = browser.windows.map { |w| w.instance_variable_get('@handle') }
 
-        browser.a(id: 'close').click
-        Watir::Wait.until { browser.windows.size == 1 }
-        allow(browser.wd).to receive(:window_handles).and_return(handles, [original_handle])
-        expect(browser.window(title: 'closeable window')).to_not exist
+          browser.a(id: 'close').click
+          Watir::Wait.until { browser.windows.size == 1 }
+          allow(browser.wd).to receive(:window_handles).and_return(handles, [original_handle])
+          expect(browser.window(title: 'closeable window')).to_not exist
+        end
       end
     end
-
     describe '#current?' do
       it 'returns false if the referenced window is closed' do
         original_window = browser.window
@@ -255,7 +260,7 @@ describe 'Window' do
     describe '#eql?' do
       it 'should return false when checking equivalence to a closed window' do
         original_window = browser.window
-        other_window = browser.window(index: 1)
+        other_window = browser.window(title: 'closeable window')
         other_window.use
         original_window.close
         expect(other_window == original_window).to be false
@@ -265,33 +270,39 @@ describe 'Window' do
     describe '#use' do
       it 'raises NoMatchingWindowFoundException error when attempting to use a referenced window that is closed' do
         original_window = browser.window
-        browser.window(index: 1).use
+        browser.window(title: 'closeable window').use
         original_window.close
         expect { original_window.use }.to raise_no_matching_window_exception
       end
 
-      it 'raises NoMatchingWindowFoundException error when attempting to use the current window if it is closed' do
-        browser.window(title: 'closeable window').use
-        browser.a(id: 'close').click
-        Watir::Wait.until { browser.windows.size == 1 }
-        expect { browser.window.use }.to raise_no_matching_window_exception
+      bug 'Clicking an Element that Closes a Window is returning NoMatchingWindowFoundException', :safari do
+        it 'raises NoMatchingWindowFoundException error when attempting to use the current window if it is closed' do
+          browser.window(title: 'closeable window').use
+          browser.a(id: 'close').click
+          Watir::Wait.until { browser.windows.size == 1 }
+          expect { browser.window.use }.to raise_no_matching_window_exception
+        end
       end
     end
 
-    it 'raises an exception when using an element on a closed window' do
-      window = browser.window(title: 'closeable window')
-      window.use
-      browser.a(id: 'close').click
-      msg = 'browser window was closed'
-      expect { browser.a.text }.to raise_exception(Watir::Exception::NoMatchingWindowFoundException, msg)
+    bug 'Clicking an Element that Closes a Window is returning NoMatchingWindowFoundException', :safari do
+      it 'raises an exception when using an element on a closed window' do
+        window = browser.window(title: 'closeable window')
+        window.use
+        browser.a(id: 'close').click
+        msg = 'browser window was closed'
+        expect { browser.a.text }.to raise_exception(Watir::Exception::NoMatchingWindowFoundException, msg)
+      end
     end
 
-    it 'raises an exception when locating a closed window' do
-      browser.window(title: 'closeable window').use
-      handles = browser.windows.map(&:handle)
-      browser.a(id: 'close').click
-      allow(browser.wd).to receive(:window_handles).and_return(handles, [browser.original_window.handle])
-      expect { browser.window(title: 'closeable window').use }.to raise_no_matching_window_exception
+    bug 'Clicking an Element that Closes a Window is returning NoMatchingWindowFoundException', :safari do
+      it 'raises an exception when locating a closed window' do
+        browser.window(title: 'closeable window').use
+        handles = browser.windows.map(&:handle)
+        browser.a(id: 'close').click
+        allow(browser.wd).to receive(:window_handles).and_return(handles, [browser.original_window.handle])
+        expect { browser.window(title: 'closeable window').use }.to raise_no_matching_window_exception
+      end
     end
 
     it 'raises an exception when locating a window closed during lookup' do
@@ -321,64 +332,66 @@ describe 'Window' do
     end
   end
 
-  context 'with current window closed' do
-    before do
-      browser.goto WatirSpec.url_for('window_switching.html')
-      browser.a(id: 'open').click
-      Watir::Wait.until { browser.windows.size == 2 }
-      browser.window(title: 'closeable window').use
-      browser.a(id: 'close').click
-      Watir::Wait.until { browser.windows.size == 1 }
-    end
-
-    after do
-      browser.window(index: 0).use
-      browser.windows[1..-1].each(&:close)
-    end
-
-    describe '#present?' do
-      it 'should find window by index' do
-        expect(browser.window(index: 0)).to be_present
+  bug 'Clicking an Element that Closes a Window is returning NoMatchingWindowFoundException', :safari do
+    context 'with current window closed' do
+      before do
+        browser.goto WatirSpec.url_for('window_switching.html')
+        browser.a(id: 'open').click
+        Watir::Wait.until { browser.windows.size == 2 }
+        browser.window(title: 'closeable window').use
+        browser.a(id: 'close').click
+        Watir::Wait.until { browser.windows.size == 1 }
       end
 
-      it 'should find window by url' do
-        expect(browser.window(url: /window_switching\.html/)).to be_present
+      after do
+        browser.original_window.use
+        browser.windows.reject(&:current?).each(&:close)
       end
 
-      it 'should find window by title' do
-        expect(browser.window(title: 'window switching')).to be_present
-      end
-    end
-
-    describe '#use' do
-      context 'switching windows without blocks' do
-        it 'by index' do
-          browser.window(index: 0).use
-          expect(browser.title).to be == 'window switching'
+      describe '#present?' do
+        it 'should find window by index' do
+          expect(browser.window(index: 0)).to be_present
         end
 
-        it 'by url' do
-          browser.window(url: /window_switching\.html/).use
-          expect(browser.title).to be == 'window switching'
+        it 'should find window by url' do
+          expect(browser.window(url: /window_switching\.html/)).to be_present
         end
 
-        it 'by title' do
-          browser.window(title: 'window switching').use
-          expect(browser.url).to match(/window_switching\.html/)
+        it 'should find window by title' do
+          expect(browser.window(title: 'window switching')).to be_present
         end
       end
 
-      context 'Switching windows with blocks' do
-        it 'by index' do
-          browser.window(index: 0).use { expect(browser.title).to be == 'window switching' }
+      describe '#use' do
+        context 'switching windows without blocks' do
+          it 'by index' do
+            browser.window(index: 0).use
+            expect(browser.title).to be == 'window switching'
+          end
+
+          it 'by url' do
+            browser.window(url: /window_switching\.html/).use
+            expect(browser.title).to be == 'window switching'
+          end
+
+          it 'by title' do
+            browser.window(title: 'window switching').use
+            expect(browser.url).to match(/window_switching\.html/)
+          end
         end
 
-        it 'by url' do
-          browser.window(url: /window_switching\.html/).use { expect(browser.title).to be == 'window switching' }
-        end
+        context 'Switching windows with blocks' do
+          it 'by index' do
+            browser.window(index: 0).use { expect(browser.title).to be == 'window switching' }
+          end
 
-        it 'by title' do
-          browser.window(title: 'window switching').use { expect(browser.url).to match(/window_switching\.html/) }
+          it 'by url' do
+            browser.window(url: /window_switching\.html/).use { expect(browser.title).to be == 'window switching' }
+          end
+
+          it 'by title' do
+            browser.window(title: 'window switching').use { expect(browser.url).to match(/window_switching\.html/) }
+          end
         end
       end
     end
