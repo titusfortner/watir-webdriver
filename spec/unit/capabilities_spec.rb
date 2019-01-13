@@ -13,6 +13,56 @@ require_relative 'unit_helper'
 # :options or :capabilities
 # :url
 #
+# W3C:
+# browser_name, browser_version, platform_name, accept_insecure_certs, page_load_strategy, proxy
+# set_window_rect, timeouts, strict_file_interactibility, unhandled_prompt_behavior
+#
+#
+# Chrome:
+# :args, :prefs, :options, :emulation, :extensions, :encoded_extensions
+#
+# Chromedriver:
+# args, binary, extensions, localState, prefs, detach, debuggerAddress, excludeSwitches, minidumpPath,
+# mobileEmulation, perfLoggingPrefs, windowTypes
+#
+# Firefox:
+# :args, :prefs, :options, :profile
+#
+# Geckodriver:
+# :binary, :args, :profile, :log, :prefs
+#
+#                 browser_options: {accessibilityChecks: false,
+#                                   geckodriverVersion: "0.23.0",
+#                                   headless: false,
+#                                   processID: 35752,
+#                                   profile: "/var/folders/px/f7vkwk593ks8tv32dzzzk1lh0000gn/T/rust_mozprofile.bQhtJvoIqMzj",
+#                                   shutdownTimeout: 60000,
+#                                   useNonSpecCompliantPointerOrigin: false,
+#                                   webdriverClick: true},
+#
+# Edge:
+# in_private, :start_page extension_paths
+#
+# IE
+#           browser_attach_timeout: 'browserAttachTimeout',
+#           element_scroll_behavior: 'elementScrollBehavior',
+#           full_page_screenshot: 'ie.enableFullPageScreenshot',
+#           ensure_clean_session: 'ie.ensureCleanSession',
+#           file_upload_dialog_timeout: 'ie.fileUploadDialogTimeout',
+#           force_create_process_api: 'ie.forceCreateProcessApi',
+#           force_shell_windows_api: 'ie.forceShellWindowsApi',
+#           ignore_protected_mode_settings: 'ignoreProtectedModeSettings',
+#           ignore_zoom_level: 'ignoreZoomSetting',
+#           initial_browser_url: 'initialBrowserUrl',
+#           native_events: 'nativeEvents',
+#           persistent_hover: 'enablePersistentHover',
+#           require_window_focus: 'requireWindowFocus',
+#           use_per_process_proxy: 'ie.usePerProcessProxy',
+#           validate_cookie_document_type: 'ie.validateCookieDocumentType'
+#
+# Safari:
+# automatic_inspection, :automatic_profiling
+#
 
 # Capabilities accessors:
 # browser
@@ -29,20 +79,27 @@ module Watir
     describe '#new' do
       let(:capabilities) { described_class.new(@options || {}) }
 
-      context 'browser arguments' do
+      describe 'browser name' do
         it 'defaults to Chrome' do
-          expect(capabilities.browser).to eq :chrome
+          expect(capabilities.browser_name).to eq :chrome
         end
 
-        it 'specifies browser' do
+        it 'specifies browser with Symbol' do
           %i[firefox ie chrome edge safari].each do |browser|
             capabilities = described_class.new(browser)
-            expect(capabilities.browser).to eq browser
+            expect(capabilities.browser_name).to eq browser
+          end
+        end
+
+        it 'specifies browser with String regardless of capitalization' do
+          %w[Firefox iE chRome EDGE safarI].each do |browser|
+            capabilities = described_class.new(browser)
+            expect(capabilities.browser_name).to eq browser.downcase.to_sym
           end
         end
       end
 
-      context 'driver arguments' do
+      describe 'driver arguments' do
         it 'defaults to chromedriver service' do
           path = '/driver/path'
           port = Selenium::WebDriver::Chrome::Service::DEFAULT_PORT
@@ -74,14 +131,191 @@ module Watir
 
           expect(capabilities.driver).to eq(driver_opts)
         end
-
-        it 'using driver_path directly is deprecated'
       end
 
-      # TODO: If Selenium supports setting Service class directly
-      context 'service arguments' do
-        it 'sets service with Selenium class'
+      # TODO: If Selenium supports setting Service class directly, implement :service keyword parameter
+      describe 'service arguments'
+
+      describe 'http client arguments' do
+        it 'defaults to Default Selenium class settings' do
+          default_http_client = Selenium::WebDriver::Remote::Http::Default.new
+
+          expect(capabilities.http_client.open_timeout).to eq default_http_client.open_timeout
+          expect(capabilities.http_client.read_timeout).to eq default_http_client.read_timeout
+        end
+
+        it 'allows timeouts to be set' do
+          @options = {http_client: {open_timeout: 30, read_timeout: 30}}
+
+          expect(capabilities.http_client.open_timeout).to eq 30
+          expect(capabilities.http_client.read_timeout).to eq 30
+        end
+
+        it 'allows setting http client from Selenium Class' do
+          http_client = Selenium::WebDriver::Remote::Http::Default.new
+
+          @options = {http_client: http_client}
+          expect(capabilities.http_client).to eq http_client
+        end
       end
+
+      describe 'proxy arguments' do
+        it 'does not create proxy by default' do
+          expect(capabilities.proxy).to be_nil
+        end
+
+        it 'builds Proxy Class from Hash' do
+          proxy = Selenium::WebDriver::Proxy.new(type: :manual)
+          @options = {proxy: {type: :manual}}
+
+          expect(capabilities.proxy).to eql proxy
+        end
+
+        it 'builds accepts Selenium Proxy class' do
+          proxy = Selenium::WebDriver::Proxy.new(type: :manual)
+          @options = {proxy: proxy}
+
+          expect(capabilities.proxy).to eql proxy
+        end
+      end
+
+      describe 'url' do
+        it 'does not create default url' do
+          expect(capabilities.url).to be_nil
+        end
+
+        it 'uses remote if url is specified' do
+          url = 'http://localhost:4444/wd/hub'
+          @options = {url: url}
+          expect(capabilities.url).to eq url
+        end
+      end
+
+      describe 'listener' do
+        it 'does not create default listener' do
+          expect(capabilities.listener).to be_nil
+        end
+
+        it 'accepts listener argument' do
+          listener = Selenium::WebDriver::Support::AbstractEventListener.new
+          @options = {listener: listener}
+
+          expect(capabilities.listener).to be_a(listener.class)
+        end
+
+      end
+
+      describe 'standard w3c options' do
+        it 'does not set default values for defined options' do
+          expect(capabilities.browser_version).to be_nil
+          expect(capabilities.platform_name).to be_nil
+          expect(capabilities.accept_insecure_certs).to be_nil
+          expect(capabilities.page_load_strategy).to be_nil
+          expect(capabilities.proxy).to be_nil
+          expect(capabilities.set_window_rect).to be_nil
+          expect(capabilities.timeouts).to be_nil
+          expect(capabilities.unhandled_prompt_behavior).to be_nil
+        end
+
+        it 'allows defined options to be set' do
+          @options = {browser_version: '47',
+                      platform_name: 'foo',
+                      accept_insecure_certs: true,
+                      page_load_strategy: 'eager',
+                      set_window_rect: false,
+                      unhandled_prompt_behavior: "ignore"}
+
+          expect(capabilities.browser_version).to eq '47'
+          expect(capabilities.platform_name).to eq 'foo'
+          expect(capabilities.accept_insecure_certs).to eq true
+          expect(capabilities.page_load_strategy).to eq 'eager'
+          expect(capabilities.set_window_rect).to eq false
+          expect(capabilities.unhandled_prompt_behavior).to eq "ignore"
+        end
+
+        it 'allows timeouts to be set' do
+          timeouts = {implicit: 1,
+                      page_load: 600_000,
+                      script: 600_000}
+          @options = {timeouts: timeouts}
+
+          timeouts = capabilities.timeouts
+          expect(timeouts).to be_a(Hash)
+          expect(timeouts[:implicit]).to eq 1
+          expect(timeouts[:page_load]).to eq 600000
+          expect(timeouts[:script]).to eq 600000
+        end
+
+        it 'checks type of options' do
+          Watir::Capabilities::W3C_OPTIONS.keys.each do |key|
+            msg = /Incorrect Type for #{key}, expected one of \[.*\], but received Regexp/
+            expect { described_class.new(key => /Unsupported Class/) }.to raise_exception(TypeError, msg)
+          end
+        end
+
+        it 'accepts Selenium Capabilities Class' do
+          options = {browser_version: '47',
+                     platform_name: 'foo',
+                     accept_insecure_certs: true,
+                     page_load_strategy: 'eager',
+                     set_window_rect: false,
+                     unhandled_prompt_behavior: "ignore"}
+
+          caps = Selenium::WebDriver::Remote::Capabilities.chrome(options)
+          @options = {desired_capabilities: caps}
+
+          expect(capabilities.browser_version).to eq '47'
+          expect(capabilities.platform_name).to eq 'foo'
+          expect(capabilities.accept_insecure_certs).to eq true
+          expect(capabilities.page_load_strategy).to eq 'eager'
+          expect(capabilities.set_window_rect).to eq false
+          expect(capabilities.unhandled_prompt_behavior).to eq "ignore"
+        end
+
+        it 'defined options take precedence over Selenium Capabilities' do
+          caps = Selenium::WebDriver::Remote::Capabilities.chrome(unhandled_prompt_behavior: "ignore")
+          @options = {desired_capabilities: caps, unhandled_prompt_behavior: "dismiss"}
+
+          expect(capabilities.unhandled_prompt_behavior).to eq "dismiss"
+        end
+
+        # TODO: implement this the way Selenium does it
+        xit 'accepts desired capabilities with a Hash' do
+          se_caps = {browser_name: 'chrome', browser_version: '68', platform_name: 'Windows'}
+          expected_capabilities = Selenium::WebDriver::Remote::Capabilities.new(se_caps)
+
+          caps = described_class.new(desired_capabilities: se_caps)
+
+          expect(caps.capabilities).to eq expected_capabilities
+        end
+      end
+
+      describe 'Browser Specific Settings' do
+        xit 'accepts Selenium Browser Options Class' do
+          options = {browser_version: '47',
+                     platform_name: 'foo',
+                     accept_insecure_certs: true,
+                     page_load_strategy: 'eager',
+                     set_window_rect: false,
+                     unhandled_prompt_behavior: "ignore"}
+
+          chrome_options = Selenium::WebDriver::Chrome::Options.new(options)
+          @options = {options: chrome_options}
+
+          expect(capabilities.options).to eq chrome_options
+
+          expect(capabilities.browser_version).to eq '47'
+          expect(capabilities.platform_name).to eq 'foo'
+          expect(capabilities.accept_insecure_certs).to eq true
+          expect(capabilities.page_load_strategy).to eq 'eager'
+          expect(capabilities.set_window_rect).to eq false
+          expect(capabilities.unhandled_prompt_behavior).to eq "ignore"
+        end
+      end
+    end
+
+
+    describe 'old' do
 
       context 'more' do
 
@@ -90,40 +324,6 @@ module Watir
 
           expect(capabilities.options.as_json).to eq default_options.as_json
         end
-
-        it 'http client' do
-          default_http_client = Selenium::WebDriver::Remote::Http::Default.new
-
-          %i[open_timeout read_timeout proxy].all? do |instance|
-            default_value = default_http_client.instance_variable_get("@#{instance}")
-            expect(capabilities.http_client.instance_variable_get("@#{instance}")).to eq default_value
-          end
-        end
-
-        it 'does not create default listener' do
-          expect(capabilities.listener).to be_nil
-        end
-
-        it 'does not create default proxy' do
-          expect(capabilities.proxy).to be_nil
-        end
-
-        it 'does not create default url' do
-          expect(capabilities.url).to be_nil
-        end
-      end
-
-      context 'with specific parameters' do
-        it 'uses remote if url is specified' do
-          url = 'http://localhost:4444/wd/hub'
-          @options = {url: url}
-          expect(capabilities.url).to eq url
-        end
-
-
-      end
-
-      context 'other stuff' do
         it 'does not allow args to be passed in directly' do
           @options = {args: %w[--foo]}
 
@@ -136,59 +336,12 @@ module Watir
 
 
       context 'with Selenium Classes alone' do
-        it 'Capabilities class pre-defined' do
-          # throw deprecation warning
-          se_caps = Selenium::WebDriver::Remote::Capabilities.chrome
-
-          caps = described_class.new(capabilities: se_caps)
-
-          expect(caps.capabilities).to eq se_caps
-        end
-
-        it 'accepts alternate browser with symbol'
-        it 'accepts alternate browser with capitalized string'
-
-        it 'Capabilities class with raw Hash' do
-          # this is the catch-all workaround for any crazy stuff that Watir/Selenium aren't supporting directly for some reason
-          se_caps = {browser_name: 'chrome', browser_version: '68', platform_name: 'Windows'}
-          expected_capabilities = Selenium::WebDriver::Remote::Capabilities.new(se_caps)
-
-          caps = described_class.new(desired_capabilities: se_caps)
-
-          expect(caps.capabilities).to eq expected_capabilities
-        end
-
-        it 'Service class' do
-          # TODO: update Selenium to have defaults for service object
-          service = Selenium::WebDriver::Chrome::Service.new(nil, 9515, {})
-
-          caps = described_class.new(service: service)
-
-          expect(caps.service).to eql service
-        end
-
         it 'Options class' do
-          options = Selenium::WebDriver::Chrome::Options.new(args: %w[--foo])
+          options = Selenium::WebDriver::Chrome::Options.new
 
           caps = described_class.new(options: options)
 
           expect(caps.options).to eql options
-        end
-
-        it 'HTTP client' do
-          http_client = Selenium::WebDriver::Remote::Http::Default.new(open_timeout: 42)
-
-          caps = described_class.new(http_client: http_client)
-
-          expect(caps.http_client).to eql http_client
-        end
-
-        it 'Proxy' do
-          proxy = Selenium::WebDriver::Proxy.new(type: 'MANUAL')
-
-          caps = described_class.new(proxy: proxy)
-
-          expect(caps.proxy).to eql proxy
         end
 
         it 'Profile' do
@@ -202,14 +355,6 @@ module Watir
       end
 
       context 'with Selenium Classes and parameters' do
-        it 'timeouts override HTTP Client class parameters' do
-          default_http_client = Selenium::WebDriver::Remote::Http::Default.new(open_timeout: 24)
-          opts = {http_client: default_http_client, open_timeout: 42}
-          expected_http_client = Selenium::WebDriver::Remote::Http::Default.new(open_timeout: 42)
-
-          expect(described_class.new(opts)).to eq expected_http_client
-        end
-
         it 'adds headless to Options class' do
           options = Selenium::WebDriver::Chrome::Options.new
           expected_options = Selenium::WebDriver::Chrome::Options.new.headless!
@@ -251,40 +396,9 @@ module Watir
           expect(capabilities.profile.instance_variable_get('@model')).to eq(profile_path)
           expect(capabilities.profile.instance_variable_get('@extensions')).to eq(extension_path)
         end
-
-        it 'driver values override Service Class' do
-          path1 = '/path/to/driver1'
-          path2 = '/path/to/driver2'
-
-          service = Selenium::WebDriver::Chrome::Service.new(path1, 1234, {verbose: true, log_path: log_path})
-          expected_service = Selenium::WebDriver::Chrome::Service.new(path2, 5678, {verbose: false, log_path: log_path})
-
-          capabilities = described_class.new(service: service, driver: {path: path2, port: 5678, verbose: false})
-          expect(capabilities.service).to eq(expected_service)
-        end
-
-        it 'driver path override Service Class' do
-          path1 = '/path/to/driver1'
-          path2 = '/path/to/driver2'
-
-          service = Selenium::WebDriver::Chrome::Service.new(path1, 1234, {})
-          expected_service = Selenium::WebDriver::Chrome::Service.new(path2, 1234, {})
-
-          capabilities = described_class.new(driver_path: path2, service: service)
-          expect(capabilities.service).to eq(expected_service)
-        end
       end
 
-
       context 'Builds Selenium Objects' do
-        it 'Builds HTTP class' do
-          expected_http_client = Selenium::WebDriver::Remote::Http::Default.new(open_timeout: 42)
-
-          capabilities = described_class.new(open_timeout: 42)
-
-          expect(capabilities.http_client).to eq expected_http_client
-        end
-
         it 'builds Options class' do
           opts = {args: args, binary: binary, prefs: prefs, extensions: extensions, options: options, emulation: emulation}
           capabilities = described_class.new(options: opts)
@@ -296,7 +410,6 @@ module Watir
           expect(capabilities.options.emulation).to eq(emulation)
         end
 
-
         it 'builds Profile Class' do
           profile_path = '/path/to/profile'
           extension_path = '/path/to/extension'
@@ -307,14 +420,6 @@ module Watir
           capabilities = described_class.new(profile: profile_path, extensions: [extension_path])
 
           expect(capabilities.profile).to eq(expected_profile)
-        end
-
-        it 'builds Proxy Class' do
-          proxy = Selenium::WebDriver::Proxy.new(type: 'MANUAL')
-
-          caps = described_class.new(proxy: {type: 'MANUAL'})
-
-          expect(caps.proxy).to eql proxy
         end
       end
 

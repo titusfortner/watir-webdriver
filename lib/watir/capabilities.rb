@@ -1,6 +1,8 @@
 module Watir
   class Capabilities
-    attr_reader :browser, :driver, :http_client, :options
+    attr_reader :browser_name, :driver, :http_client, :browser_version, :platform_name, :accept_insecure_certs,
+                :page_load_strategy, :proxy, :set_window_rect, :timeouts, :unhandled_prompt_behavior, :capabilities,
+                :listener
 
     SE_CLASSES = {chrome: 'Chrome',
                   firefox: 'Firefox',
@@ -9,15 +11,22 @@ module Watir
                   edge: 'Edge',
                   safari: 'Safari'}
 
+    W3C_OPTIONS = {browser_version: [String],
+                   platform_name: [String],
+                   accept_insecure_certs: [TrueClass, FalseClass],
+                   page_load_strategy: [String],
+                   set_window_rect: [TrueClass, FalseClass],
+                   timeouts: [Hash],
+                   unhandled_prompt_behavior: [String]}
 
-    def initialize(browser, **watir_options)
-      @browser = if browser.nil? || browser.is_a?(Hash)
+    def initialize(browser_name, **watir_options)
+      @browser_name = if browser_name.nil? || browser_name.is_a?(Hash)
                    raise unless watir_options.empty?
 
-                   watir_options = browser.nil? ? {} : browser
+                   watir_options = browser_name.nil? ? {} : browser_name
                    :chrome
                  else
-                   browser.downcase.to_sym
+                   browser_name.downcase.to_sym
                  end
 
       @watir_options = watir_options || {}
@@ -33,42 +42,99 @@ module Watir
     end
 
     def create_defaults
+      desired_capabilities
+      w3c_options
+      create_proxy
+      create_listener
       self.driver = @watir_options.delete(:driver) || {}
       self.options = @watir_options.delete(:options) || {}
       self.http_client = @watir_options.delete(:http_client) || {}
     end
 
+    def desired_capabilities
+      return unless @watir_options.key?(:desired_capabilities)
+
+      capabilities = @watir_options.delete(:desired_capabilities)
+
+      capabilities.send(:capabilities).each do |key, value|
+        if key == :browser_name
+          @browser_name = value.downcase.to_sym
+        elsif self.respond_to?(key)
+          instance_variable_set("@#{key}", value)
+        end
+      end
+    end
+
+    def w3c_options
+      W3C_OPTIONS.each do |key, type|
+        value = @watir_options.delete(key)
+        type_check(key, type, value)
+        instance_variable_set("@#{key}", value) unless value.nil?
+      end
+    end
+
+    def create_proxy
+      proxy = @watir_options.delete(:proxy)
+      return if proxy.nil?
+
+      @proxy = if proxy.is_a?(Selenium::WebDriver::Proxy)
+                 proxy
+               else
+                 Selenium::WebDriver::Proxy.new(proxy)
+               end
+    end
+
+    def create_listener
+      @listener = @watir_options.delete(:listener)
+    end
+
+
+    def options_class
+      options = @watir_options.delete('options')
+      options
+    end
+
+    def type_check(key, types, value)
+      return if value.nil? || types.include?(value.class)
+
+      raise TypeError, "Incorrect Type for #{key}, expected one of #{types}, but received #{value.class}"
+    end
+
     def driver=(driver = {})
       return if @watir_options.key?(:url)
 
-      driver[:path] ||= Selenium::WebDriver.const_get(SE_CLASSES[@browser]).driver_path
-      driver[:port] ||= Selenium::WebDriver.const_get(SE_CLASSES[@browser])::Service::DEFAULT_PORT
+      driver[:path] ||= Selenium::WebDriver.const_get(SE_CLASSES[@browser_name]).driver_path
+      driver[:port] ||= Selenium::WebDriver.const_get(SE_CLASSES[@browser_name])::Service::DEFAULT_PORT
       driver[:opt] ||= {}
       @driver = driver
     end
 
     def options=(options = {})
-      @options = Selenium::WebDriver.const_get(SE_CLASSES[@browser])::Options.new(options)
+      @options = Selenium::WebDriver.const_get(SE_CLASSES[@browser_name])::Options.new(options)
     end
 
     def http_client=(http_client = {})
-      open = http_client[:open_timeout] || http_client[:timeout]
-      read = http_client[:read_timeout] || http_client[:timeout]
+      @http_client = if http_client.is_a?(Selenium::WebDriver::Remote::Http::Common)
+                       http_client
+                     else
+                       client = Selenium::WebDriver::Remote::Http::Default.new
+                       open = http_client[:open_timeout] || http_client[:timeout]
+                       read = http_client[:read_timeout] || http_client[:timeout]
 
-      @http_client = Selenium::WebDriver::Remote::Http::Default.new(open_timeout: open, read_timeout: read)
+                       client.open_timeout = open if open
+                       client.read_timeout = read if read
+                       client
+                     end
     end
 
     def capabilities
       caps = @watir_options[:capabilities]
     end
 
-    def listener
-      @listener ||= @watir_options[:listener]
-    end
 
-    def proxy
-      @proxy ||= @watir_options[:proxy]
-    end
+    # def proxy
+    #   @proxy ||= @watir_options[:proxy]
+    # end
 
     def url
       @url ||= @watir_options[:url]
