@@ -30,7 +30,7 @@ module Watir
                  end
 
       @watir_options = watir_options || {}
-      create_defaults
+      create_values
 
       Watir.logger.info "Creating Browser instance of #{@browser} with user provided options: " \
 "#{watir_options.inspect}"
@@ -41,20 +41,20 @@ module Watir
       #@selenium_opts = {}
     end
 
-    def create_defaults
+    def create_values
       desired_capabilities
       w3c_options
-      create_proxy
-      create_listener
-      self.driver = @watir_options.delete(:driver) || {}
-      self.options = @watir_options.delete(:options) || {}
-      self.http_client = @watir_options.delete(:http_client) || {}
+      build_proxy
+
+      @listener = @watir_options.delete(:listener)
+      @driver = @watir_options.delete(:driver) || {}
+      @options = @watir_options.delete(:options) || {}
+      @http_client = @watir_options.delete(:http_client) || {}
     end
 
     def desired_capabilities
-      return unless @watir_options.key?(:desired_capabilities)
-
-      capabilities = @watir_options.delete(:desired_capabilities)
+      capabilities = @watir_options.key?(:desired_capabilities)
+      return if capabilities.nil?
 
       capabilities.send(:capabilities).each do |key, value|
         if key == :browser_name
@@ -73,7 +73,7 @@ module Watir
       end
     end
 
-    def create_proxy
+    def build_proxy
       proxy = @watir_options.delete(:proxy)
       return if proxy.nil?
 
@@ -82,10 +82,6 @@ module Watir
                else
                  Selenium::WebDriver::Proxy.new(proxy)
                end
-    end
-
-    def create_listener
-      @listener = @watir_options.delete(:listener)
     end
 
 
@@ -105,7 +101,6 @@ module Watir
 
       driver[:path] ||= Selenium::WebDriver.const_get(SE_CLASSES[@browser_name]).driver_path
       driver[:port] ||= Selenium::WebDriver.const_get(SE_CLASSES[@browser_name])::Service::DEFAULT_PORT
-      driver[:opt] ||= {}
       @driver = driver
     end
 

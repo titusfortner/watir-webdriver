@@ -18,12 +18,20 @@ require_relative 'unit_helper'
 # set_window_rect, timeouts, strict_file_interactibility, unhandled_prompt_behavior
 #
 #
+
+describe 'placeholder'
+
 # Chrome:
 # :args, :prefs, :options, :emulation, :extensions, :encoded_extensions
 #
-# Chromedriver:
+# Chromedriver options:
 # args, binary, extensions, localState, prefs, detach, debuggerAddress, excludeSwitches, minidumpPath,
 # mobileEmulation, perfLoggingPrefs, windowTypes
+#
+# Chromedriver --help
+#
+# port, adb-port, log-path, log-level, verbose (log-level=ALL), silent (log-level=OFF), append-log, replayable,
+# version, url-base, whitelisted-ips
 #
 # Firefox:
 # :args, :prefs, :options, :profile
@@ -100,10 +108,10 @@ module Watir
       end
 
       describe 'driver arguments' do
-        it 'defaults to chromedriver service' do
+        it 'defaults to chromedriver service and only creates path and port' do
           path = '/driver/path'
           port = Selenium::WebDriver::Chrome::Service::DEFAULT_PORT
-          driver_opts = {opt: {}, path: path, port: port}
+          driver_opts = {path: path, port: port}
 
           expect(Selenium::WebDriver::Chrome).to receive(:driver_path).and_return(path)
           expect(capabilities.driver).to eq(driver_opts)
@@ -112,7 +120,7 @@ module Watir
         it 'uses the service based on browser provided' do
           path = '/driver/path'
           port = Selenium::WebDriver::Firefox::Service::DEFAULT_PORT
-          driver_opts = {opt: {}, path: path, port: port}
+          driver_opts = {path: path, port: port}
 
           expect(Selenium::WebDriver::Firefox).to receive(:driver_path).and_return(path)
           expect(described_class.new(:firefox).driver).to eq(driver_opts)
@@ -124,11 +132,23 @@ module Watir
           expect(capabilities.driver).to be_nil
         end
 
-        it 'builds Service class from parameters' do
-          driver_opts = {path: '/path/to/driver', port: 5678, opt: {foo: 'bar'}}
+        it 'handles all custom chromedriver options' do
+          path = '/driver/path'
+          driver_opts = {port: 1234,
+                         adb_port: 5678,
+                         log_path: 'log/path',
+                         log_level: 'ALL',
+                         # verbose: true, # (log-level=ALL),
+                         # silent: true, # (log-level=OFF),
+                         append_log: true,
+                         replayable: true,
+                         url_base: 'wd/url',
+                         whitelisted_ips: 'http://google.com, http://yahoo.com'
+          }
 
           @options = {driver: driver_opts}
 
+          expect(Selenium::WebDriver::Chrome).to receive(:driver_path).and_return(path)
           expect(capabilities.driver).to eq(driver_opts)
         end
       end
@@ -253,6 +273,27 @@ module Watir
           end
         end
 
+        it 'accepts Selenium Options Class' do
+          options = {browser_version: '47',
+                     platform_name: 'foo',
+                     accept_insecure_certs: true,
+                     page_load_strategy: 'eager',
+                     set_window_rect: false,
+                     unhandled_prompt_behavior: 'ignore'}
+
+          chrome_options = Selenium::WebDriver::Chrome::Options.new(options)
+          @options = {chrome: chrome_options}
+
+          expect(capabilities.options).to eq chrome_options
+
+          expect(capabilities.browser_version).to eq '47'
+          expect(capabilities.platform_name).to eq 'foo'
+          expect(capabilities.accept_insecure_certs).to eq true
+          expect(capabilities.page_load_strategy).to eq 'eager'
+          expect(capabilities.set_window_rect).to eq false
+          expect(capabilities.unhandled_prompt_behavior).to eq "ignore"
+        end
+
         it 'accepts Selenium Capabilities Class' do
           options = {browser_version: '47',
                      platform_name: 'foo',
@@ -290,17 +331,60 @@ module Watir
         end
       end
 
-      describe 'Browser Specific Settings' do
-        xit 'accepts Selenium Browser Options Class' do
-          options = {browser_version: '47',
-                     platform_name: 'foo',
-                     accept_insecure_certs: true,
-                     page_load_strategy: 'eager',
-                     set_window_rect: false,
-                     unhandled_prompt_behavior: "ignore"}
+      context 'when Chrome' do
+        it 'Builds from Browser Options for' do
+          browser_options = {# http://peter.sh/experiments/chromium-command-line-switches/
+                             args: ['disable-infobars', 'remote-debugging-port=8181', 'incognito', 'window-size=400,400',
+                                    'window-position=400,400'],
+                             # Path to the Chrome executable
+                             binary: '',
+                             # base-64 encoded packed Chrome extensions
+                             extensions: ['foo.crx', 'bar.crx'],
+                             # I can't get anything to work with this
+                             local_state: {},
+                             # Docs: https://src.chromium.org/viewvc/chrome/trunk/src/chrome/common/pref_names.cc
+                             # Common: https://www.chromium.org/administrators/configuring-other-preferences
+                             prefs: {download: {prompt_for_download: false,
+                                                default_directory: '/path/to/dir'},
+                                     bookmark_bar: {show_on_all_tabs: true}},
+                             # Browser stays open after chromedriver process is ended; useful for debugging
+                             detach: true,
+                             # If a browser is created with an arg "remote-debugging-port=8181", this will connect to it
+                             debugger_address: '127.0.0.1:8181',
+                             # List of Chrome command line switches to exclude that ChromeDriver uses by default
+                             # I could not find any useful examples
+                             exclude_switches: [],
+                             # Linux Only
+                             mini_dump_path: '',
+                             mobile_emulation: {device_name: 'Pixel 2'},
+                             perfLoggingPrefs: {enableNetwork: true,
+                                                enablePage: true,
+                                                traceCategories: '',
+                                                bufferUsageReportingInterval: 1000},
+                             window_types: []}
+          @options = {chrome: browser_options}
+
+          expect(capabilities.browser_options).to eq(browser_options)
+        end
+
+        it 'accepts Selenium Options Class' do
+          options = {args: ['disable-infobars', 'remote-debugging-port=8181', 'incognito', 'window-size=400,400',
+                            'window-position=400,400'],
+                     # Path to the Chrome executable
+                     binary: '',
+                     extensions: ['foo.crx', 'bar.crx'],
+                     # base-64 encoded packed Chrome extensions
+                     encoded_extensions: [],
+                     # Docs: https://src.chromium.org/viewvc/chrome/trunk/src/chrome/common/pref_names.cc
+                     # Common: https://www.chromium.org/administrators/configuring-other-preferences
+                     prefs: {download: {prompt_for_download: false,
+                                        default_directory: '/path/to/dir'},
+                             bookmark_bar: {show_on_all_tabs: true}},
+                     options: {detach: true},
+                     emulation: {device_name: 'Pixel 2'}}
 
           chrome_options = Selenium::WebDriver::Chrome::Options.new(options)
-          @options = {options: chrome_options}
+          @options = {chrome: chrome_options}
 
           expect(capabilities.options).to eq chrome_options
 
@@ -311,7 +395,14 @@ module Watir
           expect(capabilities.set_window_rect).to eq false
           expect(capabilities.unhandled_prompt_behavior).to eq "ignore"
         end
+
+
       end
+
+      context 'when IE'
+      context 'when Edge'
+      context 'when Safari'
+      context 'when Firefox'
     end
 
 
