@@ -53,7 +53,7 @@ module Watir
     end
 
     def desired_capabilities
-      capabilities = @watir_options.key?(:desired_capabilities)
+      capabilities = @watir_options.delete :desired_capabilities
       return if capabilities.nil?
 
       capabilities.send(:capabilities).each do |key, value|

@@ -108,27 +108,7 @@ module Watir
       end
 
       describe 'driver arguments' do
-        it 'defaults to chromedriver service and only creates path and port' do
-          path = '/driver/path'
-          port = Selenium::WebDriver::Chrome::Service::DEFAULT_PORT
-          driver_opts = {path: path, port: port}
-
-          expect(Selenium::WebDriver::Chrome).to receive(:driver_path).and_return(path)
-          expect(capabilities.driver).to eq(driver_opts)
-        end
-
-        it 'uses the service based on browser provided' do
-          path = '/driver/path'
-          port = Selenium::WebDriver::Firefox::Service::DEFAULT_PORT
-          driver_opts = {path: path, port: port}
-
-          expect(Selenium::WebDriver::Firefox).to receive(:driver_path).and_return(path)
-          expect(described_class.new(:firefox).driver).to eq(driver_opts)
-        end
-
-        it 'does not create a service if a url is specified' do
-          url = 'http://localhost:4444/wd/hub'
-          @options = {url: url}
+        it 'does not set anything by default' do
           expect(capabilities.driver).to be_nil
         end
 
