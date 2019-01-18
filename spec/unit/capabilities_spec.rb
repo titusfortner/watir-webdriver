@@ -160,22 +160,23 @@ module Watir
         it 'defaults to Default Selenium class settings' do
           default_http_client = Selenium::WebDriver::Remote::Http::Default.new
 
-          expect(capabilities.http_client.open_timeout).to eq default_http_client.open_timeout
-          expect(capabilities.http_client.read_timeout).to eq default_http_client.read_timeout
+          expect(capabilities.http_client[:open_timeout]).to eq default_http_client.open_timeout
+          expect(capabilities.http_client[:read_timeout]).to eq default_http_client.read_timeout
         end
 
         it 'allows timeouts to be set' do
-          @options = {http_client: {open_timeout: 30, read_timeout: 30}}
+          @options = {http_client: {open_timeout: 10, read_timeout: 10}}
 
-          expect(capabilities.http_client.open_timeout).to eq 30
-          expect(capabilities.http_client.read_timeout).to eq 30
+          expect(capabilities.http_client[:open_timeout]).to eq 10
+          expect(capabilities.http_client[:read_timeout]).to eq 10
         end
 
-        it 'allows setting http client from Selenium Class' do
-          http_client = Selenium::WebDriver::Remote::Http::Default.new
+        it 'creates http client Hash from Selenium Class' do
+          http_client = Selenium::WebDriver::Remote::Http::Default.new(open_timeout: 10, read_timeout: 10)
 
           @options = {http_client: http_client}
-          expect(capabilities.http_client).to eq http_client
+          expect(capabilities.http_client[:open_timeout]).to eq 10
+          expect(capabilities.http_client[:read_timeout]).to eq 10
         end
       end
 
@@ -188,14 +189,14 @@ module Watir
           proxy = Selenium::WebDriver::Proxy.new(type: :manual)
           @options = {proxy: {type: :manual}}
 
-          expect(capabilities.proxy).to eql proxy
+          expect(capabilities.proxy[:type]).to eql :manual
         end
 
         it 'builds accepts Selenium Proxy class' do
           proxy = Selenium::WebDriver::Proxy.new(type: :manual)
           @options = {proxy: proxy}
 
-          expect(capabilities.proxy).to eql proxy
+          expect(capabilities.proxy[:type]).to eql :manual
         end
       end
 
@@ -222,7 +223,6 @@ module Watir
 
           expect(capabilities.listener).to be_a(listener.class)
         end
-
       end
 
       describe 'standard w3c options' do
@@ -284,8 +284,6 @@ module Watir
           chrome_options = Selenium::WebDriver::Chrome::Options.new(options)
           @options = {chrome: chrome_options}
 
-          expect(capabilities.options).to eq chrome_options
-
           expect(capabilities.browser_version).to eq '47'
           expect(capabilities.platform_name).to eq 'foo'
           expect(capabilities.accept_insecure_certs).to eq true
@@ -294,7 +292,7 @@ module Watir
           expect(capabilities.unhandled_prompt_behavior).to eq "ignore"
         end
 
-        it 'accepts Selenium Capabilities Class' do
+        it 'accepts Selenium Capabilities Class as desired_capabilities' do
           options = {browser_version: '47',
                      platform_name: 'foo',
                      accept_insecure_certs: true,
