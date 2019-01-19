@@ -45,11 +45,22 @@ module Watir
       desired_capabilities
       w3c_options
       build_proxy
-
+      create_http_client
       @listener = @watir_options.delete(:listener)
       @driver = @watir_options.delete(:driver) || {}
       @options = @watir_options.delete(:options) || {}
-      @http_client = @watir_options.delete(:http_client) || {}
+    end
+
+    def create_http_client
+      http_client = @watir_options.delete(:http_client)
+      @http_client = if http_client.is_a?(Hash)
+                       http_client
+                     else
+                       client = {}
+                       client[:open_timeout] = http_client&.open_timeout unless http_client&.open_timeout.nil?
+                       client[:read_timeout] = http_client&.read_timeout unless http_client&.read_timeout.nil?
+                       client
+                     end
     end
 
     def desired_capabilities
@@ -78,9 +89,11 @@ module Watir
       return if proxy.nil?
 
       @proxy = if proxy.is_a?(Selenium::WebDriver::Proxy)
-                 proxy
+                 Selenium::WebDriver::Proxy::ALLOWED.keys.each_with_object({}) do |key, hash|
+                   hash[key] = proxy.send(key) unless proxy.send(key).nil?
+                 end
                else
-                 Selenium::WebDriver::Proxy.new(proxy)
+                 proxy
                end
     end
 
@@ -182,7 +195,7 @@ module Watir
       @selenium_opts
     end
 
-    def create_http_client
+    def create_http_client_old
       client_timeout = @options.delete(:client_timeout)
       open_timeout = @options.delete(:open_timeout)
       read_timeout = @options.delete(:read_timeout)
