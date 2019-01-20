@@ -51,6 +51,7 @@ Metrics/BlockLength:
 ## Configuration parameters: CountComments.
 Metrics/ModuleLength:
   Exclude:
+    - 'spec/**/*'
     - 'lib/watir/elements/html_elements.rb'
     - 'lib/watir/elements/svg_elements.rb'
 

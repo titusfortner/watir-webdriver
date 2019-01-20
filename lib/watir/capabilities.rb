@@ -9,7 +9,7 @@ module Watir
                   ie: 'IE',
                   internet_explorer: 'IE',
                   edge: 'Edge',
-                  safari: 'Safari'}
+                  safari: 'Safari'}.freeze
 
     W3C_OPTIONS = {browser_version: [String],
                    platform_name: [String],
@@ -17,7 +17,7 @@ module Watir
                    page_load_strategy: [String],
                    set_window_rect: [TrueClass, FalseClass],
                    timeouts: [Hash],
-                   unhandled_prompt_behavior: [String]}
+                   unhandled_prompt_behavior: [String]}.freeze
 
     def initialize(browser_name, **watir_options)
       disambiguate_options(browser_name, **watir_options)
@@ -41,7 +41,14 @@ module Watir
       parse_desired_capabilities
       parse_w3c_options
       parse_browser_options
+      validate_remaining
     end
+
+    def to_selenium
+      [@selenium_browser, process_arguments]
+    end
+
+    private
 
     def disambiguate_options(browser_name, **watir_options)
       @browser_name = if browser_name.is_a?(Hash)
@@ -72,7 +79,7 @@ module Watir
       return if capabilities.nil?
 
       capabilities.send(:capabilities).each do |key, value|
-        if self.respond_to?(key) && key != :browser_name
+        if respond_to?(key) && key != :browser_name
           instance_variable_set("@#{key}", value)
         else
           @extra_options[key] = value
@@ -91,20 +98,20 @@ module Watir
     def parse_browser_options
       browser_options = @watir_options.delete(:browser_options)
       general_options = if browser_options.nil?
-                           {}
-                         elsif !browser_options.is_a?(Hash)
-                           convert_se_options(browser_options)
-                         else
-                           browser_options
-                        end
-      browser_options = @watir_options.delete(@browser_name)
-      specific_options = if browser_options.nil?
                           {}
                         elsif !browser_options.is_a?(Hash)
                           convert_se_options(browser_options)
                         else
                           browser_options
                         end
+      browser_options = @watir_options.delete(@browser_name)
+      specific_options = if browser_options.nil?
+                           {}
+                         elsif !browser_options.is_a?(Hash)
+                           convert_se_options(browser_options)
+                         else
+                           browser_options
+                         end
       @browser_options = general_options.merge(specific_options)
     end
 
@@ -122,197 +129,149 @@ module Watir
       raise TypeError, "Incorrect Type for #{key}, expected one of #{types}, but received #{value.class}"
     end
 
-    # def driver=(driver = {})
-    #   return if @watir_options.key?(:url)
+    def validate_remaining
+      return if @watir_options.empty?
+
+      msg = "#{@watir_options.keys} is not allowed as a direct argument, see allowed values: " \
+'http://watir.com/guides/capabilities'
+      raise ArgumentError, msg
+    end
+
+    # def create_options_old
+    #   options = @options.delete(options)
+    #   return
     #
-    #   driver[:path] ||= Selenium::WebDriver.const_get(SE_CLASSES[@browser_name]).driver_path
-    #   driver[:port] ||= Selenium::WebDriver.const_get(SE_CLASSES[@browser_name])::Service::DEFAULT_PORT
-    #   @driver = driver
-    # end
-    #
-    # def options=(options = {})
-    #   @options = Selenium::WebDriver.const_get(SE_CLASSES[@browser_name])::Options.new(options)
-    # end
-    #
-    # def http_client=(http_client = {})
-    #   @http_client = if http_client.is_a?(Selenium::WebDriver::Remote::Http::Common)
-    #                    http_client
-    #                  else
-    #                    client = Selenium::WebDriver::Remote::Http::Default.new
-    #                    open = http_client[:open_timeout] || http_client[:timeout]
-    #                    read = http_client[:read_timeout] || http_client[:timeout]
-    #
-    #                    client.open_timeout = open if open
-    #                    client.read_timeout = read if read
-    #                    client
-    #                  end
     # end
     #
-    # def capabilities
-    #   caps = @watir_options[:capabilities]
+    # def convert_browser(browser)
+    #   if browser == :remote && @options.key?(:browser)
+    #     @options.delete(:browser)
+    #   elsif browser == :remote && @options.key?(:desired_capabilities)
+    #     @options[:desired_capabilities].browser_name.to_sym
+    #   else
+    #     browser.to_sym
+    #   end
     # end
-
-
-    # def proxy
-    #   @proxy ||= @watir_options[:proxy]
+    #
+    # def selenium_browser
+    #   @selenium_browser = @browser == :remote || @options[:url] ? :remote : @browser
     # end
-
-    # def url
-    #   @url ||= @watir_options[:url]
+    #
+    # def process_arguments
+    #   url = @options.delete(:url)
+    #   @selenium_opts[:url] = url if url
+    #
+    #   create_http_client
+    #
+    #   @selenium_opts[:port] = @options.delete(:port) if @options.key?(:port)
+    #   @selenium_opts[:driver_opts] = @options.delete(:driver_opts) if @options.key?(:driver_opts)
+    #   @selenium_opts[:listener] = @options.delete(:listener) if @options.key?(:listener)
+    #
+    #   process_browser_options
+    #   process_capabilities
+    #   Watir.logger.info "Creating Browser instance with Watir processed options: #{@selenium_opts.inspect}"
+    #
+    #   @selenium_opts
     # end
+    #
+    # def create_http_client_old
+    #   client_timeout = @options.delete(:client_timeout)
+    #   open_timeout = @options.delete(:open_timeout)
+    #   read_timeout = @options.delete(:read_timeout)
+    #
+    #   http_client = @options.delete(:http_client)
+    #
+    #   %i[open_timeout read_timeout client_timeout].each do |t|
+    #     next if http_client.nil? || !respond_to?(t)
+    #
+    #     msg = "You can pass #{t} value directly into Watir::Browser opt without needing to use :http_client"
+    #     Watir.logger.warn msg, ids: %i[http_client use_capabilities]
+    #   end
+    #
+    #   http_client ||= Selenium::WebDriver::Remote::Http::Default.new
+    #
+    #   http_client.timeout = client_timeout if client_timeout
+    #   http_client.open_timeout = open_timeout if open_timeout
+    #   http_client.read_timeout = read_timeout if read_timeout
+    #   @selenium_opts[:http_client] = http_client
+    # end
+    #
+    # # TODO: - this will get addressed with Capabilities Update
+    # def process_browser_options
+    #   browser_options = @options.delete(:options) || {}
+    #
+    #   case @selenium_browser
+    #   when :chrome
+    #     if @options.key?(:args) || @options.key?(:switches)
+    #       browser_options ||= {}
+    #       browser_options[:args] = (@options.delete(:args) || @options.delete(:switches)).dup
+    #     end
+    #     if @options.delete(:headless)
+    #       browser_options ||= {}
+    #       browser_options[:args] ||= []
+    #       browser_options[:args] += ['--headless', '--disable-gpu']
+    #     end
+    #     @selenium_opts[:options] = browser_options if browser_options.is_a? Selenium::WebDriver::Chrome::Options
+    #     @selenium_opts[:options] ||= Selenium::WebDriver::Chrome::Options.new(browser_options)
+    #   when :firefox
+    #     profile = @options.delete(:profile)
+    #     if browser_options.is_a? Selenium::WebDriver::Firefox::Options
+    #       @selenium_opts[:options] = browser_options
+    #       if profile
+    #         msg = 'Initializing Browser with both :profile and :option', ':profile as a key inside :option'
+    #         Watir.logger.deprecate msg, ids: [:firefox_profile]
+    #       end
+    #     end
+    #     if @options.delete(:headless)
+    #       browser_options ||= {}
+    #       browser_options[:args] ||= []
+    #       browser_options[:args] += ['--headless']
+    #     end
+    #     @selenium_opts[:options] ||= Selenium::WebDriver::Firefox::Options.new(browser_options)
+    #     @selenium_opts[:options].profile = profile if profile
+    #   when :safari
+    #     Selenium::WebDriver::Safari.technology_preview! if @options.delete(:technology_preview)
+    #   when :remote
+    #     if @browser == :chrome && @options.delete(:headless)
+    #       args = @options.delete(:args) || @options.delete(:switches) || []
+    #       @options['chromeOptions'] = {'args' => args + ['--headless', '--disable-gpu']}
+    #     end
+    #     if @browser == :firefox && @options.delete(:headless)
+    #       args = @options.delete(:args) || @options.delete(:switches) || []
+    #       @options[Selenium::WebDriver::Firefox::Options::KEY] = {'args' => args + ['--headless']}
+    #     end
+    #     if @browser == :safari && @options.delete(:technology_preview)
+    #       @options['safari.options'] = {'technologyPreview' => true}
+    #     end
+    #   when :ie
+    #     if @options.key?(:args)
+    #       browser_options ||= {}
+    #       browser_options[:args] = @options.delete(:args).dup
+    #     end
+    #     unless browser_options.is_a? Selenium::WebDriver::IE::Options
+    #       ie_caps = browser_options.select { |k| Selenium::WebDriver::IE::Options::CAPABILITIES.include?(k) }
+    #       browser_options = Selenium::WebDriver::IE::Options.new(browser_options)
+    #       ie_caps.each { |k, v| browser_options.add_option(k, v) }
+    #     end
+    #     @selenium_opts[:options] = browser_options
+    #   end
+    # end
+    #
 
-
-
-
-
-    def to_args
-      [@selenium_browser, process_arguments]
-    end
-
-    private
-
-    def create_options_old
-      options = @options.delete(options)
-      return
-
-    end
-
-    def convert_browser(browser)
-      if browser == :remote && @options.key?(:browser)
-        @options.delete(:browser)
-      elsif browser == :remote && @options.key?(:desired_capabilities)
-        @options[:desired_capabilities].browser_name.to_sym
-      else
-        browser.to_sym
-      end
-    end
-
-    def selenium_browser
-      @selenium_browser = @browser == :remote || @options[:url] ? :remote : @browser
-    end
-
-    def process_arguments
-      url = @options.delete(:url)
-      @selenium_opts[:url] = url if url
-
-      create_http_client
-
-      @selenium_opts[:port] = @options.delete(:port) if @options.key?(:port)
-      @selenium_opts[:driver_opts] = @options.delete(:driver_opts) if @options.key?(:driver_opts)
-      @selenium_opts[:listener] = @options.delete(:listener) if @options.key?(:listener)
-
-      process_browser_options
-      process_capabilities
-      Watir.logger.info "Creating Browser instance with Watir processed options: #{@selenium_opts.inspect}"
-
-      @selenium_opts
-    end
-
-    def create_http_client_old
-      client_timeout = @options.delete(:client_timeout)
-      open_timeout = @options.delete(:open_timeout)
-      read_timeout = @options.delete(:read_timeout)
-
-      http_client = @options.delete(:http_client)
-
-      %i[open_timeout read_timeout client_timeout].each do |t|
-        next if http_client.nil? || !respond_to?(t)
-
-        msg = "You can pass #{t} value directly into Watir::Browser opt without needing to use :http_client"
-        Watir.logger.warn msg, ids: %i[http_client use_capabilities]
-      end
-
-      http_client ||= Selenium::WebDriver::Remote::Http::Default.new
-
-      http_client.timeout = client_timeout if client_timeout
-      http_client.open_timeout = open_timeout if open_timeout
-      http_client.read_timeout = read_timeout if read_timeout
-      @selenium_opts[:http_client] = http_client
-    end
-
-    # TODO: - this will get addressed with Capabilities Update
-    # rubocop:disable Metrics/AbcSize
-    # rubocop:disable Metrics/MethodLength
-    # rubocop:disable Metrics/PerceivedComplexity:
-    # rubocop:disable Metrics/CyclomaticComplexity::
-    def process_browser_options
-      browser_options = @options.delete(:options) || {}
-
-      case @selenium_browser
-      when :chrome
-        if @options.key?(:args) || @options.key?(:switches)
-          browser_options ||= {}
-          browser_options[:args] = (@options.delete(:args) || @options.delete(:switches)).dup
-        end
-        if @options.delete(:headless)
-          browser_options ||= {}
-          browser_options[:args] ||= []
-          browser_options[:args] += ['--headless', '--disable-gpu']
-        end
-        @selenium_opts[:options] = browser_options if browser_options.is_a? Selenium::WebDriver::Chrome::Options
-        @selenium_opts[:options] ||= Selenium::WebDriver::Chrome::Options.new(browser_options)
-      when :firefox
-        profile = @options.delete(:profile)
-        if browser_options.is_a? Selenium::WebDriver::Firefox::Options
-          @selenium_opts[:options] = browser_options
-          if profile
-            msg = 'Initializing Browser with both :profile and :option', ':profile as a key inside :option'
-            Watir.logger.deprecate msg, ids: [:firefox_profile]
-          end
-        end
-        if @options.delete(:headless)
-          browser_options ||= {}
-          browser_options[:args] ||= []
-          browser_options[:args] += ['--headless']
-        end
-        @selenium_opts[:options] ||= Selenium::WebDriver::Firefox::Options.new(browser_options)
-        @selenium_opts[:options].profile = profile if profile
-      when :safari
-        Selenium::WebDriver::Safari.technology_preview! if @options.delete(:technology_preview)
-      when :remote
-        if @browser == :chrome && @options.delete(:headless)
-          args = @options.delete(:args) || @options.delete(:switches) || []
-          @options['chromeOptions'] = {'args' => args + ['--headless', '--disable-gpu']}
-        end
-        if @browser == :firefox && @options.delete(:headless)
-          args = @options.delete(:args) || @options.delete(:switches) || []
-          @options[Selenium::WebDriver::Firefox::Options::KEY] = {'args' => args + ['--headless']}
-        end
-        if @browser == :safari && @options.delete(:technology_preview)
-          @options['safari.options'] = {'technologyPreview' => true}
-        end
-      when :ie
-        if @options.key?(:args)
-          browser_options ||= {}
-          browser_options[:args] = @options.delete(:args).dup
-        end
-        unless browser_options.is_a? Selenium::WebDriver::IE::Options
-          ie_caps = browser_options.select { |k| Selenium::WebDriver::IE::Options::CAPABILITIES.include?(k) }
-          browser_options = Selenium::WebDriver::IE::Options.new(browser_options)
-          ie_caps.each { |k, v| browser_options.add_option(k, v) }
-        end
-        @selenium_opts[:options] = browser_options
-      end
-    end
-
-    # rubocop:enable Metrics/AbcSize
-    # rubocop:enable Metrics/MethodLength
-    # rubocop:enable Metrics/PerceivedComplexity:
-    # rubocop:enable Metrics/CyclomaticComplexity::
-
-    def process_capabilities
-      caps = @options.delete(:desired_capabilities)
-
-      if caps
-        msg = 'You can pass values directly into Watir::Browser opt without needing to use :desired_capabilities'
-        Watir.logger.warn msg,
-                          ids: [:use_capabilities]
-        @selenium_opts.merge!(@options)
-      else
-        caps = Selenium::WebDriver::Remote::Capabilities.send @browser, @options
-      end
-
-      @selenium_opts[:desired_capabilities] = caps
-    end
+    #
+    # def process_capabilities
+    #   caps = @options.delete(:desired_capabilities)
+    #
+    #   if caps
+    #     msg = 'You can pass values directly into Watir::Browser opt without needing to use :desired_capabilities'
+    #     Watir.logger.warn msg,
+    #                       ids: [:use_capabilities]
+    #     @selenium_opts.merge!(@options)
+    #   else
+    #     caps = Selenium::WebDriver::Remote::Capabilities.send @browser, @options
+    #   end
+    #
+    #   @selenium_opts[:desired_capabilities] = caps
+    # end
   end
 end
