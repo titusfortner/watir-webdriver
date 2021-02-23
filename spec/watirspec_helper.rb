@@ -14,7 +14,7 @@ class LocalConfig
   end
 
   def browser
-    @browser ||= (ENV['WATIR_BROWSER'] || :chrome).to_sym
+    @browser ||= (ENV['WATIR_BROWSER'] || :firefox).to_sym
   end
 
   def configure
@@ -94,7 +94,8 @@ class LocalConfig
   end
 
   def firefox_args
-    ENV['FIREFOX_BINARY'] ? {options: {binary: ENV['FIREFOX_BINARY']}} : {}
+    Watir.logger.selenium = :debug
+    {options: {log_level: :trace}}
   end
 
   def safari_args
